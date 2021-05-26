@@ -36,5 +36,5 @@ Command | Description
 
 
 ## See also
-* [Tiled](https://github.com/snowpackjs/snowpack)
+* [Tiled](https://www.mapeditor.org/)
 
