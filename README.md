@@ -36,7 +36,7 @@ Command | Description
 
 
 ## See also
-* [Konva] (https://konvajs.org/)
-* [Material-UI] (https://material-ui.com/)
+* [Konva](https://konvajs.org/)
+* [Material-UI](https://material-ui.com/)
 * [Tiled](https://www.mapeditor.org/)
 
