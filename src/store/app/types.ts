@@ -1,3 +1,3 @@
-import { INITIAL_STATE } from "./constants";
+import { INITIAL_STATE } from './constants'
 
-export type AppState = typeof INITIAL_STATE;
+export type AppState = typeof INITIAL_STATE
