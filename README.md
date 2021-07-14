@@ -7,6 +7,8 @@
 
 # [Demo](http://plextus.surge.sh/)
 
+![Screenshot](./src/assets/images/screenshot.png)
+
 ## Installation
 
 1. Clone/download repo

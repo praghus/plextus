@@ -204,6 +204,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                     onChangeSelectedLayer(layer.id)
                     setIsProcessing(false)
                     onChangeAppIsLoading(false)
+                    onSaveChanges()
                     onClose()
                 }, 'image/png')
             }
@@ -218,7 +219,6 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
             } else {
                 processNewTileset()
             }
-            onSaveChanges()
         }, 100)
     }
 
