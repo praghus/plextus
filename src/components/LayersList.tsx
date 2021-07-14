@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { v4 as uuidv4 } from 'uuid'
 import { makeStyles } from '@material-ui/core/styles'
 import styled from '@emotion/styled'
 import {
@@ -11,6 +10,7 @@ import {
     ListItemSecondaryAction,
     ListItemText,
     IconButton,
+    TextField,
     Typography,
     Slider
 } from '@material-ui/core'
@@ -25,11 +25,19 @@ import {
 } from '@material-ui/icons'
 
 import { changeItemPosition } from '../common/utils/array'
-import { getLayerById } from '../store/editor/utils'
+import { createEmptyLayer, getLayerById } from '../store/editor/utils'
 import { Layer } from '../store/editor/types'
-import { changeSelectedLayer, changeLayers, changeLayerOpacity, changeLayerVisible } from '../store/editor/actions'
+import {
+    changeSelectedLayer,
+    changeLayers,
+    changeLayerName,
+    changeLayerOpacity,
+    changeLayerVisible
+} from '../store/editor/actions'
 import { selectCanvas, selectSelected, selectLayers, selectTileset } from '../store/editor/selectors'
 import ConfirmationDialog from './ConfirmationDialog'
+
+type EditingLayer = { id: string; name: string }
 
 const useStyles = makeStyles(theme => ({
     layersList: {
@@ -80,10 +88,13 @@ const LayersList = (): JSX.Element => {
     const onChangeSelectedLayer = (layerId: string) => dispatch(changeSelectedLayer(layerId))
     const onChangeLayerVisible = (layerId: string, value: boolean) => dispatch(changeLayerVisible(layerId, value))
     const onChangeLayerOpacity = (layerId: string, value: number) => dispatch(changeLayerOpacity(layerId, value))
+    const onChangeLayerName = (layerId: string, value: string) => dispatch(changeLayerName(layerId, value))
     const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
     const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
     const onOpacityChange = (event: any, value: any) => setOpacity(value)
     const onOpacityChangeCommitted = (event: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
+
+    const [editingLayer, setEditingLayer] = useState<EditingLayer | null>()
 
     const onConfirmRemoveLayer = () => {
         const index = layers.indexOf(currentLayer)
@@ -97,6 +108,13 @@ const LayersList = (): JSX.Element => {
         }
     }
 
+    const onRenameLayer = () => {
+        if (editingLayer) {
+            onChangeLayerName(editingLayer.id, editingLayer.name)
+            setEditingLayer(null)
+        }
+    }
+
     const onChangeLayerOrder = (dir: number) => {
         const index = layers.indexOf(currentLayer)
         const from = dir > 0 ? index - 1 : index
@@ -106,15 +124,9 @@ const LayersList = (): JSX.Element => {
     }
 
     const onCreateNewLayer = () => {
-        const newLayer = {
-            id: uuidv4(),
-            opacity: 255,
-            visible: true,
-            name: 'New Layer',
-            width: Math.round(canvas.width / tileset.tilewidth),
-            height: Math.round(canvas.height / tileset.tileheight),
-            data: []
-        }
+        const width = Math.round(canvas.width / tileset.tilewidth)
+        const height = Math.round(canvas.height / tileset.tileheight)
+        const newLayer = createEmptyLayer('New Layer', width, height)
         onChangeLayers([...layers, newLayer])
     }
 
@@ -131,19 +143,48 @@ const LayersList = (): JSX.Element => {
             <List className={classes.layersList}>
                 {reversedList.map(({ id, name, visible }) => (
                     <ListItem
-                        key={id}
                         dense
                         button
+                        key={id}
                         selected={id === selected.layerId}
                         onClick={() => {
-                            setOpacity(getLayerById(layers, id).opacity)
-                            onChangeSelectedLayer(id)
+                            const layer = getLayerById(layers, id)
+                            if (layer) {
+                                setOpacity(layer.opacity)
+                                onChangeSelectedLayer(id)
+                            }
+                        }}
+                        onDoubleClick={() => {
+                            setEditingLayer({ id, name })
                         }}
                     >
                         <ListItemIcon>
                             <AppsIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText id={`checkbox-list-label-${id}`} primary={name} />
+                        {id === editingLayer?.id ? (
+                            <TextField
+                                autoFocus
+                                fullWidth
+                                size="small"
+                                type="text"
+                                variant="outlined"
+                                value={editingLayer.name}
+                                onBlur={onRenameLayer}
+                                onChange={e => {
+                                    setEditingLayer({ ...editingLayer, name: e.target.value })
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                        onRenameLayer()
+                                    }
+                                    if (e.key === 'Escape') {
+                                        setEditingLayer(null)
+                                    }
+                                }}
+                            />
+                        ) : (
+                            <ListItemText id={`checkbox-list-label-${id}`} primary={name} />
+                        )}
                         <ListItemSecondaryAction>
                             <IconButton
                                 edge="end"

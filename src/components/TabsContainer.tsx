@@ -2,11 +2,9 @@ import React, { useCallback, useState } from 'react'
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux'
 import { debounce } from 'lodash'
-import { makeStyles } from '@material-ui/core/styles'
 import { RgbaColorPicker } from 'react-colorful'
-import AppBar from '@material-ui/core/AppBar'
-import Tabs from '@material-ui/core/Tabs'
-import Tab from '@material-ui/core/Tab'
+import { makeStyles } from '@material-ui/core/styles'
+import { AppBar, Button, Tab, Tabs } from '@material-ui/core'
 import { selectSelected } from '../store/editor/selectors'
 import { changePrimaryColor } from '../store/editor/actions'
 import TabPanel from './TabPanel'
@@ -47,7 +45,7 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
                 <Tabs value={tab} {...{ onChange }}>
                     <Tab label="Tileset" className={classes.tab} />
                     <Tab label="Colors" className={classes.tab} />
-                    <Tab label="Tool" className={classes.tab} />
+                    <Tab label="Settings" className={classes.tab} />
                 </Tabs>
             </AppBar>
             <TabPanel value={tab} index={0}>
@@ -58,7 +56,7 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
                 <Palette />
             </TabPanel>
             <TabPanel value={tab} index={2}>
-                Tool
+                Lorem ipsum
             </TabPanel>
         </>
     )

@@ -4,18 +4,20 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Image, Layer, Rect, Stage } from 'react-konva'
 // import Grid from "@material-ui/core/Grid";
 import AddIcon from '@material-ui/icons/Add'
+import SaveAltIcon from '@material-ui/icons/SaveAlt'
 import RemoveIcon from '@material-ui/icons/Remove'
 import IconButton from '@material-ui/core/IconButton'
 // import Typography from "@material-ui/core/Typography";
 import Slider from '@material-ui/core/Slider'
 import styled from '@emotion/styled'
-// import GridLines from "../GridLines";
-import { getTilesetDimensions, getCoordsFromPos, getPointerRelativePos } from '../store/editor/utils'
-import { changeSelectedTile } from '../store/editor/actions'
+// import GridLines from './GridLines'
+import { getTilesetDimensions, getCoordsFromPos, getPointerRelativePos, addNewTile } from '../store/editor/utils'
+import { changeSelectedTile, changeTilesetImage, changeTileset } from '../store/editor/actions'
 import { selectGrid, selectSelected, selectTileset } from '../store/editor/selectors'
-import { BG_IMAGE_DARK, RIGHT_BAR_WIDTH, SCALE_STEP } from '../common/constants'
+import { RIGHT_BAR_WIDTH, SCALE_STEP } from '../common/constants'
+import { Workspace } from 'store/editor/types'
 
-export const StyledTilesetImageContainer = styled.div`
+const StyledTilesetImageContainer = styled.div`
     overflow: auto;
     margin-bottom: 10px;
     height: calc(45vh);
@@ -27,14 +29,14 @@ const StyledBottomContainer = styled.div`
 `
 
 const StyledButtonContainer = styled.div`
-    width: 48px;
+    width: 72px;
     display: flex;
     padding: 4px;
     margin-right: 10px;
 `
 
 const StyledSliderContainer = styled.div`
-    width: 264px;
+    width: 240px;
     display: flex;
     padding-top: 4px;
     padding-right: 10px;
@@ -47,12 +49,12 @@ type Props = {
 const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     const containerRef = useRef<HTMLDivElement>(null)
     const stageRef = useRef<Konva.Stage>(null)
+
     const grid = useSelector(selectGrid)
     const tileset = useSelector(selectTileset)
     const selected = useSelector(selectSelected)
     const imageDimensions = getTilesetDimensions(tileset)
 
-    // const [stage, setStage] = useState(null);
     const [scale, setScale] = useState({ x: 2, y: 2 })
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [size, setSize] = useState({
@@ -60,10 +62,12 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         height: 500
     })
 
-    const { columns, tilewidth, tileheight } = tileset
+    const { columns, tilecount, tilewidth, tileheight } = tileset
 
     const dispatch = useDispatch()
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
+    const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
+    const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
 
     const onMouseDown = () => {
         const stage = stageRef.current
@@ -73,11 +77,14 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                     x: stage.x(),
                     y: stage.y(),
                     scale: scale.x
-                },
-                stage.getPointerPosition()
+                } as Workspace,
+                stage.getPointerPosition() as Konva.Vector2d
             )
             const { x, y } = getCoordsFromPos(grid, localPos)
-            onChangeSelectedTile(x + y * columns + 1)
+            const tileId = x + y * columns + 1
+            if (tileId <= tilecount) {
+                onChangeSelectedTile(tileId)
+            }
         }
     }
 
@@ -125,6 +132,23 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         }
     }
 
+    const onAddTile = () => {
+        addNewTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
+            onSaveTilesetImage(blob)
+            onChangeTileset({ ...tileset, tilecount: newTileId })
+            onChangeSelectedTile(newTileId)
+        })
+    }
+
+    const onDownloadTilesetImage = () => {
+        const downloadLink = document.createElement('a')
+        const dataURL = tilesetCanvas.toDataURL('image/png')
+        const url = dataURL.replace(/^data:image\/png/, 'data:application/octet-stream')
+        downloadLink.setAttribute('download', 'tileset.png')
+        downloadLink.setAttribute('href', url)
+        downloadLink.click()
+    }
+
     useEffect(() => {
         // const defaultScale = (RIGHT_BAR_WIDTH - 11) / (tilewidth * columns)
         // setScale({ x: defaultScale, y: defaultScale })
@@ -153,26 +177,26 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                 >
                     <Stage ref={stageRef} width={size.width} height={size.height} {...{ scale }}>
                         <Layer imageSmoothingEnabled={false}>
-                            <Rect
+                            {/* <Rect
                                 width={imageDimensions.w}
                                 height={imageDimensions.h}
                                 fillPatternImage={BG_IMAGE_DARK}
                                 fillPatternScaleX={1 / scale.x}
                                 fillPatternScaleY={1 / scale.y}
-                            />
+                            /> */}
                             {tilesetCanvas && <Image image={tilesetCanvas} {...{ onMouseDown }} />}
                             {/* <GridLines
-                dash={false}
-                width={imageDimensions.w}
-                height={imageDimensions.h}
-                scale={scale.x}
-                {...{ grid }}
-              /> */}
+                                dash={false}
+                                width={imageDimensions.w}
+                                height={imageDimensions.h}
+                                scale={scale.x}
+                                {...{ grid }}
+                            /> */}
                             <Rect
                                 x={position.x}
                                 y={position.y}
                                 width={tilewidth}
-                                height={tilewidth}
+                                height={tileheight}
                                 shadowBlur={5}
                                 strokeWidth={1}
                                 stroke="#fff"
@@ -194,11 +218,14 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                     />
                 </StyledSliderContainer>
                 <StyledButtonContainer>
-                    <IconButton size="small">
+                    <IconButton size="small" onClick={onAddTile}>
                         <AddIcon fontSize="small" />
                     </IconButton>
                     <IconButton size="small">
                         <RemoveIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" onClick={onDownloadTilesetImage}>
+                        <SaveAltIcon fontSize="small" />
                     </IconButton>
                 </StyledButtonContainer>
             </StyledBottomContainer>

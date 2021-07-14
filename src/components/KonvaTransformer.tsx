@@ -1,17 +1,29 @@
 import React, { useRef } from 'react'
-import PropTypes from 'prop-types'
+import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
 
-const KonvaTransformer = ({ isResizing, grid, listening, onChange, onClick }) => {
-    const shapeRef = useRef()
-    const trRef = useRef()
+import { Grid } from '../store/editor/types'
 
+type Props = {
+    grid: Grid
+    isResizing: boolean
+    listening: boolean
+    onChange: () => void
+    onClick: (isResizing: boolean) => void
+}
+
+const KonvaTransformer = ({ grid, isResizing, listening, onChange, onClick }: Props): JSX.Element => {
+    const shapeRef = useRef<Konva.Rect>(null)
+    const trRef = useRef<Konva.Transformer>(null)
     const { width, height } = grid
 
     React.useEffect(() => {
-        if (isResizing) {
+        if (isResizing && trRef.current && shapeRef.current) {
+            const layer = trRef.current.getLayer()
             trRef.current.nodes([shapeRef.current])
-            trRef.current.getLayer().batchDraw()
+            if (layer) {
+                layer.batchDraw()
+            }
         }
     }, [isResizing])
 
@@ -43,11 +55,12 @@ const KonvaTransformer = ({ isResizing, grid, listening, onChange, onClick }) =>
                     onChange()
                 }}
                 onTransformEnd={() => {
-                    const node = shapeRef.current
-                    const scaleX = node.scaleX()
-                    const scaleY = node.scaleY()
-                    onChange()
-                    console.info(scaleX, scaleY)
+                    if (shapeRef.current) {
+                        const scaleX = shapeRef.current.scaleX()
+                        const scaleY = shapeRef.current.scaleY()
+                        onChange()
+                        console.info(scaleX, scaleY)
+                    }
                 }}
             />
             {isResizing && (
@@ -67,12 +80,6 @@ const KonvaTransformer = ({ isResizing, grid, listening, onChange, onClick }) =>
     )
 }
 
-KonvaTransformer.propTypes = {
-    grid: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired,
-    onClick: PropTypes.func.isRequired,
-    isResizing: PropTypes.bool,
-    listening: PropTypes.bool
-}
+KonvaTransformer.displayName = 'KonvaTransformer'
 
 export default KonvaTransformer

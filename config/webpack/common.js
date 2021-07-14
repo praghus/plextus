@@ -1,11 +1,26 @@
 // shared config (dev and prod)
 const { resolve } = require('path')
+const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        fallback: { crypto: require.resolve('crypto-browserify') }
+        fallback: {
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify')
+        },
+        alias: {
+            'react-dom': '@hot-loader/react-dom',
+            zlib: require.resolve('browserify-zlib'),
+            buffer: require.resolve('buffer/'),
+            events: require.resolve('events/'),
+            process: 'process/browser',
+            stream: require.resolve('stream-browserify'),
+            assert: require.resolve('assert/'),
+            timers: require.resolve('timers-browserify'),
+            util: require.resolve('util/')
+        }
     },
     context: resolve(__dirname, '../../src'),
     module: {
@@ -32,7 +47,12 @@ module.exports = {
             }
         ]
     },
-    plugins: [new HtmlWebpackPlugin({ template: 'index.html.ejs' })],
+    plugins: [
+        new HtmlWebpackPlugin({ template: 'index.html.ejs' }),
+        new webpack.ProvidePlugin({
+            process: 'process/browser'
+        })
+    ],
     externals: {
         react: 'React',
         'react-dom': 'ReactDOM'

@@ -32,5 +32,3 @@ export const store = configureStore({
     devTools: !IS_PRODUCTION,
     enhancers
 })
-
-export type RootState = ReturnType<typeof store.getState>

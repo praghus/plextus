@@ -15,7 +15,6 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
     if (!grid.visible || grid.width * scale < 8) {
         return null
     }
-
     const lines: any[] = []
     const line = (key: string, points: any[]) => (
         <Line
@@ -24,7 +23,7 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
                 key,
                 points,
                 stroke: getRgbaValue(grid.color),
-                strokeWidth: 0.8 / scale
+                strokeWidth: 0.5 / scale
             }}
         />
     )
@@ -40,13 +39,6 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
     return (
         <Group {...{ ref, width, height }} listening={false}>
             {lines}
-            {/* {selectedLayer && selectedLayer.data && selectedLayer.data.map((gid, i) => {
-        const x = 1 + (i % selectedLayer.width) * grid.width
-        const y = 1 + Math.ceil(((i + 1) / selectedLayer.width) - 1) * grid.height
-        return gid ?
-          <Text {...{ x, y }} fill={getRgbaValue(grid.color)} fontSize={4.5} text={gid} key={`${x}-${y}`} /> :
-          null
-      })} */}
         </Group>
     )
 })

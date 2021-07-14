@@ -4,6 +4,8 @@ import {
     APP_REHYDRATE_STORE_SUCCESS,
     APP_REHYDRATE_STORE_ERROR,
     APP_REHYDRATE_STORE_START,
+    APP_CHANGE_IS_IMPORT_DIALOG_OPEN,
+    APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN,
     APP_CHANGE_LAST_UPDATE_TIME,
     APP_CHANGE_IS_LOADING,
     INITIAL_STATE
@@ -32,6 +34,16 @@ function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
                 isLoaded: false,
                 error: action.payload?.error.message,
                 isLoading: false
+            }
+        case APP_CHANGE_IS_IMPORT_DIALOG_OPEN:
+            return {
+                ...state,
+                isImportDialogOpen: action.payload.isImportDialogOpen
+            }
+        case APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN:
+            return {
+                ...state,
+                isNewProjectDialogOpen: action.payload.isNewProjectDialogOpen
             }
         case APP_CHANGE_LAST_UPDATE_TIME:
             return {

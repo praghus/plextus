@@ -37,7 +37,8 @@ import ImportPreview from './ImportPreview'
 
 const useStyles = makeStyles(theme => ({
     input: {
-        padding: theme.spacing(1)
+        marginTop: theme.spacing(2),
+        marginRight: theme.spacing(1)
     }
 }))
 
@@ -295,14 +296,15 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                             }}
                         />
                         <Grid container>
-                            <Grid item xs={mode === IMPORT_MODES.NEW_PROJECT ? 4 : 8}>
+                            <Grid item xs={4}>
                                 <TextField
                                     className={classes.input}
-                                    fullWidth={mode === IMPORT_MODES.NEW_LAYER}
                                     value={name}
                                     onChange={event => setName(event.target.value)}
                                     id="name"
                                     label="Layer name"
+                                    size="small"
+                                    variant="outlined"
                                 />
                             </Grid>
                             {mode === IMPORT_MODES.NEW_PROJECT && (
@@ -320,6 +322,8 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                             }
                                             id="width"
                                             label="Tile width"
+                                            size="small"
+                                            variant="outlined"
                                         />
                                     </Grid>
                                     <Grid item xs={2}>
@@ -335,6 +339,8 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                             }
                                             id="height"
                                             label="Tile height"
+                                            size="small"
+                                            variant="outlined"
                                         />
                                     </Grid>
                                 </>
@@ -347,6 +353,8 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                     onChange={event => setOffset({ ...offset, x: parseInt(event.target.value) })}
                                     id="offsetX"
                                     label="Offset X"
+                                    size="small"
+                                    variant="outlined"
                                 />
                             </Grid>
                             <Grid item xs={2}>
@@ -356,7 +364,9 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                     defaultValue={offset.y}
                                     onChange={event => setOffset({ ...offset, y: parseInt(event.target.value) })}
                                     id="offsetY"
-                                    label="Offset y"
+                                    label="Offset Y"
+                                    size="small"
+                                    variant="outlined"
                                 />
                             </Grid>
                         </Grid>

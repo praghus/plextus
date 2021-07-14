@@ -1,80 +1,116 @@
 import React, { memo, useRef, useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
+import Konva from 'konva'
 import { Image } from 'react-konva'
 import { TOOLS } from '../common/constants'
 import {
+    addNewTile,
     drawLine,
     getImageData,
     getCoordsFromPos,
     getPointerRelativePos,
     getTilePos
-    // textRenderer,
 } from '../store/editor/utils'
+import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 import logger from '../common/utils/logger'
 
-const TOOL_SIZE = 1
-
-let pointerPosition = null
-let isDrawing = false
-let isEmpty = false
-let isPlacing = false
-let selectedTile
-
+const TOOL_SIZE = 2
 const tempData = {}
+
+type SelectedTile = { gid: number; x: number; y: number }
+
+type Props = {
+    canvas: Canvas
+    grid: Grid
+    layer: Layer
+    onChangeLayerData: (layerId: string, data: number[]) => void
+    onChangePrimaryColor: (color: number[]) => void
+    onChangeSelectedTile: (tileId: number) => void
+    onChangeTileset: (tileset: any) => void
+    onSaveTilesetImage: (blob: Blob | null) => void
+    selected: Selected
+    stage: Konva.Stage
+    tileset: Tileset
+    tilesetCanvas: HTMLCanvasElement
+    workspace: Workspace
+}
 
 const MapLayer = ({
     canvas,
     grid,
     layer,
+    onChangeLayerData,
+    onChangePrimaryColor,
+    onChangeSelectedTile,
+    onChangeTileset,
+    onSaveTilesetImage,
     selected,
     stage,
     tileset,
     tilesetCanvas,
-    onChangeLayerData,
-    onChangePrimaryColor,
-    onChangeSelectedTile,
-    onSaveTilesetImage,
     workspace
-}) => {
-    const imageRef = useRef(null)
+}: Props): JSX.Element => {
+    const [ctx, setCtx] = useState<CanvasRenderingContext2D | undefined>()
+    const [data, setData] = useState<number[]>([])
+    const [image, setImage] = useState<CanvasImageSource>()
+    const [isDrawing, setIsDrawing] = useState(false)
+    const [isPlacing, setIsPlacing] = useState(false)
+    const [pixelTool, setPixelTool] = useState<ImageData>()
+    const [selectedTile, setSelectedTile] = useState<SelectedTile>()
 
-    const [ctx, setCtx] = useState(null)
-    const [data, setData] = useState([])
-    const [image, setImage] = useState(null)
-    const [pixelTool, setPixelTool] = useState(null)
+    const imageRef = useRef<Konva.Image>(null)
+    const [pointerRelPosition, setPointerRelPosition] = useState<Konva.Vector2d | null>({ x: 0, y: 0 })
 
     const { width, height } = canvas
     const { opacity, visible } = layer
     const { tilewidth, tileheight } = tileset
 
     const isSelected = selected.layerId === layer.id
-    const canvasElement = document.createElement('canvas')
-    const canvasContext = canvasElement.getContext('2d')
+    const canvasElement: any = document.createElement('canvas')
+    const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
 
-    const usePixelTool = (x, y) => {
+    const usePixelTool = (x: number, y: number): void => {
         // obey selected tile bounds
+        const tilesetContext = tilesetCanvas.getContext('2d')
         if (
+            ctx &&
+            pixelTool &&
+            selectedTile &&
+            tilesetContext &&
             x > selectedTile.x * tilewidth &&
             x < selectedTile.x * tilewidth + tilewidth &&
             y > selectedTile.y * tileheight &&
             y < selectedTile.y * tileheight + tileheight
         ) {
+            const { x: tx, y: ty } = getTilePos(selectedTile.gid, tileset)
             ctx.putImageData(pixelTool, x, y)
+            tilesetContext.putImageData(
+                pixelTool,
+                tx + (x - selectedTile.x * tilewidth),
+                ty + (y - selectedTile.y * tileheight)
+            )
         }
     }
 
-    const draw = (gid, i) => {
-        const x = (i % layer.width) * grid.width
-        const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
-        ctx.clearRect(x, y, tilewidth, tileheight)
-        if (gid) {
-            const { x: posX, y: posY } = getTilePos(gid, tileset)
-            ctx.drawImage(tilesetCanvas, posX, posY, tilewidth, tileheight, x, y, tilewidth, tileheight)
-            // if (isSelected) {
-            //   ctx.fillStyle = 'black'
-            //   ctx.fillRect(x, y, `${gid}`.length * 5, 6)
-            //   textRenderer(ctx)(`${gid}`, x, y + 1)
-            // }
+    const draw = (gid: number | null, i: number): void => {
+        if (ctx) {
+            const x = (i % layer.width) * grid.width
+            const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
+            ctx.clearRect(x, y, tilewidth, tileheight)
+            if (gid) {
+                const { x: posX, y: posY } = getTilePos(gid, tileset)
+                ctx.drawImage(tilesetCanvas, posX, posY, tilewidth, tileheight, x, y, tilewidth, tileheight)
+            } else if (isSelected) {
+                ctx.fillStyle = 'rgba(0,0,0,0.2)'
+                ctx.fillRect(x, y, tilewidth, tileheight)
+            }
+        }
+    }
+
+    const redraw = (): void => {
+        if (ctx && layer.data) {
+            ctx.clearRect(0, 0, width, height)
+            layer.data.map((gid, i) => draw(gid, i))
+            stage.batchDraw()
         }
     }
 
@@ -96,15 +132,10 @@ const MapLayer = ({
         setData(layer.data)
         tempData[layer.id] = layer.data
         logger.info(`layer ${layer.id} updated`)
-        if (ctx && layer.data && tilesetCanvas) {
-            ctx.clearRect(0, 0, width, height)
-            layer.data.map((gid, i) => draw(gid, i))
-            logger.info(`layer ${layer.id} rendered`)
-            stage.batchDraw()
-        }
-    }, [ctx, tilesetCanvas, layer.data])
+        redraw()
+    }, [ctx, tilesetCanvas, layer.data, isSelected])
 
-    const updateLayer = (x, y, gid) => {
+    const updateLayer = (x: number, y: number, gid: number | null): void => {
         const pos = x + ((layer.width * tilewidth) / grid.width) * y
         if (tempData[layer.id][pos] !== gid) {
             tempData[layer.id][pos] = gid
@@ -113,13 +144,26 @@ const MapLayer = ({
         }
     }
 
-    const onMouseDown = e => {
-        if (visible && isSelected) {
-            const localPos = getPointerRelativePos(workspace, stage.getPointerPosition())
+    const onMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+        const localPos = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+
+        if (ctx && visible && isSelected) {
             const { x, y } = getCoordsFromPos(grid, localPos)
             const gid = layer.data[x + ((layer.width * tilewidth) / grid.width) * y]
 
-            selectedTile = { gid, x, y }
+            if (!gid && selected.tool === TOOLS.PENCIL) {
+                addNewTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
+                    const newLayerData = [...layer.data]
+                    newLayerData[x + ((layer.width * tilewidth) / grid.width) * y] = newTileId
+                    setData(newLayerData)
+                    onSaveTilesetImage(blob)
+                    onChangeTileset({ ...tileset, tilecount: newTileId })
+                    onChangeSelectedTile(newTileId)
+                    onChangeLayerData(layer.id, newLayerData)
+                })
+            }
+
+            setSelectedTile({ gid, x, y })
 
             switch (selected.tool) {
                 case TOOLS.DELETE:
@@ -127,7 +171,7 @@ const MapLayer = ({
                     if (e.evt.button === 2) {
                         onChangeSelectedTile(gid)
                     } else {
-                        isPlacing = true
+                        setIsPlacing(true)
                         tempData[layer.id] = [...data]
                         updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     }
@@ -135,102 +179,78 @@ const MapLayer = ({
                 case TOOLS.PENCIL:
                 case TOOLS.ERASER:
                     if (gid) {
+                        onChangeSelectedTile(gid)
                         if (e.evt.button === 2) {
                             const colorData = Object.values(ctx.getImageData(localPos.x, localPos.y, 1, 1).data)
                             onChangePrimaryColor(colorData)
                         } else {
-                            isDrawing = true
-                            pointerPosition = stage.getPointerPosition()
                             usePixelTool(localPos.x, localPos.y)
+                            setIsDrawing(true)
                             stage.batchDraw()
                         }
-                    } else {
-                        isEmpty = true
-                        ctx.save()
-                        ctx.fillStyle = 'rgba(255,0,0,0.6)'
-                        ctx.fillRect(x * tilewidth, y * tileheight, tilewidth, tileheight)
-                        ctx.restore()
-                        stage.batchDraw()
                     }
                     break
 
                 default:
                     break
             }
+            setPointerRelPosition(localPos)
             e.evt.preventDefault()
         }
     }
 
     const onMouseMove = () => {
-        const pos = stage.getPointerPosition()
-        const localPos = getPointerRelativePos(workspace, pos)
+        const localPos = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+
         if (isDrawing) {
-            const { x: x1, y: y1 } = getPointerRelativePos(workspace, pointerPosition)
+            const { x: x1, y: y1 } = pointerRelPosition as Konva.Vector2d
             const { x: x2, y: y2 } = localPos
             drawLine(x1, y1, x2, y2, usePixelTool)
-            pointerPosition = pos
             stage.batchDraw()
         } else if (isPlacing) {
             const { x, y } = getCoordsFromPos(grid, localPos)
             updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
         }
+
+        setPointerRelPosition(localPos)
     }
 
     const onMouseUp = () => {
         if (isDrawing) {
-            const tilesetContext = tilesetCanvas.getContext('2d')
-            const { x, y } = getTilePos(selectedTile.gid, tileset)
-            const tx = selectedTile.x * tilewidth
-            const ty = selectedTile.y * tileheight
-            tilesetContext.clearRect(x, y, tilewidth, tileheight)
-            tilesetContext.drawImage(image, tx, ty, tilewidth, tileheight, x, y, tilewidth, tileheight)
-
-            isDrawing = false
-            layer.data.map((gid, i) => draw(gid, i))
-            stage.batchDraw()
+            redraw()
+            setIsDrawing(false)
             tilesetCanvas.toBlob(onSaveTilesetImage, 'image/png')
         }
         if (isPlacing) {
-            isPlacing = false
+            setIsPlacing(false)
             setData(tempData[layer.id])
             onChangeLayerData(layer.id, tempData[layer.id])
         }
-        if (isEmpty) {
-            isEmpty = false
-            ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
-            stage.batchDraw()
-        }
     }
 
-    console.info(`Layer ${layer.name}`, isSelected)
-
     return (
-        visible && (
+        <>
             <Image
                 key={layer.id}
-                listening={isSelected}
                 ref={imageRef}
+                listening={isSelected && visible}
                 opacity={opacity / 255}
                 {...{
                     image,
                     onMouseDown,
                     onMouseMove,
                     onMouseUp,
+                    visible,
                     width,
                     height
                 }}
             />
-        )
+            {/* <Pointer {...{ grid, selected, stage, tileset, pointerRelPosition }} /> */}
+        </>
     )
 }
 
-MapLayer.propTypes = {
-    canvas: PropTypes.object.isRequired,
-    grid: PropTypes.object.isRequired,
-    layer: PropTypes.object.isRequired,
-    tileset: PropTypes.object.isRequired,
-    tilesetCanvas: PropTypes.object.isRequired
-}
+MapLayer.displayName = 'MapLayer'
 
 // export default MapLayer
 export default memo(
@@ -241,6 +261,7 @@ export default memo(
         // prevProps.selected.tool === nextProps.selected.tool &&
         prevProps.selected === nextProps.selected &&
         prevProps.workspace === nextProps.workspace &&
+        // prevProps.tileset === nextProps.tileset &&
         prevProps.tilesetCanvas === nextProps.tilesetCanvas &&
         prevProps.layer === nextProps.layer
     // prevProps.layer.opacity === nextProps.layer.opacity &&

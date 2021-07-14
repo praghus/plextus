@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { hot } from 'react-hot-loader'
+import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import { Switch, Route } from 'react-router-dom'
 import { ThemeProvider } from '@material-ui/core/styles'

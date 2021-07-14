@@ -1,11 +1,9 @@
-import { APP_CHANGE_LAST_UPDATE_TIME, APP_CHANGE_IS_LOADING } from './constants'
-
-// export interface IChangeAppIsLoading extends Action<"changeAppIsLoading"> {
-//   isLoading: boolean;
-// }
-// export interface IChangeLastUpdateTime extends Action<"IChangeLastUpdateTime"> {
-//   lastUpdateTime: number;
-// }
+import {
+    APP_CHANGE_LAST_UPDATE_TIME,
+    APP_CHANGE_IS_LOADING,
+    APP_CHANGE_IS_IMPORT_DIALOG_OPEN,
+    APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN
+} from './constants'
 
 export const changeAppIsLoading = (isLoading: boolean) =>
     ({
@@ -19,6 +17,14 @@ export const changeLastUpdateTime = (lastUpdateTime: number) =>
         payload: { lastUpdateTime }
     } as const)
 
-// export type AppActions =
-//   | ReturnType<typeof changeAppIsLoading>
-//   | ReturnType<typeof changeLastUpdateTime>;
+export const changeAppIsImportDialogOpen = (isImportDialogOpen: boolean) =>
+    ({
+        type: APP_CHANGE_IS_IMPORT_DIALOG_OPEN,
+        payload: { isImportDialogOpen }
+    } as const)
+
+export const changeAppIsNewProjectDialogOpen = (isNewProjectDialogOpen: boolean) =>
+    ({
+        type: APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN,
+        payload: { isNewProjectDialogOpen }
+    } as const)

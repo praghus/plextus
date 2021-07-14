@@ -21,13 +21,15 @@ import {
     changePrimaryColor,
     changeScale,
     changeSelectedTile,
+    changeTileset,
     changeTilesetImage
 } from '../store/editor/actions'
 // import { getCoordsFromPos, getPointerRelativePos } from "../../../store/editor/utils";
-import logger from '../common/utils/logger'
+// import logger from '../common/utils/logger'
 
 import GridLines from './GridLines'
 import MapLayer from './MapLayer'
+import TilesIds from './TilesIds'
 // import KonvaTransformer from "../KonvaTransformer";
 
 const styles = ({ selected }) => css`
@@ -55,7 +57,6 @@ type Props = {
 
 const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
     const stageRef = useRef<Konva.Stage>(null)
-    const gridRef = useRef<Konva.Group>(null)
 
     const selected = useSelector(selectSelected)
     const grid = useSelector(selectGrid)
@@ -68,7 +69,8 @@ const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
     const onChangeLayerData = (layerId: string, data: number[]) => dispatch(changeLayerData(layerId, data))
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
-    const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
+    const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
+    const onSaveTilesetImage = (blob: Blob | null) => dispatch(changeTilesetImage(blob))
 
     const onChangePosition = useCallback(
         debounce((x, y) => dispatch(changePosition(x, y)), 300),
@@ -85,20 +87,21 @@ const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
     useEffect(() => {
         if (stageRef.current) {
             const { scale, x, y } = workspace
+            const stage = stageRef.current
             if (x && y) {
-                stageRef.current.position({ x, y })
+                stage.position({ x, y })
             } else {
-                stageRef.current.position({
+                stage.position({
                     x: (workspace.width - canvas.width * scale) / 2,
                     y: (workspace.height - canvas.height * scale) / 2
                 })
-                onChangePosition(stageRef.current.x(), stageRef.current.y())
+                onChangePosition(stage.x(), stage.y())
             }
-            stageRef.current.scale({ x: scale, y: scale })
-            stageRef.current.batchDraw()
-            setStage(stageRef.current)
+            stage.scale({ x: scale, y: scale })
+            stage.batchDraw()
+            setStage(stage)
         }
-    }, [])
+    }, [tileset.lastUpdateTime]) // workspace
 
     const onScale = (newScale: number) => {
         if (stage) {
@@ -144,64 +147,61 @@ const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
         }
     }
 
-    logger.info('render', 'STAGE')
-
     return (
-        <React.Fragment>
-            <div css={styles({ selected })}>
-                <Stage
-                    ref={stageRef}
-                    width={workspace.width}
-                    height={workspace.height}
-                    draggable={selected.tool === TOOLS.DRAG}
-                    onContextMenu={e => {
-                        e.evt.preventDefault()
-                    }}
-                    {...{
-                        onWheel,
-                        onDragEnd
-                    }}
-                >
-                    <Layer imageSmoothingEnabled={false}>
-                        <Rect
-                            shadowBlur={10}
-                            width={canvas.width}
-                            height={canvas.height}
-                            fillPatternImage={BG_IMAGE}
-                            fillPatternScaleX={1 / workspace.scale}
-                            fillPatternScaleY={1 / workspace.scale}
-                        />
-                        {stage &&
-                            layers.map(layer => (
-                                <MapLayer
-                                    key={`layer-${layer.id}`}
-                                    {...{
-                                        canvas,
-                                        grid,
-                                        layer,
-                                        onChangeLayerData,
-                                        onChangePrimaryColor,
-                                        onChangeSelectedTile,
-                                        onSaveTilesetImage,
-                                        selected,
-                                        stage,
-                                        tileset,
-                                        tilesetCanvas,
-                                        workspace
-                                    }}
-                                />
-                            ))}
-                        <GridLines
-                            ref={gridRef}
-                            width={canvas.width}
-                            height={canvas.height}
-                            scale={workspace.scale}
-                            {...{ grid, selectedLayer }}
-                        />
-                    </Layer>
-                </Stage>
-            </div>
-        </React.Fragment>
+        <div css={styles({ selected })}>
+            <Stage
+                ref={stageRef}
+                width={workspace.width}
+                height={workspace.height}
+                draggable={selected.tool === TOOLS.DRAG}
+                onContextMenu={e => {
+                    e.evt.preventDefault()
+                }}
+                {...{
+                    onWheel,
+                    onDragEnd
+                }}
+            >
+                <Layer imageSmoothingEnabled={false}>
+                    <Rect
+                        shadowBlur={10}
+                        width={canvas.width}
+                        height={canvas.height}
+                        fillPatternImage={BG_IMAGE}
+                        fillPatternScaleX={1 / workspace.scale}
+                        fillPatternScaleY={1 / workspace.scale}
+                    />
+                    {stage &&
+                        layers.map(layer => (
+                            <MapLayer
+                                key={`layer-${layer.id}`}
+                                {...{
+                                    canvas,
+                                    grid,
+                                    layer,
+                                    onChangeLayerData,
+                                    onChangePrimaryColor,
+                                    onChangeSelectedTile,
+                                    onChangeTileset,
+                                    onSaveTilesetImage,
+                                    selected,
+                                    stage,
+                                    tileset,
+                                    tilesetCanvas,
+                                    workspace
+                                }}
+                            />
+                        ))}
+                    <TilesIds
+                        width={canvas.width}
+                        height={canvas.height}
+                        scale={workspace.scale}
+                        {...{ grid, selectedLayer }}
+                    />
+                    <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />
+                </Layer>
+            </Stage>
+        </div>
     )
 }
 

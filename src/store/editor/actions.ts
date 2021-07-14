@@ -92,7 +92,7 @@ export const changeTileset = (tileset: Tileset) =>
         payload: { tileset }
     } as const)
 
-export const changeTilesetImage = (blob: Blob) =>
+export const changeTilesetImage = (blob: Blob | null) =>
     ({
         type: EDITOR_SET_TILESET_IMAGE,
         payload: { blob }

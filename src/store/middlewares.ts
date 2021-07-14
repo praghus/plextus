@@ -18,7 +18,9 @@ import {
     APP_REHYDRATE_STORE_START,
     APP_STORAGE_KEY
 } from './app/constants'
-import { RootState } from './store'
+import { store } from './store'
+
+type RootState = ReturnType<typeof store.getState>
 
 let isLoadExecuted = false
 
@@ -81,7 +83,6 @@ const cacheMiddleware: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => 
     } else if (action.type === EDITOR_SAVE_CHANGES) {
         handleSave(api.getState())
     }
-    // console.info(action, state);
     return next(action)
 }
 

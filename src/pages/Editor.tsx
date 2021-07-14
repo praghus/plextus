@@ -10,7 +10,7 @@ import { actions as undoActions } from 'redux-undo-redo'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from '../common/constants'
 import { EDITOR_RESOURCE_NAME } from '../store/editor/constants'
 import { getTilesetDimensions } from '../store/editor/utils'
-import { selectIsLoaded } from '../store/app/selectors'
+import { selectIsLoaded, selectIsImportDialogOpen } from '../store/app/selectors'
 import { selectTileset } from '../store/editor/selectors'
 import { adjustWorkspaceSize } from '../store/editor/actions'
 import reducer from '../store/editor/reducer'
@@ -21,7 +21,7 @@ import LayersList from '../components/LayersList'
 import ToolBar from '../components/ToolBar'
 import KonvaStage from '../components/KonvaStage'
 import Footer from '../components/Footer'
-import ImportDialog from '../components/ImportDialog'
+
 // import Palette from "../../components/Palette";
 import StatusBar from '../components/StatusBar'
 import TabContainer from '../components/TabsContainer'
@@ -64,18 +64,15 @@ const Editor = (): JSX.Element => {
 
     const { t } = useTranslation()
 
+    const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
     const isLoaded = useSelector(selectIsLoaded)
     const tileset = useSelector(selectTileset)
 
-    const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
     const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
-    // const [isRestoring, setIsRestoring] = useState(true);
     const [stage, setStage] = useState<Konva.Stage>()
 
     const dispatch = useDispatch()
     const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
-    const onImportDialogOpen = () => setIsImportDialogOpen(true)
-    const onImportDialogClose = () => setIsImportDialogOpen(false)
 
     // Undo/Redo actions
     const onClear = () => dispatch(undoActions.clear())
@@ -108,7 +105,6 @@ const Editor = (): JSX.Element => {
             const canvasElement: any = document.createElement('canvas')
             const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
 
-            // img.crossOrigin = "Anonymous";
             img.src = tileset.image
             img.onload = () => {
                 canvasElement.width = w
@@ -118,7 +114,7 @@ const Editor = (): JSX.Element => {
                 logger.info('New tileset', 'CANVAS')
             }
         }
-    }, [tileset])
+    }, [tileset, isImportDialogOpen])
 
     return (
         <>
@@ -127,15 +123,9 @@ const Editor = (): JSX.Element => {
             </Helmet>
             <StyledContainer>
                 <LoadingIndicator loading={!isLoaded} />
-                {isImportDialogOpen && <ImportDialog onClose={onImportDialogClose} />}
-                <ToolBar {...{ onImportDialogOpen }} />
+                <ToolBar />
                 <StyledMiddleContainer>
-                    <KonvaStage
-                        {...{
-                            setStage,
-                            tilesetCanvas
-                        }}
-                    />
+                    <KonvaStage {...{ setStage, tilesetCanvas }} />
                     {stage && <StatusBar {...{ stage }} />}
                 </StyledMiddleContainer>
                 <StyledRightContainer>
