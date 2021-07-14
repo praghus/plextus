@@ -7,8 +7,10 @@ export const TRANSLATIONS_PL = {
     cancel: 'Anuluj',
     new_project: 'Nowy projekt',
     import_image: 'Importuj obraz',
-    export_map: 'Eksportuj do formatu .tmx',
+    export_map: 'Eksportuj do .tmx',
     save: 'Zapisz',
     undo: 'Cofnij',
-    redo: 'Powtórz'
+    redo: 'Powtórz',
+    close_project: 'Zamknij projekt',
+    close_project_message: `Closing the project will clear the workspace and remove the entire tileset. The unexported project will be deleted. are you sure you want to do this?`
 }

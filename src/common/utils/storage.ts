@@ -1,5 +1,7 @@
 import localforage from 'localforage'
 
+export const clearCache = localforage.clear
+
 export const setCacheItem = (key: string, data: Record<string, unknown>): Promise<Record<string, unknown>> =>
     localforage.setItem(key, data)
 

@@ -84,6 +84,7 @@ const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
     const selectedLayer = layers.find(({ id }) => id === selected.layerId)
     const stage = stageRef.current
 
+    // @todo refactor
     useEffect(() => {
         if (stageRef.current) {
             const { scale, x, y } = workspace
@@ -192,12 +193,7 @@ const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
                                 }}
                             />
                         ))}
-                    <TilesIds
-                        width={canvas.width}
-                        height={canvas.height}
-                        scale={workspace.scale}
-                        {...{ grid, selectedLayer }}
-                    />
+                    <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} />
                     <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />
                 </Layer>
             </Stage>

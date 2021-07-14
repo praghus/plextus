@@ -30,6 +30,17 @@ export enum TOOLS {
     ZOOM = 'ZOOM'
 }
 
+export const PENCIL_STYLES = {
+    DEFAULT: [1],
+    DOUBLE: [1, 1, 1, 1],
+    TOP: [1, 1, 0, 0],
+    BOTTOM: [0, 0, 1, 1],
+    LEFT: [1, 0, 1, 0],
+    RIGHT: [0, 1, 0, 1],
+    SLASH: [0, 1, 1, 0],
+    BACKSLASH: [1, 0, 0, 1]
+}
+
 export const PALETTES = {
     DAWNBRINGER_16_PALETTE: {
         name: 'Dawnbringer 16',

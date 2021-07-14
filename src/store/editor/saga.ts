@@ -2,9 +2,10 @@ import { AnyAction } from 'redux'
 import { put, StrictEffect, select, takeLatest } from 'redux-saga/effects'
 
 import logger from '../../common/utils/logger'
+import { clearCache } from '../../common/utils/storage'
 import { selectHistoryTilesets } from '../app/selectors'
-import { changeTilesetImageSuccess } from './actions'
-import { EDITOR_SET_TILESET_IMAGE } from './constants'
+import { resetToDefaults, changeTilesetImageSuccess } from './actions'
+import { EDITOR_CLEAR_PROJECT, EDITOR_SET_TILESET_IMAGE } from './constants'
 
 const historyData: any[] = []
 
@@ -30,6 +31,16 @@ export function* setTilesetImage(action: AnyAction): Generator<StrictEffect, voi
     }
 }
 
+export function* clearProject(): Generator<StrictEffect, void, any> {
+    try {
+        historyData.forEach(URL.revokeObjectURL)
+        clearCache()
+        yield put(resetToDefaults())
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
 export default function* editorSaga(): Generator {
-    yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage)
+    yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage), yield takeLatest(EDITOR_CLEAR_PROJECT, clearProject)
 }

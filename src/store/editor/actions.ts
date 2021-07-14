@@ -9,6 +9,7 @@ import {
     EDITOR_CHANGE_LAYER_NAME,
     EDITOR_CHANGE_LAYER_OPACITY,
     EDITOR_CHANGE_LAYER_VISIBLE,
+    EDITOR_CLEAR_PROJECT,
     EDITOR_REMOVE_LAYER,
     EDITOR_CHANGE_LAYERS,
     EDITOR_CHANGE_PALETTE,
@@ -20,6 +21,7 @@ import {
     EDITOR_CHANGE_TILESET,
     EDITOR_CHANGE_TOOL,
     EDITOR_CHANGE_WORKSPACE_SIZE,
+    EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID,
@@ -28,7 +30,17 @@ import {
 } from './constants'
 import { Layer, Pallete, Tileset } from './types'
 
-export const changeCanvasSize = (width: number, height: number) =>
+export const clearProject = () =>
+    ({
+        type: EDITOR_CLEAR_PROJECT
+    } as const)
+
+export const resetToDefaults = () =>
+    ({
+        type: EDITOR_RESET_TO_DEFAULTS
+    } as const)
+
+export const changeCanvasSize = (width: number | null, height: number | null) =>
     ({
         type: EDITOR_CHANGE_CANVAS_SIZE,
         payload: { width, height }
@@ -104,7 +116,7 @@ export const changeTilesetImageSuccess = (image: ImageData) =>
         payload: { image }
     } as const)
 
-export const changeLayers = (layers: Layer[]) =>
+export const changeLayers = (layers: Layer | null[]) =>
     ({
         type: EDITOR_CHANGE_LAYERS,
         payload: { layers }

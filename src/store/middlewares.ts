@@ -46,6 +46,7 @@ const loadStore = async (api: MiddlewareAPI): Promise<RootState> => {
     return api.getState()
 }
 
+// @todo move to store/editor/saga
 const handleSave = async (state: RootState) => {
     const { image } = state[EDITOR_RESOURCE_NAME].tileset
     if (image) {

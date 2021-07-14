@@ -20,6 +20,7 @@ import {
     EDITOR_CHANGE_TILESET,
     EDITOR_CHANGE_TOOL,
     EDITOR_CHANGE_WORKSPACE_SIZE,
+    EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_TOGGLE_SHOW_GRID,
     EDITOR_HISTORY_ACTION
@@ -149,6 +150,8 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 layers: action.payload.layers,
                 tileset: action.payload.tileset
             }
+        case EDITOR_RESET_TO_DEFAULTS:
+            return INITIAL_STATE
         default:
             return state
     }

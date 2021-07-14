@@ -24,10 +24,11 @@ import { hexToRgba, rgbToHex } from '../common/utils/colors'
 import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
 import { selectCanvas, selectLayers, selectTileset, selectGrid, selectSelected } from '../store/editor/selectors'
 import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
-import { changePrimaryColor, changeTool, saveChanges, toggleShowGrid } from '../store/editor/actions'
+import { clearProject, changePrimaryColor, changeTool, saveChanges, toggleShowGrid } from '../store/editor/actions'
 import { EraserIcon, StampIcon } from './Icons'
 import ImportDialog from './ImportDialog'
 import NewProjectDialog from './NewProjectDialog'
+import ConfirmationDialog from './ConfirmationDialog'
 
 export const useStyles = makeStyles(theme => ({
     iconButton: {
@@ -82,6 +83,8 @@ const ToolBar = (): JSX.Element => {
     const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
     const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
 
+    const [confirmationDialogOpen, setConfirmationDialogOpen] = React.useState(false)
+
     const dispatch = useDispatch()
     const handleClose = () => setAnchorEl(null)
     const handleClick = event => setAnchorEl(event.currentTarget)
@@ -93,6 +96,7 @@ const ToolBar = (): JSX.Element => {
     const onToggleNewProjectDialog = open => dispatch(changeAppIsNewProjectDialogOpen(open))
     const onUndo = () => dispatch(undoActions.undo())
     const onRedo = () => dispatch(undoActions.redo())
+    const onCloseProject = () => dispatch(clearProject())
 
     const [r, g, b]: number[] = selected.color || [0, 0, 0]
 
@@ -100,6 +104,16 @@ const ToolBar = (): JSX.Element => {
         <>
             {isNewProjectDialogOpen && <NewProjectDialog onClose={() => onToggleNewProjectDialog(false)} />}
             {isImportDialogOpen && <ImportDialog onClose={() => onToggleImportDialog(false)} />}
+            <ConfirmationDialog
+                title={t('hold_on')}
+                message={t('close_project_message')}
+                open={confirmationDialogOpen}
+                onConfirm={() => {
+                    setConfirmationDialogOpen(false)
+                    onCloseProject()
+                }}
+                onClose={() => setConfirmationDialogOpen(false)}
+            />
             <StyledContainer>
                 <Paper elevation={5} className={classes.paper}>
                     <StyledToggleButtonGroup
@@ -121,6 +135,15 @@ const ToolBar = (): JSX.Element => {
                             >
                                 {t('new_project')}
                             </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    handleClose()
+                                    setConfirmationDialogOpen(true)
+                                }}
+                            >
+                                {t('close_project')}
+                            </MenuItem>
+                            <Divider orientation="horizontal" />
                             <MenuItem onClick={onUndo}>{t('undo')}</MenuItem>
                             <MenuItem onClick={onRedo}>{t('redo')}</MenuItem>
                             <Divider orientation="horizontal" />

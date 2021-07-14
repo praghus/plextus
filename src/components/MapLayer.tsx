@@ -13,7 +13,7 @@ import {
 import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 import logger from '../common/utils/logger'
 
-const TOOL_SIZE = 2
+const TOOL_SIZE = 1
 const tempData = {}
 
 type SelectedTile = { gid: number; x: number; y: number }

@@ -6,12 +6,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { Helmet } from 'react-helmet'
 import { actions as undoActions } from 'redux-undo-redo'
-
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from '../common/constants'
 import { EDITOR_RESOURCE_NAME } from '../store/editor/constants'
 import { getTilesetDimensions } from '../store/editor/utils'
 import { selectIsLoaded, selectIsImportDialogOpen } from '../store/app/selectors'
-import { selectTileset } from '../store/editor/selectors'
+import { selectCanvas, selectTileset } from '../store/editor/selectors'
 import { adjustWorkspaceSize } from '../store/editor/actions'
 import reducer from '../store/editor/reducer'
 import saga from '../store/editor/saga'
@@ -21,10 +20,10 @@ import LayersList from '../components/LayersList'
 import ToolBar from '../components/ToolBar'
 import KonvaStage from '../components/KonvaStage'
 import Footer from '../components/Footer'
-
-// import Palette from "../../components/Palette";
 import StatusBar from '../components/StatusBar'
 import TabContainer from '../components/TabsContainer'
+import WelcomeDialog from '../components/WelcomeDialog'
+// import LogoImg from '../assets/logo.png'
 
 const StyledContainer = styled.div`
     height: calc(100vh - ${FOOTER_HEIGHT}px);
@@ -42,7 +41,6 @@ const StyledMiddleContainer = styled.div`
     width: 100%;
     height: 100%;
 `
-
 const StyledRightContainer = styled.div`
     width: ${RIGHT_BAR_WIDTH}px;
     min-width: ${RIGHT_BAR_WIDTH}px;
@@ -64,6 +62,7 @@ const Editor = (): JSX.Element => {
 
     const { t } = useTranslation()
 
+    const canvas = useSelector(selectCanvas)
     const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
     const isLoaded = useSelector(selectIsLoaded)
     const tileset = useSelector(selectTileset)
@@ -125,14 +124,15 @@ const Editor = (): JSX.Element => {
                 <LoadingIndicator loading={!isLoaded} />
                 <ToolBar />
                 <StyledMiddleContainer>
-                    <KonvaStage {...{ setStage, tilesetCanvas }} />
-                    {stage && <StatusBar {...{ stage }} />}
+                    {canvas && <KonvaStage {...{ setStage, tilesetCanvas }} />}
+                    {canvas && stage && <StatusBar {...{ stage }} />}
                 </StyledMiddleContainer>
                 <StyledRightContainer>
                     <TabContainer {...{ tilesetCanvas }} />
                     <LayersList />
                 </StyledRightContainer>
             </StyledContainer>
+            {!canvas && isLoaded && <WelcomeDialog />}
             <StyledFooter />
         </>
     )
