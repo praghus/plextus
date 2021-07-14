@@ -28,9 +28,10 @@ import {
     changeLayers,
     changeSelectedLayer,
     changeTileset,
-    changeTilesetImage
+    changeTilesetImage,
+    saveChanges
 } from '../store/editor/actions'
-import { selectLayers, selectTileset } from '../store/editor/selectors'
+import { selectCanvas, selectLayers, selectTileset } from '../store/editor/selectors'
 // import { getOrderedPalette } from "../../common/utils/colors";
 import { getImageDimensions } from '../common/utils/image'
 import ImportPreview from './ImportPreview'
@@ -48,6 +49,7 @@ type Props = {
 
 const ImportDialog = ({ onClose }: Props): JSX.Element => {
     const classes = useStyles()
+    const canvas = useSelector(selectCanvas)
     const layers = useSelector(selectLayers)
     // const palette = useSelector(selectPalette);
     const tileset = useSelector(selectTileset)
@@ -61,6 +63,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
     const onChangeGridSize = (width, height) => dispatch(changeGridSize(width, height))
     const onChangeSelectedLayer = value => dispatch(changeSelectedLayer(value))
     const onChangeTileset = value => dispatch(changeTileset(value))
+    const onSaveChanges = () => dispatch(saveChanges())
     const onSaveLayers = value => dispatch(changeLayers(value))
     const onSaveTilesetImage = value => dispatch(changeTilesetImage(value))
 
@@ -215,6 +218,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
             } else {
                 processNewTileset()
             }
+            onSaveChanges()
         }, 100)
     }
 
@@ -267,26 +271,28 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                 )}
                 {!isProcessing && isLoaded && (
                     <>
-                        <FormControl component="fieldset">
-                            <RadioGroup
-                                row
-                                aria-label="position"
-                                name="position"
-                                value={mode}
-                                onChange={event => setMode(event.target.value)}
-                            >
-                                <FormControlLabel
-                                    value={IMPORT_MODES.NEW_PROJECT}
-                                    control={<Radio color="primary" />}
-                                    label="Import as a new project"
-                                />
-                                <FormControlLabel
-                                    value={IMPORT_MODES.NEW_LAYER}
-                                    control={<Radio color="primary" />}
-                                    label="Add as a new layer"
-                                />
-                            </RadioGroup>
-                        </FormControl>
+                        {canvas && (
+                            <FormControl component="fieldset">
+                                <RadioGroup
+                                    row
+                                    aria-label="position"
+                                    name="position"
+                                    value={mode}
+                                    onChange={event => setMode(event.target.value)}
+                                >
+                                    <FormControlLabel
+                                        value={IMPORT_MODES.NEW_PROJECT}
+                                        control={<Radio color="primary" />}
+                                        label="Import as a new project"
+                                    />
+                                    <FormControlLabel
+                                        value={IMPORT_MODES.NEW_LAYER}
+                                        control={<Radio color="primary" />}
+                                        label="Add as a new layer"
+                                    />
+                                </RadioGroup>
+                            </FormControl>
+                        )}
                         <ImportPreview
                             {...{
                                 imageDimensions,

@@ -45,21 +45,8 @@ const WelcomeDialog = (): JSX.Element => {
                 </Typography>
             </StyledDialogContent>
             <StyledDialogActions>
-                <Button
-                    onClick={() => {
-                        onToggleImportDialog(true)
-                    }}
-                >
-                    Import image
-                </Button>
-                <Button
-                    autoFocus
-                    onClick={() => {
-                        onToggleNewProjectDialog(true)
-                    }}
-                >
-                    Create an empty project
-                </Button>
+                <Button onClick={() => onToggleImportDialog(true)}>Import image</Button>
+                <Button onClick={() => onToggleNewProjectDialog(true)}>Create an empty project</Button>
             </StyledDialogActions>
         </Dialog>
     )
