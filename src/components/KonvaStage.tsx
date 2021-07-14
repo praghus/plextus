@@ -30,6 +30,7 @@ import {
 import GridLines from './GridLines'
 import MapLayer from './MapLayer'
 import TilesIds from './TilesIds'
+import StatusBar from './StatusBar'
 // import KonvaTransformer from "../KonvaTransformer";
 
 const styles = ({ selected }) => css`
@@ -51,11 +52,11 @@ const styles = ({ selected }) => css`
 `
 
 type Props = {
-    setStage: (stage: Konva.Stage) => void
+    // setStage: (stage: Konva.Stage) => void
     tilesetCanvas: HTMLCanvasElement
 }
 
-const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
+const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
     const stageRef = useRef<Konva.Stage>(null)
 
     const selected = useSelector(selectSelected)
@@ -100,7 +101,7 @@ const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
             }
             stage.scale({ x: scale, y: scale })
             stage.batchDraw()
-            setStage(stage)
+            // setStage(stage)
         }
     }, [tileset.lastUpdateTime]) // workspace
 
@@ -149,54 +150,58 @@ const KonvaStage = ({ setStage, tilesetCanvas }: Props): JSX.Element => {
     }
 
     return (
-        <div css={styles({ selected })}>
-            <Stage
-                ref={stageRef}
-                width={workspace.width}
-                height={workspace.height}
-                draggable={selected.tool === TOOLS.DRAG}
-                onContextMenu={e => {
-                    e.evt.preventDefault()
-                }}
-                {...{
-                    onWheel,
-                    onDragEnd
-                }}
-            >
-                <Layer imageSmoothingEnabled={false}>
-                    <Rect
-                        shadowBlur={10}
-                        width={canvas.width}
-                        height={canvas.height}
-                        fillPatternImage={BG_IMAGE}
-                        fillPatternScaleX={1 / workspace.scale}
-                        fillPatternScaleY={1 / workspace.scale}
-                    />
-                    {stage &&
-                        layers.map(layer => (
-                            <MapLayer
-                                key={`layer-${layer.id}`}
-                                {...{
-                                    canvas,
-                                    grid,
-                                    layer,
-                                    onChangeLayerData,
-                                    onChangePrimaryColor,
-                                    onChangeSelectedTile,
-                                    onChangeTileset,
-                                    onSaveTilesetImage,
-                                    selected,
-                                    stage,
-                                    tileset,
-                                    tilesetCanvas,
-                                    workspace
-                                }}
-                            />
-                        ))}
-                    <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} />
-                    <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />
-                </Layer>
-            </Stage>
+        <div>
+            <div css={styles({ selected })}>
+                <Stage
+                    ref={stageRef}
+                    width={workspace.width}
+                    height={workspace.height}
+                    draggable={selected.tool === TOOLS.DRAG}
+                    onContextMenu={e => {
+                        e.evt.preventDefault()
+                    }}
+                    {...{
+                        onWheel,
+                        onDragEnd
+                    }}
+                >
+                    <Layer imageSmoothingEnabled={false}>
+                        <Rect
+                            shadowBlur={10}
+                            width={canvas.width}
+                            height={canvas.height}
+                            fillPatternImage={BG_IMAGE}
+                            fillPatternScaleX={1 / workspace.scale}
+                            fillPatternScaleY={1 / workspace.scale}
+                        />
+
+                        {stage &&
+                            layers.map(layer => (
+                                <MapLayer
+                                    key={`layer-${layer.id}`}
+                                    {...{
+                                        canvas,
+                                        grid,
+                                        layer,
+                                        onChangeLayerData,
+                                        onChangePrimaryColor,
+                                        onChangeSelectedTile,
+                                        onChangeTileset,
+                                        onSaveTilesetImage,
+                                        selected,
+                                        stage,
+                                        tileset,
+                                        tilesetCanvas,
+                                        workspace
+                                    }}
+                                />
+                            ))}
+                        <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} />
+                        <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />
+                    </Layer>
+                </Stage>
+            </div>
+            {stage && <StatusBar {...{ stage }} />}
         </div>
     )
 }

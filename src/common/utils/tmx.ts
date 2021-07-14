@@ -82,7 +82,7 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
     const tilesetImage = await fetch(tileset.image).then(r => r.blob())
     const tilesetFolder = zip.folder('tileset') as JSZip
 
-    zip.file('ReadMe.txt', 'Exported from Plextus\n')
+    zip.file('ReadMe.txt', 'Exported from Plextus!\n--\nDownload Tiled from https://www.mapeditor.org/\n')
     zip.file('tiledmap.tmx', tiledmapTmx)
     tilesetFolder.file('tileset.png', tilesetImage)
 

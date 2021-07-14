@@ -116,7 +116,7 @@ export const changeTilesetImageSuccess = (image: ImageData) =>
         payload: { image }
     } as const)
 
-export const changeLayers = (layers: Layer | null[]) =>
+export const changeLayers = (layers: Layer[] | null[]) =>
     ({
         type: EDITOR_CHANGE_LAYERS,
         payload: { layers }

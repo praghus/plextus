@@ -68,7 +68,7 @@ const Editor = (): JSX.Element => {
     const tileset = useSelector(selectTileset)
 
     const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
-    const [stage, setStage] = useState<Konva.Stage>()
+    // const [stage, setStage] = useState<Konva.Stage>()
 
     const dispatch = useDispatch()
     const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
@@ -123,10 +123,7 @@ const Editor = (): JSX.Element => {
             <StyledContainer>
                 <LoadingIndicator loading={!isLoaded} />
                 <ToolBar />
-                <StyledMiddleContainer>
-                    {canvas && <KonvaStage {...{ setStage, tilesetCanvas }} />}
-                    {canvas && stage && <StatusBar {...{ stage }} />}
-                </StyledMiddleContainer>
+                <StyledMiddleContainer>{canvas && <KonvaStage {...{ tilesetCanvas }} />}</StyledMiddleContainer>
                 <StyledRightContainer>
                     <TabContainer {...{ tilesetCanvas }} />
                     <LayersList />

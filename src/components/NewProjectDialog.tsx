@@ -21,7 +21,8 @@ import {
     changeScale,
     changeSelectedLayer,
     changeSelectedTile,
-    changeTileset
+    changeTileset,
+    saveChanges
 } from '../store/editor/actions'
 import { createEmptyLayer } from '../store/editor/utils'
 import { INITIAL_STATE } from '../store/editor/constants'
@@ -59,6 +60,7 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
     const onChangeSelectedLayer = (value: string) => dispatch(changeSelectedLayer(value))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
+    const onSaveChanges = () => dispatch(saveChanges())
     const onSaveLayers = (layers: Layer[]) => dispatch(changeLayers(layers))
 
     const [config, setConfig] = useState({
@@ -91,6 +93,7 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
             lastUpdateTime: performance.now()
         })
         onChangeSelectedTile(1)
+        onSaveChanges()
         onClose()
     }
 

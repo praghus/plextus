@@ -151,7 +151,13 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 tileset: action.payload.tileset
             }
         case EDITOR_RESET_TO_DEFAULTS:
-            return INITIAL_STATE
+            return {
+                ...state,
+                canvas: null,
+                layers: [],
+                selected: INITIAL_STATE.selected,
+                tileset: INITIAL_STATE.tileset
+            }
         default:
             return state
     }
