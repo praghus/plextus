@@ -2,9 +2,10 @@ import React, { useRef, useEffect } from 'react'
 import Konva from 'konva'
 import useImage from 'use-image'
 import { Rect } from 'react-konva'
-import { getCoordsFromPos, getTilePos } from '../store/editor/utils'
-import { Grid, Selected, Tileset } from '../store/editor/types'
 import { TOOLS } from '../common/constants'
+import { getCoordsFromPos } from '../common/utils/konva'
+import { getTilePos } from '../store/editor/utils'
+import { Grid, Selected, Tileset } from '../store/editor/types'
 
 const TOOL_SIZE = 1
 

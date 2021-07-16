@@ -1,10 +1,19 @@
 import Konva from 'konva'
-import { Canvas, Workspace } from '../../store/editor/types'
+import { FONT_SPRITE } from '../../common/constants'
+import { Canvas, Grid, Workspace } from '../../store/editor/types'
 import { getRgbaValue } from './colors'
 
-const PADDING = 150
-
 const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
+
+export const getCoordsFromPos = (grid: Grid, pos: Konva.Vector2d): Konva.Vector2d => ({
+    x: Math.ceil(pos.x / grid.width) - 1,
+    y: Math.ceil(pos.y / grid.height) - 1
+})
+
+export const getPointerRelativePos = (workspace: Workspace, pos: Konva.Vector2d): Konva.Vector2d => ({
+    x: (pos.x - workspace.x) / workspace.scale,
+    y: (pos.y - workspace.y) / workspace.scale
+})
 
 export const centerStage = (
     stage: Konva.Stage,
@@ -12,6 +21,7 @@ export const centerStage = (
     workspace: Workspace,
     cb: (x: number, y: number, scale: number) => void
 ): void => {
+    const PADDING = 150
     const dimension = workspace.height > workspace.width ? 'height' : 'width'
     const scale = workspace[dimension] / (canvas[dimension] + PADDING)
     const x = (workspace.width - canvas.width * scale) / 2
@@ -153,4 +163,26 @@ export function actionLine(
     }
 
     drawPixel(Math.round(endPos.x), Math.round(endPos.y), 1, 1)
+}
+
+export const textRenderer = (text: string, x: number, y: number, ctx: CanvasRenderingContext2D): void => {
+    text.split('\n')
+        .reverse()
+        .forEach((output, index) => {
+            for (let i = 0; i < output.length; i += 1) {
+                const chr = output.charCodeAt(i)
+                const size = 5
+                ctx.drawImage(
+                    FONT_SPRITE,
+                    (chr % 16) * size,
+                    Math.ceil((chr + 1) / 16 - 1) * size,
+                    size,
+                    size,
+                    Math.floor(x + i * size),
+                    Math.floor(y - index * (size + 1)),
+                    size,
+                    size
+                )
+            }
+        })
 }

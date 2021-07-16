@@ -13,8 +13,8 @@ import {
 import { changePosition, changeScale, toggleShowGrid } from '../store/editor/actions'
 import { SCALE_MIN, SCALE_MAX, SCALE_BY, SCALE_STEP } from '../common/constants'
 import { selectCanvas, selectGrid, selectTileset, selectWorkspace } from '../store/editor/selectors'
-import { centerStage } from '../common/utils/konva'
-import { getCoordsFromPos } from '../store/editor/utils'
+import { centerStage, getCoordsFromPos } from '../common/utils/konva'
+
 import { Layer } from '../store/editor/types'
 
 const StyledStatusBar = styled.div`

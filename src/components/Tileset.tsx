@@ -11,9 +11,10 @@ import IconButton from '@material-ui/core/IconButton'
 import Slider from '@material-ui/core/Slider'
 import styled from '@emotion/styled'
 // import GridLines from './GridLines'
-import { getTilesetDimensions, getCoordsFromPos, getPointerRelativePos, addNewTile } from '../store/editor/utils'
+import { getTilesetDimensions, createEmptyTile } from '../store/editor/utils'
 import { changeSelectedTile, changeTilesetImage, changeTileset } from '../store/editor/actions'
 import { selectGrid, selectSelected, selectTileset } from '../store/editor/selectors'
+import { getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
 import { RIGHT_BAR_WIDTH, SCALE_STEP } from '../common/constants'
 import { Workspace } from 'store/editor/types'
 
@@ -133,7 +134,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     }
 
     const onAddTile = () => {
-        addNewTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
+        createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
             onSaveTilesetImage(blob)
             onChangeTileset({ ...tileset, tilecount: newTileId })
             onChangeSelectedTile(newTileId)

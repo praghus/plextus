@@ -6,8 +6,8 @@ import { jsx, css } from '@emotion/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
 import { SCALE_BY, TOOLS, BG_IMAGE } from '../common/constants'
-import { centerStage } from '../common/utils/konva'
-import { getPointerRelativePos } from '../store/editor/utils'
+import { centerStage, getPointerRelativePos } from '../common/utils/konva'
+
 import {
     selectCanvas,
     selectGrid,

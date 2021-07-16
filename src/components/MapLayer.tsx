@@ -1,21 +1,18 @@
-import React, { memo, useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import Konva from 'konva'
 import { Image } from 'react-konva'
 import { TOOLS } from '../common/constants'
+import { createEmptyTile, getTilePos } from '../store/editor/utils'
 import {
-    addNewTile,
-    drawLine,
-    getImageData,
+    actionDraw,
+    actionLine,
     getCoordsFromPos,
     getPointerRelativePos,
-    getTilePos
-} from '../store/editor/utils'
-import { actionDraw, actionLine, fillColor, pickColor } from '../common/utils/konva'
+    fillColor,
+    pickColor
+} from '../common/utils/konva'
 import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 import { isValidArray } from '../common/utils/array'
-import logger from '../common/utils/logger'
-
-// const TOOL_SIZE = 1
 
 type SelectedTile = { gid: number; x: number; y: number }
 
@@ -167,7 +164,7 @@ const MapLayer = ({
 
     const createNewEmptyTile = (x: number, y: number): void => {
         const newLayerData = [...layer.data]
-        addNewTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
+        createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
             newLayerData[x + ((layer.width * tilewidth) / grid.width) * y] = newTileId
             setData(newLayerData)
             onChangeTileset({ ...tileset, tilecount: newTileId })
@@ -237,7 +234,6 @@ const MapLayer = ({
                     break
             }
             setSelectedTile({ gid, x, y })
-            // e.evt.preventDefault()
         }
     }
 
@@ -318,7 +314,7 @@ const MapLayer = ({
 MapLayer.displayName = 'MapLayer'
 
 export default MapLayer
-// export default memo(
+// export default React.memo(
 //     MapLayer,
 //     (prevProps, nextProps) =>
 //         prevProps.selected === nextProps.selected &&
