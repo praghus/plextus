@@ -1,21 +1,31 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
-
-import { Grid } from '../store/editor/types'
+import { Canvas, Grid } from '../store/editor/types'
 
 type Props = {
+    canvas: Canvas
     grid: Grid
-    isResizing: boolean
-    listening: boolean
-    onChange: () => void
-    onClick: (isResizing: boolean) => void
 }
 
-const KonvaTransformer = ({ grid, isResizing, listening, onChange, onClick }: Props): JSX.Element => {
+const KonvaTransformer = ({ canvas, grid }: Props): JSX.Element => {
     const shapeRef = useRef<Konva.Rect>(null)
     const trRef = useRef<Konva.Transformer>(null)
+    const [isResizing, setIsResizing] = useState(true)
+
     const { width, height } = grid
+
+    const setPosition = e => ({
+        x: Math.round(e.target.x() / width) * width,
+        y: Math.round(e.target.y() / height) * height
+    })
+
+    React.useEffect(() => {
+        if (shapeRef.current) {
+            shapeRef.current.scaleX(canvas.width / width)
+            shapeRef.current.scaleY(canvas.height / height)
+        }
+    }, [])
 
     React.useEffect(() => {
         if (isResizing && trRef.current && shapeRef.current) {
@@ -30,35 +40,29 @@ const KonvaTransformer = ({ grid, isResizing, listening, onChange, onClick }: Pr
     return (
         <React.Fragment>
             <Rect
-                {...{ listening }}
+                {...{ width, height }}
                 draggable
                 ref={shapeRef}
                 id="selectRect"
                 fill="rgba(0,128,255,0.3)"
-                onClick={() => onClick(!isResizing)}
-                onTap={() => onClick(!isResizing)}
+                onClick={() => setIsResizing(!isResizing)}
+                onTap={() => setIsResizing(!isResizing)}
                 onTransform={e => {
                     e.target.scaleX(Math.round((e.target.scaleX() / width) * width))
                     e.target.scaleY(Math.round((e.target.scaleY() / height) * height))
-                    e.target.position({
-                        x: Math.round(e.target.x() / width) * width,
-                        y: Math.round(e.target.y() / height) * height
-                    })
+                    e.target.position(setPosition(e))
                 }}
                 onDragMove={e => {
-                    e.target.position({
-                        x: Math.round(e.target.x() / width) * width,
-                        y: Math.round(e.target.y() / height) * height
-                    })
+                    e.target.position(setPosition(e))
                 }}
                 onDragEnd={() => {
-                    onChange()
+                    // onChange()
                 }}
                 onTransformEnd={() => {
                     if (shapeRef.current) {
                         const scaleX = shapeRef.current.scaleX()
                         const scaleY = shapeRef.current.scaleY()
-                        onChange()
+                        // onChange()
                         console.info(scaleX, scaleY)
                     }
                 }}

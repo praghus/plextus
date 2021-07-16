@@ -122,7 +122,7 @@ export const changeLayers = (layers: Layer[] | null[]) =>
         payload: { layers }
     } as const)
 
-export const changeLayerData = (layerId: string, data: number[]) =>
+export const changeLayerData = (layerId: string, data: (number | null)[]) =>
     ({
         type: EDITOR_CHANGE_LAYER_DATA,
         payload: { layerId, data }

@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { debounce } from 'lodash'
 import { RgbaColorPicker } from 'react-colorful'
 import { makeStyles } from '@material-ui/core/styles'
-import { AppBar, Button, Tab, Tabs } from '@material-ui/core'
+
+import { AppBar, Card, CardContent, Tab, Tabs, Typography } from '@material-ui/core'
 import { selectSelected } from '../store/editor/selectors'
 import { changePrimaryColor } from '../store/editor/actions'
 import TabPanel from './TabPanel'
@@ -45,7 +46,7 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
                 <Tabs value={tab} {...{ onChange }}>
                     <Tab label="Tileset" className={classes.tab} />
                     <Tab label="Colors" className={classes.tab} />
-                    <Tab label="Settings" className={classes.tab} />
+                    <Tab label="Properties" className={classes.tab} />
                 </Tabs>
             </AppBar>
             <TabPanel value={tab} index={0}>
@@ -56,7 +57,13 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
                 <Palette />
             </TabPanel>
             <TabPanel value={tab} index={2}>
-                Lorem ipsum
+                <Card>
+                    <CardContent>
+                        <Typography variant="h5" component="h2">
+                            Properties (work in progress)
+                        </Typography>
+                    </CardContent>
+                </Card>
             </TabPanel>
         </>
     )

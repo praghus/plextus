@@ -1,12 +1,13 @@
 /** @jsx jsx */
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Konva from 'konva'
 import { debounce } from 'lodash'
 import { jsx, css } from '@emotion/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
-
 import { SCALE_BY, TOOLS, BG_IMAGE } from '../common/constants'
+import { centerStage } from '../common/utils/konva'
+import { getPointerRelativePos } from '../store/editor/utils'
 import {
     selectCanvas,
     selectGrid,
@@ -24,14 +25,12 @@ import {
     changeTileset,
     changeTilesetImage
 } from '../store/editor/actions'
-// import { getCoordsFromPos, getPointerRelativePos } from "../../../store/editor/utils";
-// import logger from '../common/utils/logger'
-
 import GridLines from './GridLines'
 import MapLayer from './MapLayer'
-import TilesIds from './TilesIds'
 import StatusBar from './StatusBar'
-// import KonvaTransformer from "../KonvaTransformer";
+import KonvaTransformer from './KonvaTransformer'
+import Pointer from './Pointer'
+// import TilesIds from './TilesIds'
 
 const styles = ({ selected }) => css`
     ${(selected.tool === TOOLS.DRAG &&
@@ -52,13 +51,11 @@ const styles = ({ selected }) => css`
 `
 
 type Props = {
-    // setStage: (stage: Konva.Stage) => void
     tilesetCanvas: HTMLCanvasElement
 }
 
-const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
+const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const stageRef = useRef<Konva.Stage>(null)
-
     const selected = useSelector(selectSelected)
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
@@ -66,8 +63,12 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
     const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
 
+    const [isMouseDown, setIsMouseDown] = useState(false)
+    const [isMouseOver, setIsMouseOver] = useState(false)
+    const [pointerRelPosition, setPointerRelPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
+
     const dispatch = useDispatch()
-    const onChangeLayerData = (layerId: string, data: number[]) => dispatch(changeLayerData(layerId, data))
+    const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
@@ -82,7 +83,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
         []
     )
 
-    const selectedLayer = layers.find(({ id }) => id === selected.layerId)
+    const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
     const stage = stageRef.current
 
     // @todo refactor
@@ -92,18 +93,25 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
             const stage = stageRef.current
             if (x && y) {
                 stage.position({ x, y })
+                stage.scale({ x: scale, y: scale })
+                stage.batchDraw()
             } else {
-                stage.position({
-                    x: (workspace.width - canvas.width * scale) / 2,
-                    y: (workspace.height - canvas.height * scale) / 2
+                centerStage(stageRef.current, canvas, workspace, (x, y, scale) => {
+                    onChangePosition(x, y)
+                    onChangeScale(scale)
                 })
-                onChangePosition(stage.x(), stage.y())
             }
-            stage.scale({ x: scale, y: scale })
-            stage.batchDraw()
-            // setStage(stage)
         }
     }, [tileset.lastUpdateTime]) // workspace
+
+    useEffect(() => {
+        if (stageRef.current && selected.tool == TOOLS.CROP) {
+            centerStage(stageRef.current, canvas, workspace, (x, y, scale) => {
+                onChangePosition(x, y)
+                onChangeScale(scale)
+            })
+        }
+    }, [selected.tool])
 
     const onScale = (newScale: number) => {
         if (stage) {
@@ -124,7 +132,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
         }
     }
 
-    const onWheel = e => {
+    const onWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
         const { altKey, deltaX, deltaY } = e.evt
         if (stage) {
             if (altKey) {
@@ -144,8 +152,13 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
     }
 
     const onDragEnd = () => {
+        stage && onChangePosition(stage.x(), stage.y())
+    }
+
+    const onMouseMove = () => {
         if (stage) {
-            onChangePosition(stage.x(), stage.y())
+            const localPos = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+            setPointerRelPosition(localPos)
         }
     }
 
@@ -157,12 +170,15 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
                     width={workspace.width}
                     height={workspace.height}
                     draggable={selected.tool === TOOLS.DRAG}
-                    onContextMenu={e => {
-                        e.evt.preventDefault()
-                    }}
+                    onContextMenu={e => e.evt.preventDefault()}
+                    onMouseDown={() => setIsMouseDown(true)}
+                    onMouseUp={() => setIsMouseDown(false)}
+                    onMouseOver={() => setIsMouseOver(true)}
+                    onMouseOut={() => setIsMouseOver(false)}
                     {...{
-                        onWheel,
-                        onDragEnd
+                        onDragEnd,
+                        onMouseMove,
+                        onWheel
                     }}
                 >
                     <Layer imageSmoothingEnabled={false}>
@@ -174,7 +190,6 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
                             fillPatternScaleX={1 / workspace.scale}
                             fillPatternScaleY={1 / workspace.scale}
                         />
-
                         {stage &&
                             layers.map(layer => (
                                 <MapLayer
@@ -182,6 +197,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
                                     {...{
                                         canvas,
                                         grid,
+                                        isMouseDown,
                                         layer,
                                         onChangeLayerData,
                                         onChangePrimaryColor,
@@ -196,22 +212,16 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element => {
                                     }}
                                 />
                             ))}
-                        <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} />
+                        {selected.tool === TOOLS.CROP && <KonvaTransformer {...{ canvas, grid }} />}
+                        {/* <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} /> */}
                         <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />
+                        <Pointer {...{ grid, isMouseDown, isMouseOver, pointerRelPosition, selected, tileset }} />
                     </Layer>
                 </Stage>
             </div>
-            {stage && <StatusBar {...{ stage }} />}
+            {stage && <StatusBar {...{ pointerRelPosition, selectedLayer, stage }} />}
         </div>
     )
 }
 
 export default KonvaStage
-// export default React.memo(
-//   KonvaStage,
-//   (prevProps, nextProps) =>
-//     prevProps.grid === nextProps.grid &&
-//     prevProps.workspace === nextProps.workspace &&
-//     prevProps.selected === nextProps.selected &&
-//     prevProps.tilesetCanvas === nextProps.tilesetCanvas,
-// );

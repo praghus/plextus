@@ -92,8 +92,8 @@ export const getImageData = (ctx: CanvasRenderingContext2D, size: number, rgba: 
     return imgData
 }
 
-// Refer to: http://rosettacode.org/wiki/Bitmap/Bresenham's_line_algorithm#JavaScript
-// function bline(x0, y0, x1, y1, setPixel = noop) {
+// // Refer to: http://rosettacode.org/wiki/Bitmap/Bresenham's_line_algorithm#JavaScript
+// export const bline = (x0: number, y0: number, x1: number, y1: number, setPixel = noop) => {
 //     const dx = Math.abs(x1 - x0),
 //         sx = x0 < x1 ? 1 : -1
 //     const dy = Math.abs(y1 - y0),
@@ -188,3 +188,64 @@ export const drawLine = (x1: number, y1: number, x2: number, y2: number, pixel =
         }
     }
 }
+
+// //Action functions
+// export function actionDraw(offScreenCTX, coordX, coordY, currentColor, currentMode) {
+//     offScreenCTX.fillStyle = currentColor.color
+//     switch (currentMode) {
+//         case 'erase':
+//             offScreenCTX.clearRect(coordX, coordY, 1, 1)
+//             break
+//         default:
+//             offScreenCTX.fillRect(coordX, coordY, 1, 1)
+//     }
+// }
+
+// export function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, scale = 1) {
+//     ctx.fillStyle = currentColor.color
+//     const drawPixel = (x, y, w, h) => {
+//         return currentMode === 'erase' ? ctx.clearRect(x, y, w, h) : ctx.fillRect(x, y, w, h)
+//     }
+//     //create triangle object
+//     const tri: { x: number; y: number; long: number } = { x: 0, y: 0, long: 0 }
+
+//     const getTriangle = (x1, y1, x2, y2, ang) => {
+//         if (Math.abs(x1 - x2) > Math.abs(y1 - y2)) {
+//             tri.x = Math.sign(Math.cos(ang))
+//             tri.y = Math.tan(ang) * Math.sign(Math.cos(ang))
+//             tri.long = Math.abs(x1 - x2)
+//         } else {
+//             tri.x = Math.tan(Math.PI / 2 - ang) * Math.sign(Math.cos(Math.PI / 2 - ang))
+//             tri.y = Math.sign(Math.cos(Math.PI / 2 - ang))
+//             tri.long = Math.abs(y1 - y2)
+//         }
+//     }
+
+//     // finds the angle of (x,y) on a plane from the origin
+//     const getAngle = (x, y) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
+
+//     const angle = getAngle(tx - sx, ty - sy) // angle of line
+
+//     getTriangle(sx, sy, tx, ty, angle)
+
+//     for (let i = 0; i < tri.long; i++) {
+//         const thispoint = {
+//             x: Math.round(sx + tri.x * i),
+//             y: Math.round(sy + tri.y * i)
+//         }
+//         // for each point along the line
+//         drawPixel(
+//             thispoint.x * scale, // round for perfect pixels
+//             thispoint.y * scale, // thus no aliasing
+//             scale,
+//             scale
+//         ) // fill in one pixel, 1x1
+//     }
+//     //fill endpoint
+//     drawPixel(
+//         Math.round(tx) * scale, // round for perfect pixels
+//         Math.round(ty) * scale, // thus no aliasing
+//         scale,
+//         scale
+//     ) // fill in one pixel, 1x1
+// }

@@ -1,15 +1,21 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux'
-import AppsIcon from '@material-ui/icons/Apps'
-import AspectRatioIcon from '@material-ui/icons/AspectRatio'
-import Slider from '@material-ui/core/Slider'
-import ZoomInIcon from '@material-ui/icons/ZoomIn'
-import ZoomOutIcon from '@material-ui/icons/ZoomOut'
-import { changePosition, changeScale } from '../store/editor/actions'
+import { Slider } from '@material-ui/core'
+import {
+    AspectRatio as AspectRatioIcon,
+    GridOn as GridOnIcon,
+    GridOff as GridOffIcon,
+    ZoomIn as ZoomInIcon,
+    ZoomOut as ZoomOutIcon
+} from '@material-ui/icons'
+import { changePosition, changeScale, toggleShowGrid } from '../store/editor/actions'
 import { SCALE_MIN, SCALE_MAX, SCALE_BY, SCALE_STEP } from '../common/constants'
-import { selectCanvas, selectGrid, selectWorkspace } from '../store/editor/selectors'
+import { selectCanvas, selectGrid, selectTileset, selectWorkspace } from '../store/editor/selectors'
+import { centerStage } from '../common/utils/konva'
+import { getCoordsFromPos } from '../store/editor/utils'
+import { Layer } from '../store/editor/types'
 
 const StyledStatusBar = styled.div`
     display: flex;
@@ -54,20 +60,29 @@ const StyledCol = styled.div`
 `
 
 type Props = {
+    pointerRelPosition: Konva.Vector2d | null
+    selectedLayer: Layer | null
     stage: Konva.Stage
 }
 
-const StatusBar = ({ stage }: Props): JSX.Element => {
+const StatusBar = ({ pointerRelPosition, selectedLayer, stage }: Props): JSX.Element => {
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
+    const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
+
     const { scale } = workspace
+    const { x, y } = getCoordsFromPos(grid, pointerRelPosition as Konva.Vector2d)
+    const gid = selectedLayer
+        ? selectedLayer.data[x + ((selectedLayer.width * tileset.tilewidth) / grid.width) * y]
+        : null
 
     const [value, setValue] = useState(scale)
 
     const dispatch = useDispatch()
     const onChangePosition = (x: number, y: number) => dispatch(changePosition(x, y))
     const onChangeScale = (scale: number) => dispatch(changeScale(scale))
+    const onToggleShowGrid = (showGrid: boolean) => dispatch(toggleShowGrid(showGrid))
 
     const onChange = (event: any, value: any) => {
         const sx = workspace.width / 2
@@ -102,29 +117,33 @@ const StatusBar = ({ stage }: Props): JSX.Element => {
     }
 
     const onCenter = () => {
-        const dimension = workspace.height > workspace.width ? 'height' : 'width'
-        const newScale = workspace[dimension] / canvas[dimension]
-
-        stage.scale({ x: newScale, y: newScale })
-        stage.position({
-            x: (workspace.width - canvas.width * newScale) / 2,
-            y: (workspace.height - canvas.height * newScale) / 2
-        })
-
-        onChangeScale(newScale)
-        onChangePosition(stage.x(), stage.y())
+        canvas &&
+            centerStage(stage, canvas, workspace, (x, y, scale) => {
+                onChangePosition(x, y)
+                onChangeScale(scale)
+            })
     }
 
+    useEffect(() => {
+        scale && setValue(scale)
+    }, [scale])
+
     return (
-        <StyledStatusBar className="status-bar">
+        <StyledStatusBar>
             <StyledInfoContainer>
-                <StyledCol>
-                    <AspectRatioIcon onClick={onCenter} />
-                    {canvas.width}x{canvas.height}
+                <StyledCol onClick={() => onToggleShowGrid(!grid.visible)}>
+                    {grid.visible ? <GridOnIcon /> : <GridOffIcon />}
+                    Grid [{grid.width} x {grid.height}]: {grid.visible ? `On` : `Off`}
                 </StyledCol>
                 <StyledCol>
-                    <AppsIcon />
-                    {grid.width}x{grid.height}
+                    <AspectRatioIcon onClick={onCenter} />
+                    {canvas &&
+                        `${canvas.width} x ${canvas.height} px [${canvas.width / grid.width} x ${
+                            canvas.height / grid.height
+                        }]`}
+                </StyledCol>
+                <StyledCol>
+                    {x}, {y} [{gid || 'empty'}]
                 </StyledCol>
             </StyledInfoContainer>
             <StyledSliderContainer>

@@ -19,26 +19,16 @@ export enum IMPORT_MODES {
 }
 
 export enum TOOLS {
-    COLOR_PICKER = 'COLOR_PICKER',
+    CROP = 'CROP',
     DRAG = 'DRAG',
     DELETE = 'DELETE',
     ERASER = 'ERASER',
+    FILL = 'FILL',
+    LINE = 'LINE',
     PENCIL = 'PENCIL',
-    SELECT = 'SELECT',
+    PICKER = 'PICKER',
     STAMP = 'STAMP',
-    TILE_EDIT = 'TILE_EDIT',
     ZOOM = 'ZOOM'
-}
-
-export const PENCIL_STYLES = {
-    DEFAULT: [1],
-    DOUBLE: [1, 1, 1, 1],
-    TOP: [1, 1, 0, 0],
-    BOTTOM: [0, 0, 1, 1],
-    LEFT: [1, 0, 1, 0],
-    RIGHT: [0, 1, 0, 1],
-    SLASH: [0, 1, 1, 0],
-    BACKSLASH: [1, 0, 0, 1]
 }
 
 export const PALETTES = {

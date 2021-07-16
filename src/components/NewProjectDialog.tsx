@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { makeStyles } from '@material-ui/core/styles'
+import { TOOLS } from '../common/constants'
+import { INITIAL_STATE } from '../store/editor/constants'
 import {
     Button,
     Dialog,
@@ -22,10 +24,10 @@ import {
     changeSelectedLayer,
     changeSelectedTile,
     changeTileset,
+    changeTool,
     saveChanges
 } from '../store/editor/actions'
 import { createEmptyLayer } from '../store/editor/utils'
-import { INITIAL_STATE } from '../store/editor/constants'
 import { Layer, Tileset } from '../store/editor/types'
 import { selectTileset, selectWorkspace } from '../store/editor/selectors'
 
@@ -62,6 +64,7 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
     const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
     const onSaveChanges = () => dispatch(saveChanges())
     const onSaveLayers = (layers: Layer[]) => dispatch(changeLayers(layers))
+    const onChangeTool = tool => tool && dispatch(changeTool(tool))
 
     const [config, setConfig] = useState({
         w: 160 / tileset.tilewidth,
@@ -93,6 +96,7 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
             lastUpdateTime: performance.now()
         })
         onChangeSelectedTile(1)
+        onChangeTool(TOOLS.DRAG)
         onSaveChanges()
         onClose()
     }

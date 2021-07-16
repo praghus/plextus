@@ -7,7 +7,7 @@ export const selectEditor = (state: ReturnType<typeof store.getState>): EditorSt
 
 export const selectCanvas = createSelector<typeof selectEditor, EditorState, Canvas>(
     selectEditor,
-    ({ canvas }) => canvas
+    ({ canvas }) => canvas as Canvas
 )
 
 export const selectGrid = createSelector<typeof selectEditor, EditorState, Grid>(selectEditor, ({ grid }) => grid)

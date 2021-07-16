@@ -387,7 +387,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                     {!isLoaded && (
                         <Button variant="contained" component="label">
                             Upload File
-                            <input type="file" hidden accept=".png" onChange={onChange} />
+                            <input type="file" hidden accept="image/png, image/gif, image/jpeg" onChange={onChange} />
                         </Button>
                     )}
                     {isLoaded && (
