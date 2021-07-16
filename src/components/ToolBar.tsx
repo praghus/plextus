@@ -170,21 +170,22 @@ const ToolBar = (): JSX.Element => {
                     <ToggleButton value={TOOLS.DRAG}>
                         <PanToolIcon className={classes.icon} />
                     </ToggleButton>
+                    <ToggleButton value={TOOLS.ERASER}>
+                        <EraserIcon className={classes.icon} />
+                    </ToggleButton>
                     <ToggleButton value={TOOLS.PENCIL}>
                         <CreateIcon className={classes.icon} />
                     </ToggleButton>
                     <ToggleButton value={TOOLS.LINE}>
                         <LineIcon className={classes.icon} />
                     </ToggleButton>
-                    <ToggleButton value={TOOLS.ERASER}>
-                        <EraserIcon className={classes.icon} />
+                    <ToggleButton value={TOOLS.PICKER}>
+                        <ColorizeIcon className={classes.icon} />
                     </ToggleButton>
                     <ToggleButton value={TOOLS.FILL}>
                         <FormatColorFillIcon className={classes.icon} />
                     </ToggleButton>
-                    <ToggleButton value={TOOLS.PICKER}>
-                        <ColorizeIcon className={classes.icon} />
-                    </ToggleButton>
+                    <Divider orientation="horizontal" className={classes.divider} />
                     <ToggleButton value={TOOLS.STAMP}>
                         <StampIcon className={classes.icon} />
                     </ToggleButton>

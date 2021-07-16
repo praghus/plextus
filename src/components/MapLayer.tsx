@@ -81,7 +81,7 @@ const MapLayer = ({
         setCtx(canvasContext)
         setBufferImage(canvasBufferElement)
         setBufferCtx(canvasBufferContext)
-    }, [])
+    }, [width, height, tilewidth, tileheight])
 
     useEffect(() => {
         setData(layer.data)
@@ -167,6 +167,7 @@ const MapLayer = ({
             const tempData = [...data]
             tempData[pos] = gid
             setData(tempData)
+            stage.batchDraw()
         }
         drawTile(gid, pos)
     }
@@ -284,19 +285,20 @@ const MapLayer = ({
             case TOOLS.DELETE:
             case TOOLS.STAMP:
                 onChangeLayerData(layer.id, data)
-                tilesetCanvas.toBlob(onSaveTilesetImage, 'image/png')
                 break
             case TOOLS.ERASER:
             case TOOLS.LINE:
             case TOOLS.PENCIL:
                 if (bufferImage && selectedTile && tilesetContext) {
-                    const { x: tx, y: ty } = getTilePos(selectedTile.gid, tileset)
-                    tilesetContext.drawImage(bufferImage, tx, ty)
+                    const { x, y } = getTilePos(selectedTile.gid, tileset)
+                    tilesetContext.drawImage(bufferImage, x, y)
                     tilesetCanvas.toBlob(onSaveTilesetImage, 'image/png')
                 }
                 break
-            default:
+            case TOOLS.FILL:
                 tilesetCanvas.toBlob(onSaveTilesetImage, 'image/png')
+                break
+            default:
                 break
         }
     }

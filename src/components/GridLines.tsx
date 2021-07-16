@@ -12,18 +12,15 @@ type Props = {
 }
 
 const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, scale, dash }: Props, ref) => {
-    if (!grid.visible || grid.width * scale < 8) {
-        return null
-    }
     const lines: any[] = []
     const line = (key: string, points: any[]) => (
         <Line
-            dash={dash ? [2 / scale, 2 / scale] : undefined}
+            dash={dash && grid.width * scale > 8 ? [2 / scale, 2 / scale] : undefined}
             {...{
                 key,
                 points,
                 stroke: getRgbaValue(grid.color),
-                strokeWidth: 0.5 / scale
+                strokeWidth: (grid.width * scale > 8 ? 0.5 : 0.2) / scale
             }}
         />
     )
@@ -37,9 +34,11 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
     }
 
     return (
-        <Group {...{ ref, width, height }} listening={false}>
-            {lines}
-        </Group>
+        grid.visible && (
+            <Group {...{ ref, width, height }} listening={false}>
+                {lines}
+            </Group>
+        )
     )
 })
 GridLines.displayName = 'Grid'
