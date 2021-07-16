@@ -7,7 +7,7 @@
 
 # [Demo](http://plextus.surge.sh/)
 
-![showcase](https://user-images.githubusercontent.com/5312169/125951360-8bbda537-04f7-4d50-95e6-b889a768d004.gif)
+![showcase](https://user-images.githubusercontent.com/5312169/125956013-1d561a40-bafb-481b-8ddd-8234318b5c92.gif)
 
 ## Installation
 
