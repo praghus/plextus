@@ -165,7 +165,7 @@ export function actionLine(
     drawPixel(Math.round(endPos.x), Math.round(endPos.y), 1, 1)
 }
 
-export const textRenderer = (text: string, x: number, y: number, ctx: CanvasRenderingContext2D): void => {
+export const renderText = (text: string, x: number, y: number, ctx: CanvasRenderingContext2D): void => {
     text.split('\n')
         .reverse()
         .forEach((output, index) => {

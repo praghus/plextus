@@ -1,6 +1,15 @@
 import React from 'react'
 import GridLoader from 'react-spinners/GridLoader'
+import Backdrop from '@material-ui/core/Backdrop'
+import { makeStyles } from '@material-ui/core/styles'
 import { css } from '@emotion/react'
+
+const useStyles = makeStyles(theme => ({
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff'
+    }
+}))
 
 const override = css`
     margin: 2em auto;
@@ -20,9 +29,14 @@ type Props = {
     size: number
 }
 
-const LoadingIndicator = ({ color, loading, size }: Props): JSX.Element => (
-    <GridLoader css={override} {...{ loading, size, color }} />
-)
+const LoadingIndicator = ({ color, loading, size }: Props): JSX.Element => {
+    const classes = useStyles()
+    return (
+        <Backdrop className={classes.backdrop} open={loading}>
+            <GridLoader css={override} {...{ loading, size, color }} />
+        </Backdrop>
+    )
+}
 
 LoadingIndicator.defaultProps = {
     size: 15,

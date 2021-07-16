@@ -9,7 +9,7 @@ import { actions as undoActions } from 'redux-undo-redo'
 import {
     Colorize as ColorizeIcon,
     Create as CreateIcon,
-    Crop as CropIcon,
+    // Crop as CropIcon,
     DeleteForever as DeleteForeverIcon,
     FormatColorFill as FormatColorFillIcon,
     Menu as MenuIcon,
@@ -191,9 +191,9 @@ const ToolBar = (): JSX.Element => {
                     <ToggleButton value={TOOLS.DELETE}>
                         <DeleteForeverIcon className={classes.icon} />
                     </ToggleButton>
-                    <ToggleButton value={TOOLS.CROP}>
+                    {/* <ToggleButton value={TOOLS.CROP}>
                         <CropIcon className={classes.icon} />
-                    </ToggleButton>
+                    </ToggleButton> */}
                     <Divider orientation="horizontal" className={classes.divider} />
                     <IconButton>
                         <input type="color" value={rgbToHex(r, g, b)} onChange={onChangePrimaryColor} />

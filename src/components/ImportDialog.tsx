@@ -262,14 +262,10 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
     }
 
     return (
-        <Dialog open disableBackdropClick disableEscapeKeyDown onClose={onClose} aria-labelledby="form-dialog-title">
-            <DialogTitle id="form-dialog-title">Import</DialogTitle>
+        <Dialog open={!isProcessing} disableBackdropClick disableEscapeKeyDown onClose={onClose}>
+            <DialogTitle>Import image</DialogTitle>
             <DialogContent>
-                <LoadingIndicator loading={isProcessing} />
-                {!isProcessing && !isLoaded && (
-                    <DialogContentText>You can choose a graphic file containing a tiled map.</DialogContentText>
-                )}
-                {!isProcessing && isLoaded && (
+                {isLoaded ? (
                     <>
                         {canvas && (
                             <FormControl component="fieldset">
@@ -377,26 +373,26 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                             </Grid>
                         </Grid>
                     </>
+                ) : (
+                    <DialogContentText>Choose a graphic file containing a tiled map.</DialogContentText>
                 )}
             </DialogContent>
-            {!isProcessing && (
-                <DialogActions>
-                    <Button onClick={onCancel} color="primary">
-                        Cancel
+
+            <DialogActions>
+                <Button onClick={onCancel} color="primary">
+                    Cancel
+                </Button>
+                {isLoaded ? (
+                    <Button onClick={onSave} variant="contained">
+                        Save
                     </Button>
-                    {!isLoaded && (
-                        <Button variant="contained" component="label">
-                            Upload File
-                            <input type="file" hidden accept="image/png, image/gif, image/jpeg" onChange={onChange} />
-                        </Button>
-                    )}
-                    {isLoaded && (
-                        <Button onClick={onSave} variant="contained">
-                            Save
-                        </Button>
-                    )}
-                </DialogActions>
-            )}
+                ) : (
+                    <Button variant="contained" component="label">
+                        Upload File
+                        <input type="file" hidden accept="image/png, image/gif, image/jpeg" onChange={onChange} />
+                    </Button>
+                )}
+            </DialogActions>
         </Dialog>
     )
 }
