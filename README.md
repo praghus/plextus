@@ -1,6 +1,6 @@
 # Plextus
 
-> Pixel art editor designed to make tiled maps and tilesets.
+### Pixel art editor designed to make tiled maps and tilesets.
 
 -   Plextus allows you to create and edit tile maps and tile sets, it also allows you to draw directly on tiles and track changes on your map in real time.
 -   Plextus is fully compatible with [Tiled](https://www.mapeditor.org/) map editor and allows you to export your finished project to `.tmx` format.
