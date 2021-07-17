@@ -306,14 +306,16 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                 variant="outlined"
                             />
                         </Grid>
-                        <ImportPreview
-                            {...{
-                                imageDimensions,
-                                gridSize,
-                                offset,
-                                previewImage
-                            }}
-                        />
+                        {previewImage && (
+                            <ImportPreview
+                                {...{
+                                    imageDimensions,
+                                    gridSize,
+                                    offset,
+                                    previewImage
+                                }}
+                            />
+                        )}
                         <Grid container>
                             {mode === IMPORT_MODES.NEW_PROJECT && (
                                 <>

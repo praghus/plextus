@@ -148,9 +148,6 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     }
 
     useEffect(() => {
-        // const defaultScale = (RIGHT_BAR_WIDTH - 11) / (tilewidth * columns)
-        // setScale({ x: defaultScale, y: defaultScale })
-        // stageRef.current.scale(scale)
         onResize()
         window.addEventListener('resize', onResize)
         return () => {

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
 import Slider from '@material-ui/core/Slider'
-import { Image, Stage, Layer, Rect } from 'react-konva'
+import { Stage, Layer, Rect } from 'react-konva'
 import {
     IMPORT_PREVIEW_WIDTH,
     IMPORT_PREVIEW_HEIGHT,
@@ -37,16 +37,18 @@ type Props = {
         x: number
         y: number
     }
-    previewImage?: CanvasImageSource | undefined
+    previewImage: CanvasImageSource
 }
 
 const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Props): JSX.Element => {
     const stageRef = useRef<Konva.Stage>(null)
-    const [scale, setScale] = useState({ x: 2, y: 2 })
-    const [position, setPosition] = useState({ x: 0, y: 0 })
+    const imageRef = useRef<Konva.Rect>(null)
 
-    const width = Math.ceil(imageDimensions.w / gridSize.w) * gridSize.w
-    const height = Math.ceil(imageDimensions.h / gridSize.h) * gridSize.h
+    const width = Math.ceil((imageDimensions.w + offset.x) / gridSize.w) * gridSize.w
+    const height = Math.ceil((imageDimensions.h + offset.y) / gridSize.h) * gridSize.h
+
+    const [scale, setScale] = useState<Konva.Vector2d>({ x: 2, y: 2 })
+    const [position, setPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
 
     useEffect(() => {
         if (stageRef.current) {
@@ -54,7 +56,18 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
             stageRef.current.position(position)
             stageRef.current.batchDraw()
         }
-    }, [scale, position])
+    }, [position, scale])
+
+    useEffect(() => {
+        if (imageRef.current) {
+            imageRef.current.setAttrs({
+                fillPatternImage: previewImage,
+                width,
+                height
+            })
+            imageRef.current.fillPatternOffset({ x: -offset.x, y: -offset.y })
+        }
+    }, [offset, previewImage, width, height])
 
     const onScale = (newScale: any): void => {
         if (stageRef.current) {
@@ -81,14 +94,8 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
                     draggable
                 >
                     <Layer imageSmoothingEnabled={false}>
-                        <Rect
-                            {...{ width, height }}
-                            shadowBlur={10}
-                            fillPatternImage={BG_IMAGE}
-                            fillPatternScaleX={1}
-                            fillPatternScaleY={1}
-                        />
-                        <Image image={previewImage} x={offset.x} y={offset.y} />
+                        <Rect fillPatternImage={BG_IMAGE} {...{ width, height }} />
+                        <Rect fillPatternRepeat="no-repeat" ref={imageRef} />
                         <GridLines
                             {...{ width, height }}
                             scale={scale.x}

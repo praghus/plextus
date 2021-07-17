@@ -46,7 +46,7 @@ const useStyles = makeStyles(theme => ({
     inputNarrow: {
         marginTop: theme.spacing(2),
         marginRight: theme.spacing(1),
-        width: '122px'
+        width: '126px'
     }
 }))
 
@@ -118,25 +118,6 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                             <Typography variant="subtitle1" gutterBottom>
                                 Tileset
                             </Typography>
-                            <Grid item xs={10}>
-                                <TextField
-                                    className={classes.input}
-                                    type="number"
-                                    value={config.columns}
-                                    onChange={event => {
-                                        const columns = parseInt(event.target.value)
-                                        Number.isInteger(columns) && columns > 0 && setConfig({ ...config, columns })
-                                    }}
-                                    InputProps={{
-                                        inputProps: { min: 1 },
-                                        endAdornment: <InputAdornment position="end">columns</InputAdornment>
-                                    }}
-                                    id="cols"
-                                    label="Tileset maximum width"
-                                    size="small"
-                                    variant="outlined"
-                                />
-                            </Grid>
                             <Grid item xs={12}>
                                 <TextField
                                     className={classes.inputNarrow}
@@ -154,7 +135,6 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                                     size="small"
                                     variant="outlined"
                                 />
-
                                 <TextField
                                     className={classes.inputNarrow}
                                     type="number"
@@ -168,6 +148,25 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                                     }}
                                     id="tileHeight"
                                     label="Tile height (px)"
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    className={classes.input}
+                                    type="number"
+                                    value={config.columns}
+                                    onChange={event => {
+                                        const columns = parseInt(event.target.value)
+                                        Number.isInteger(columns) && columns > 0 && setConfig({ ...config, columns })
+                                    }}
+                                    InputProps={{
+                                        inputProps: { min: 1 },
+                                        endAdornment: <InputAdornment position="end">columns</InputAdornment>
+                                    }}
+                                    id="cols"
+                                    label="Tileset maximum width"
                                     size="small"
                                     variant="outlined"
                                 />

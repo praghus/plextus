@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import { Group, Line } from 'react-konva'
+import { Group, Line, Rect } from 'react-konva'
 import { getRgbaValue } from '../common/utils/colors'
 import Konva from 'konva'
 
@@ -37,6 +37,7 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
         grid.visible && (
             <Group {...{ ref, width, height }} listening={false}>
                 {lines}
+                <Rect stroke={getRgbaValue(grid.color)} strokeWidth={0.5 / scale} {...{ width, height }} />
             </Group>
         )
     )

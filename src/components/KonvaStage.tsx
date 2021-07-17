@@ -183,7 +183,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                 >
                     <Layer imageSmoothingEnabled={false}>
                         <Rect
-                            shadowBlur={10}
+                            // shadowBlur={10}
                             width={canvas.width}
                             height={canvas.height}
                             fillPatternImage={BG_IMAGE}
