@@ -2,15 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import Konva from 'konva'
 import { useDispatch, useSelector } from 'react-redux'
 import { Image, Layer, Rect, Stage } from 'react-konva'
-// import Grid from "@material-ui/core/Grid";
 import AddIcon from '@material-ui/icons/Add'
 import SaveAltIcon from '@material-ui/icons/SaveAlt'
 import RemoveIcon from '@material-ui/icons/Remove'
 import IconButton from '@material-ui/core/IconButton'
-// import Typography from "@material-ui/core/Typography";
 import Slider from '@material-ui/core/Slider'
 import styled from '@emotion/styled'
-// import GridLines from './GridLines'
 import { getTilesetDimensions, createEmptyTile } from '../store/editor/utils'
 import { changeSelectedTile, changeTilesetImage, changeTileset } from '../store/editor/actions'
 import { selectGrid, selectSelected, selectTileset } from '../store/editor/selectors'
@@ -178,30 +175,16 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                 >
                     <Stage ref={stageRef} width={size.width} height={size.height} {...{ scale }}>
                         <Layer imageSmoothingEnabled={false}>
-                            {/* <Rect
-                                width={imageDimensions.w}
-                                height={imageDimensions.h}
-                                fillPatternImage={BG_IMAGE_DARK}
-                                fillPatternScaleX={1 / scale.x}
-                                fillPatternScaleY={1 / scale.y}
-                            /> */}
                             {tilesetCanvas && <Image image={tilesetCanvas} {...{ onMouseDown }} />}
-                            {/* <GridLines
-                                dash={false}
-                                width={imageDimensions.w}
-                                height={imageDimensions.h}
-                                scale={scale.x}
-                                {...{ grid }}
-                            /> */}
                             <Rect
                                 x={position.x}
                                 y={position.y}
                                 width={tilewidth}
                                 height={tileheight}
                                 shadowBlur={5}
-                                strokeWidth={1}
-                                stroke="#fff"
-                                fill="rgba(255,255,255,0.3)"
+                                strokeWidth={1 / scale.x}
+                                stroke="#96cdff"
+                                fill="rgba(150,200,255,0.3)"
                             />
                         </Layer>
                     </Stage>

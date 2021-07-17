@@ -215,7 +215,17 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                         {selected.tool === TOOLS.CROP && <KonvaTransformer {...{ canvas, grid }} />}
                         {/* <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} /> */}
                         <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />
-                        <Pointer {...{ grid, isMouseDown, isMouseOver, pointerRelPosition, selected, tileset }} />
+                        <Pointer
+                            scale={workspace.scale}
+                            {...{
+                                grid,
+                                isMouseDown,
+                                isMouseOver,
+                                pointerRelPosition,
+                                selected,
+                                tileset
+                            }}
+                        />
                     </Layer>
                 </Stage>
             </div>

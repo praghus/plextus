@@ -3,24 +3,21 @@ import Konva from 'konva'
 import styled from '@emotion/styled'
 import Slider from '@material-ui/core/Slider'
 import { Image, Stage, Layer, Rect } from 'react-konva'
-import { useDidUpdate } from '../hooks/useDidUpdate'
 import {
     IMPORT_PREVIEW_WIDTH,
     IMPORT_PREVIEW_HEIGHT,
-    TRANSPARENCY_BG_MID_IMG,
+    BG_IMAGE,
     SCALE_MIN,
     SCALE_MAX,
     SCALE_STEP
 } from '../common/constants'
-import GridLines from './GridLines'
 
-const bgImage = new window.Image()
-bgImage.src = TRANSPARENCY_BG_MID_IMG
+import GridLines from './GridLines'
 
 const StyledPreviewContainer = styled.div`
     width: ${IMPORT_PREVIEW_WIDTH}px;
     overflow: auto;
-    margin-bottom: 10px;
+    margin-top: 15px;
 `
 
 const StyledStage = styled(Stage)`
@@ -48,13 +45,10 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
     const [scale, setScale] = useState({ x: 2, y: 2 })
     const [position, setPosition] = useState({ x: 0, y: 0 })
 
-    useEffect(() => {
-        if (stageRef.current) {
-            stageRef.current.scale(scale)
-        }
-    }, [])
+    const width = Math.ceil(imageDimensions.w / gridSize.w) * gridSize.w
+    const height = Math.ceil(imageDimensions.h / gridSize.h) * gridSize.h
 
-    useDidUpdate(() => {
+    useEffect(() => {
         if (stageRef.current) {
             stageRef.current.scale(scale)
             stageRef.current.position(position)
@@ -78,13 +72,6 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
 
     return (
         <>
-            <Slider
-                value={scale.x}
-                step={SCALE_STEP}
-                min={SCALE_MIN}
-                max={SCALE_MAX}
-                onChange={(event, value) => onScale(value)}
-            />
             <StyledPreviewContainer>
                 <StyledStage
                     {...{ scale }}
@@ -95,17 +82,15 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
                 >
                     <Layer imageSmoothingEnabled={false}>
                         <Rect
-                            width={imageDimensions.w}
-                            height={imageDimensions.h}
+                            {...{ width, height }}
                             shadowBlur={10}
-                            fillPatternImage={bgImage}
+                            fillPatternImage={BG_IMAGE}
                             fillPatternScaleX={1}
                             fillPatternScaleY={1}
                         />
                         <Image image={previewImage} x={offset.x} y={offset.y} />
                         <GridLines
-                            width={imageDimensions.w}
-                            height={imageDimensions.h}
+                            {...{ width, height }}
                             scale={scale.x}
                             grid={{
                                 color: [255, 255, 255, 128],
@@ -117,6 +102,13 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
                     </Layer>
                 </StyledStage>
             </StyledPreviewContainer>
+            <Slider
+                value={scale.x}
+                step={SCALE_STEP}
+                min={SCALE_MIN}
+                max={SCALE_MAX}
+                onChange={(event, value) => onScale(value)}
+            />
         </>
     )
 }

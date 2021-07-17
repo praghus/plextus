@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { TOOLS } from '../common/constants'
 import { INITIAL_STATE } from '../store/editor/constants'
 import {
@@ -31,6 +31,8 @@ import { createEmptyLayer } from '../store/editor/utils'
 import { Layer, Tileset } from '../store/editor/types'
 import { selectTileset, selectWorkspace } from '../store/editor/selectors'
 
+const ImageResolutionInfo = withStyles({ root: { color: '#222' } })(Typography)
+
 const useStyles = makeStyles(theme => ({
     root: {
         '& > *': {
@@ -40,6 +42,11 @@ const useStyles = makeStyles(theme => ({
     input: {
         marginTop: theme.spacing(2),
         marginRight: theme.spacing(1)
+    },
+    inputNarrow: {
+        marginTop: theme.spacing(2),
+        marginRight: theme.spacing(1),
+        width: '122px'
     }
 }))
 
@@ -109,93 +116,100 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                     <Grid container>
                         <Grid item xs={7}>
                             <Typography variant="subtitle1" gutterBottom>
-                                Map
+                                Tileset
                             </Typography>
-                            <Grid container>
-                                <Grid item xs={5}>
-                                    <TextField
-                                        className={classes.input}
-                                        type="number"
-                                        value={config.tilewidth}
-                                        onChange={event => {
-                                            setConfig({ ...config, tilewidth: parseInt(event.target.value) })
-                                        }}
-                                        id="tileWidth"
-                                        label="Tile width (px)"
-                                        size="small"
-                                        variant="outlined"
-                                    />
-                                    <TextField
-                                        className={classes.input}
-                                        type="number"
-                                        value={config.w}
-                                        onChange={event => {
-                                            setConfig({ ...config, w: parseInt(event.target.value) })
-                                        }}
-                                        InputProps={{
-                                            endAdornment: <InputAdornment position="end">tiles</InputAdornment>
-                                        }}
-                                        id="width"
-                                        label="Map width"
-                                        size="small"
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                <Grid item xs={5}>
-                                    <TextField
-                                        className={classes.input}
-                                        type="number"
-                                        value={config.tileheight}
-                                        onChange={event => {
-                                            setConfig({ ...config, tileheight: parseInt(event.target.value) })
-                                        }}
-                                        id="tileHeight"
-                                        label="Tile height (px)"
-                                        size="small"
-                                        variant="outlined"
-                                    />
-                                    <TextField
-                                        className={classes.input}
-                                        type="number"
-                                        value={config.h}
-                                        onChange={event => {
-                                            setConfig({ ...config, h: parseInt(event.target.value) })
-                                        }}
-                                        InputProps={{
-                                            endAdornment: <InputAdornment position="end">tiles</InputAdornment>
-                                        }}
-                                        id="height"
-                                        label="Map height"
-                                        size="small"
-                                        variant="outlined"
-                                    />
-                                </Grid>
+                            <Grid item xs={10}>
+                                <TextField
+                                    className={classes.input}
+                                    type="number"
+                                    value={config.columns}
+                                    onChange={event => {
+                                        const columns = parseInt(event.target.value)
+                                        Number.isInteger(columns) && columns > 0 && setConfig({ ...config, columns })
+                                    }}
+                                    InputProps={{
+                                        inputProps: { min: 1 },
+                                        endAdornment: <InputAdornment position="end">columns</InputAdornment>
+                                    }}
+                                    id="cols"
+                                    label="Tileset maximum width"
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    className={classes.inputNarrow}
+                                    type="number"
+                                    value={config.tilewidth}
+                                    InputProps={{ inputProps: { min: 1 } }}
+                                    onChange={event => {
+                                        const tilewidth = parseInt(event.target.value)
+                                        Number.isInteger(tilewidth) &&
+                                            tilewidth > 0 &&
+                                            setConfig({ ...config, tilewidth })
+                                    }}
+                                    id="tileWidth"
+                                    label="Tile width (px)"
+                                    size="small"
+                                    variant="outlined"
+                                />
+
+                                <TextField
+                                    className={classes.inputNarrow}
+                                    type="number"
+                                    value={config.tileheight}
+                                    InputProps={{ inputProps: { min: 1 } }}
+                                    onChange={event => {
+                                        const tileheight = parseInt(event.target.value)
+                                        Number.isInteger(tileheight) &&
+                                            tileheight > 0 &&
+                                            setConfig({ ...config, tileheight })
+                                    }}
+                                    id="tileHeight"
+                                    label="Tile height (px)"
+                                    size="small"
+                                    variant="outlined"
+                                />
                             </Grid>
                         </Grid>
                         <Grid item xs={5}>
                             <Typography variant="subtitle1" gutterBottom>
-                                Tileset size
+                                Map
                             </Typography>
                             <TextField
                                 className={classes.input}
                                 type="number"
-                                value={config.columns}
+                                value={config.w}
                                 onChange={event => {
-                                    setConfig({ ...config, columns: parseInt(event.target.value) })
+                                    const w = parseInt(event.target.value)
+                                    Number.isInteger(w) && w > 0 && setConfig({ ...config, w })
                                 }}
                                 InputProps={{
-                                    endAdornment: <InputAdornment position="end">columns</InputAdornment>
+                                    inputProps: { min: 1 },
+                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>
                                 }}
-                                id="cols"
-                                label="Tileset maximum width"
+                                id="width"
+                                label="Map width"
                                 size="small"
                                 variant="outlined"
                             />
                             <TextField
-                                disabled
-                                fullWidth
                                 className={classes.input}
-                                value={`${config.w * config.tilewidth} x ${config.h * config.tileheight} pixels`}
+                                type="number"
+                                value={config.h}
+                                onChange={event => {
+                                    const h = parseInt(event.target.value)
+                                    Number.isInteger(h) && h > 0 && setConfig({ ...config, h })
+                                }}
+                                InputProps={{
+                                    inputProps: { min: 1 },
+                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>
+                                }}
+                                id="height"
+                                label="Map height"
+                                size="small"
+                                variant="outlined"
                             />
                         </Grid>
                     </Grid>
@@ -203,6 +217,11 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
             </DialogContent>
 
             <DialogActions>
+                <ImageResolutionInfo variant="caption" display="block">
+                    {config.w * config.tilewidth} x {config.h * config.tileheight} pixels
+                </ImageResolutionInfo>
+
+                <div style={{ flex: '1 0 0' }} />
                 <Button onClick={onClose} color="primary">
                     Cancel
                 </Button>

@@ -3,6 +3,7 @@ import Konva from 'konva'
 import useImage from 'use-image'
 import { Rect } from 'react-konva'
 import { TOOLS } from '../common/constants'
+import { getRgbaValue } from '../common/utils/colors'
 import { getCoordsFromPos } from '../common/utils/konva'
 import { getTilePos } from '../store/editor/utils'
 import { Grid, Selected, Tileset } from '../store/editor/types'
@@ -14,6 +15,7 @@ type Props = {
     isMouseDown: boolean
     isMouseOver: boolean
     pointerRelPosition: Konva.Vector2d
+    scale: number
     selected: Selected
     tileset: Tileset
 }
@@ -23,6 +25,7 @@ const Pointer = ({
     isMouseDown,
     isMouseOver,
     pointerRelPosition,
+    scale,
     selected,
     tileset
 }: Props): JSX.Element | null => {
@@ -30,45 +33,65 @@ const Pointer = ({
         return null
     }
 
+    const { tilewidth: width, tileheight: height } = tileset
     const pointerRef = useRef<Konva.Rect>(null)
-    const { tilewidth, tileheight } = tileset
+    const pointerOverlayRef = useRef<Konva.Rect>(null)
     const { x, y } = getCoordsFromPos(grid, pointerRelPosition as Konva.Vector2d)
-    const [image] = useImage(tileset.image)
+    const [fillPatternImage] = useImage(tileset.image)
     const [posX, posY] =
         selected.tool === TOOLS.STAMP || selected.tool === TOOLS.DELETE
-            ? [x * tilewidth, y * tileheight]
+            ? [x * width, y * height]
             : [Math.ceil(pointerRelPosition.x / TOOL_SIZE) - 1, Math.ceil(pointerRelPosition.y / TOOL_SIZE) - 1]
 
     useEffect(() => {
-        if (pointerRef.current && image) {
+        if (pointerRef.current && pointerOverlayRef.current && fillPatternImage) {
             const pointer = pointerRef.current
+            const overlay = pointerOverlayRef.current
             if (selected.tool === TOOLS.STAMP) {
+                overlay.setAttrs({
+                    width,
+                    height,
+                    stroke: '#96cdff',
+                    fill: 'rgba(150,200,255,0.3)'
+                })
                 pointer.setAttrs({
-                    width: tilewidth,
-                    height: tileheight,
-                    stroke: '#00C',
-                    fillPatternImage: image
+                    width,
+                    height,
+                    fillPatternImage,
+                    stroke: '#96cdff'
                 })
                 pointer.fillPatternOffset(getTilePos(selected.tileId, tileset))
             } else if (selected.tool === TOOLS.DELETE) {
-                pointer.setAttrs({
-                    width: tilewidth,
-                    height: tileheight,
-                    stroke: '#C00',
-                    fillPatternImage: null
+                overlay.setAttrs({
+                    width,
+                    height,
+                    stroke: '#ff8080',
+                    fill: 'rgba(255,128,128,0.3)'
                 })
             } else {
-                pointer.setAttrs({
+                overlay.setAttrs({
                     width: 1,
                     height: 1,
-                    stroke: '#00C',
-                    fillPatternImage: null
+                    stroke: 'rgba(255,255,255,0.8)',
+                    fill: getRgbaValue(selected.color)
                 })
             }
         }
-    }, [image, tileset, selected])
+    }, [fillPatternImage, tileset, selected])
 
-    return <Rect listening={false} ref={pointerRef} strokeWidth={0.1} x={posX} y={posY} />
+    return (
+        <>
+            <Rect
+                visible={selected.tool === TOOLS.STAMP}
+                listening={false}
+                ref={pointerRef}
+                strokeWidth={0.1}
+                x={posX}
+                y={posY}
+            />
+            <Rect listening={false} ref={pointerOverlayRef} strokeWidth={0.5 / scale} x={posX} y={posY} />
+        </>
+    )
 }
 
 Pointer.displayName = 'Pointer'
