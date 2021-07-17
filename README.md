@@ -44,6 +44,20 @@
 | `yarn run lint --fix` | Run linter and fix issues                                                     |
 | `yarn run start`      | (alias of `yarn run start-dev`)                                               |
 
+## TODO
+
+- [x] Line tool
+- [x] Paint bucket tool
+- [ ] More pixel tools (Circle, Rectangle)
+- [ ] Crop and resize
+- [ ] Change grid color
+- [ ] Support tile flips
+- [ ] Tile clone
+- [ ] Tile bucket fill tool
+- [ ] Remove tile from tileset
+- [ ] Set and change map background color 
+
+
 ## See also
 
 -   [Konva](https://konvajs.org/)
