@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
-import { Divider, IconButton, Menu, MenuItem, Paper } from '@material-ui/core'
+import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar } from '@material-ui/core'
+import MuiAlert from '@material-ui/lab/Alert'
 import {
     Colorize as ColorizeIcon,
     Create as CreateIcon,
@@ -80,6 +81,7 @@ const ToolBar = (): JSX.Element => {
     const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
 
     const [confirmationDialogOpen, setConfirmationDialogOpen] = React.useState(false)
+    const [isSaved, setIsSaved] = React.useState(false)
     const [r, g, b]: number[] = selected.color || [0, 0, 0]
 
     const dispatch = useDispatch()
@@ -161,6 +163,7 @@ const ToolBar = (): JSX.Element => {
                             onClick={() => {
                                 handleClose()
                                 onSaveChanges()
+                                setIsSaved(true)
                             }}
                         >
                             {t('save')}
@@ -201,6 +204,19 @@ const ToolBar = (): JSX.Element => {
                     </IconButton>
                 </StyledToggleButtonGroup>
             </Paper>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                }}
+                open={isSaved}
+                autoHideDuration={6000}
+                onClose={() => setIsSaved(false)}
+            >
+                <MuiAlert elevation={6} variant="filled" severity="success">
+                    Map saved!
+                </MuiAlert>
+            </Snackbar>
         </StyledContainer>
     )
 }

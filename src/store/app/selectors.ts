@@ -1,7 +1,5 @@
 import { createSelector } from 'reselect'
-import { isEmpty } from 'lodash'
 import { store } from '../store'
-import { selectHistory } from '../history/selectors'
 import { AppState } from './types'
 import { APP_RESOURCE_NAME, INITIAL_STATE } from './constants'
 
@@ -39,18 +37,4 @@ export const selectIsNewProjectDialogOpen = createSelector<typeof selectApp, App
 export const selectIsLoaded = createSelector<typeof selectApp, AppState, boolean>(
     selectApp,
     ({ isLoading, isLoaded }) => !isLoading && isLoaded
-)
-
-export const selectIsPristine = createSelector<typeof selectHistory, RootState, boolean>(
-    selectHistory,
-    ({ undo, redo }) => isEmpty(undo) && isEmpty(redo)
-)
-
-export const selectHistoryTilesets = createSelector<typeof selectHistory, RootState, string[]>(
-    selectHistory,
-    ({ undo, redo }) => {
-        const undoImages = undo.map(({ before }) => before.tileset && before.tileset.image)
-        const redoImages = redo.map(({ before }) => before.tileset && before.tileset.image)
-        return [...undoImages, ...redoImages]
-    }
 )

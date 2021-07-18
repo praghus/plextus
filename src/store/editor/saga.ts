@@ -1,18 +1,23 @@
 import { AnyAction } from 'redux'
-import { put, StrictEffect, select, takeLatest } from 'redux-saga/effects'
-
+import { put, StrictEffect, select, takeLatest, call } from 'redux-saga/effects'
+import request from '../../common/utils/fetch-api'
 import logger from '../../common/utils/logger'
-import { clearCache } from '../../common/utils/storage'
+import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
-import { selectHistoryTilesets } from '../app/selectors'
+
+import { selectHistoryTilesets } from '../history/selectors'
+import { selectTileset, selectRawLayers } from './selectors'
 import { resetToDefaults, changeTilesetImageSuccess, changeLayersSuccess } from './actions'
+import { APP_STORAGE_KEY } from '../app/constants'
 import {
     EDITOR_CHANGE_LAYERS,
     EDITOR_CHANGE_LAYER_DATA,
     EDITOR_CLEAR_PROJECT,
-    EDITOR_SET_TILESET_IMAGE
+    EDITOR_SAVE_CHANGES,
+    EDITOR_SET_TILESET_IMAGE,
+    EDITOR_TILESET_RESOURCE_KEY
 } from './constants'
-import { selectRawLayers } from './selectors'
+
 import { DeflatedLayer, Layer } from './types'
 
 const historyData: any[] = []
@@ -34,6 +39,23 @@ export function* setTilesetImage(action: AnyAction): Generator<StrictEffect, voi
         historyData.push(image)
 
         yield put(changeTilesetImageSuccess(image))
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* saveChanges(): Generator<StrictEffect, void, any> {
+    try {
+        const state = yield select(state => state)
+        const { image } = yield select(selectTileset)
+        if (image) {
+            const imageBlob = yield call(() => request.blob(image))
+            if (imageBlob) {
+                yield call(() => setCacheBlob(EDITOR_TILESET_RESOURCE_KEY, imageBlob, 'image/png'))
+            }
+        }
+        yield call(() => setCacheBlob(APP_STORAGE_KEY, JSON.stringify(state), 'application/json'))
+        logger.info('Saving store')
     } catch (err) {
         logger.error(err)
     }
@@ -76,6 +98,7 @@ export function* clearProject(): Generator<StrictEffect, void, any> {
 
 export default function* editorSaga(): Generator {
     yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage),
+        yield takeLatest(EDITOR_SAVE_CHANGES, saveChanges),
         yield takeLatest(EDITOR_CHANGE_LAYERS, changeLayers),
         yield takeLatest(EDITOR_CHANGE_LAYER_DATA, changeLayerData),
         yield takeLatest(EDITOR_CLEAR_PROJECT, clearProject)

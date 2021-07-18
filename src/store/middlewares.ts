@@ -4,11 +4,10 @@ import logger from '../common/utils/logger'
 import request from '../common/utils/fetch-api'
 import { selectUndoable, selectTileset, selectRawLayers } from './editor/selectors'
 import { changeLayerData, changeTilesetImageSuccess, historyAction } from './editor/actions'
-import { getCacheItem, setCacheBlob } from '../common/utils/storage'
+import { getCacheItem } from '../common/utils/storage'
 import {
     EDITOR_RESOURCE_NAME,
     EDITOR_TILESET_RESOURCE_KEY,
-    EDITOR_SAVE_CHANGES,
     EDITOR_CHANGE_LAYER_DATA,
     EDITOR_SET_TILESET_IMAGE
 } from './editor/constants'
@@ -46,19 +45,6 @@ const loadStore = async (api: MiddlewareAPI): Promise<RootState> => {
     return api.getState()
 }
 
-// @todo move to store/editor/saga
-const handleSave = async (state: RootState) => {
-    const { image } = state[EDITOR_RESOURCE_NAME].tileset
-    if (image) {
-        const imageBlob = await request.blob(image)
-        if (imageBlob) {
-            await setCacheBlob(EDITOR_TILESET_RESOURCE_KEY, imageBlob, 'image/png')
-        }
-    }
-    await setCacheBlob(APP_STORAGE_KEY, JSON.stringify(state), 'application/json')
-    logger.info('Saving store')
-}
-
 const handleLoad = async (api: MiddlewareAPI) => {
     const { dispatch } = api
     dispatch({ type: APP_REHYDRATE_STORE_START })
@@ -81,8 +67,6 @@ const cacheMiddleware: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => 
     if (!isLoadExecuted) {
         isLoadExecuted = true
         handleLoad(api)
-    } else if (action.type === EDITOR_SAVE_CHANGES) {
-        handleSave(api.getState())
     }
     return next(action)
 }
@@ -93,11 +77,11 @@ const undoMiddleware = createUndoMiddleware({
     revertingActions: {
         [EDITOR_SET_TILESET_IMAGE]: {
             action: (action: AnyAction, { image }: any) => changeTilesetImageSuccess(image),
-            createArgs: (state: any) => ({ tileset: selectTileset(state) })
+            getBefore: (state: any) => ({ tileset: selectTileset(state) })
         },
         [EDITOR_CHANGE_LAYER_DATA]: {
             action: (action: AnyAction, { layerId, data }: any) => changeLayerData(layerId, data),
-            createArgs: (state: any) => ({ layers: selectRawLayers(state) })
+            getBefore: (state: any) => ({ layers: selectRawLayers(state) })
         }
     }
 })

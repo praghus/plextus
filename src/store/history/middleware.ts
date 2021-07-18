@@ -39,7 +39,7 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }) 
                     break
                 default:
                     if (!acting && includes(SUPPORTED_ACTIONS, action.type)) {
-                        getViewState && dispatch(add(action, getUndoArgs(state, action)))
+                        getViewState && dispatch(add(action, getBefore(state, action)))
                     }
                     break
             }
@@ -57,9 +57,9 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }) 
         return actionCreator(action, before)
     }
 
-    function getUndoArgs(state, action) {
-        const argsFactory = get(revertingActions[action.type], 'createArgs')
-        return argsFactory && argsFactory(state, action)
+    function getBefore(state, action) {
+        const beforeFactory = get(revertingActions[action.type], 'getBefore')
+        return beforeFactory && beforeFactory(state, action)
     }
 }
 
