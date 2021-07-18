@@ -72,7 +72,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
-    const onSaveTilesetImage = (blob: Blob | null) => dispatch(changeTilesetImage(blob))
+    const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
 
     const onChangePosition = useCallback(
         debounce((x, y) => dispatch(changePosition(x, y)), 300),

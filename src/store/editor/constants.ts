@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import { PALETTES, DEFAULT_TILESET_IMAGE, TOOLS } from '../../common/constants'
-import { Canvas, Layer } from './types'
+import { Canvas, DeflatedLayer } from './types'
 
 export const EDITOR_RESOURCE_NAME = 'editor'
 export const EDITOR_TILESET_RESOURCE_KEY = 'tileset'
@@ -24,6 +24,7 @@ export const EDITOR_CHANGE_TILESET = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_TILE
 export const EDITOR_CHANGE_WORKSPACE_SIZE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_WORKSPACE_SIZE`
 export const EDITOR_CLEAR_PROJECT = `${EDITOR_RESOURCE_NAME}/EDITOR_CLEAR_PROJECT`
 export const EDITOR_CHANGE_LAYERS = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_LAYERS`
+export const EDITOR_CHANGE_LAYERS_SUCCESS = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_LAYERS_SUCCESS`
 export const EDITOR_HISTORY_ACTION = `${EDITOR_RESOURCE_NAME}/EDITOR_HISTORY_ACTION`
 export const EDITOR_REMOVE_LAYER = `${EDITOR_RESOURCE_NAME}/EDITOR_REMOVE_LAYER`
 export const EDITOR_RESET_TO_DEFAULTS = `${EDITOR_RESOURCE_NAME}/EDITOR_RESET_TO_DEFAULTS`
@@ -44,7 +45,7 @@ export const INITIAL_STATE = {
         visible: true,
         color: [255, 255, 255, 128]
     },
-    layers: [] as Layer[] | [],
+    layers: [] as DeflatedLayer[] | [],
     palette: DEFAULT_PALLETE,
     selected: {
         area: {

@@ -27,6 +27,7 @@ import {
     changeTool,
     saveChanges
 } from '../store/editor/actions'
+import { clear } from '../store/history/actions'
 import { createEmptyLayer } from '../store/editor/utils'
 import { Layer, Tileset } from '../store/editor/types'
 import { selectTileset, selectWorkspace } from '../store/editor/selectors'
@@ -69,6 +70,7 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
     const onChangeSelectedLayer = (value: string) => dispatch(changeSelectedLayer(value))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
+    const onClearHistory = () => dispatch(clear())
     const onSaveChanges = () => dispatch(saveChanges())
     const onSaveLayers = (layers: Layer[]) => dispatch(changeLayers(layers))
     const onChangeTool = tool => tool && dispatch(changeTool(tool))
@@ -105,6 +107,7 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
         onChangeSelectedTile(1)
         onChangeTool(TOOLS.DRAG)
         onSaveChanges()
+        onClearHistory()
         onClose()
     }
 

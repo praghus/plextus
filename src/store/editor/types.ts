@@ -10,7 +10,7 @@ export type Workspace = typeof INITIAL_STATE.workspace
 export type Canvas = {
     width: number
     height: number
-    background?: number
+    background: number[] | null
 }
 
 export type Layer = {
@@ -21,4 +21,14 @@ export type Layer = {
     visible: boolean
     opacity: number
     data: number[]
+}
+
+export type DeflatedLayer = {
+    id: string
+    name: string
+    width: number
+    height: number
+    visible: boolean
+    opacity: number
+    data: string
 }

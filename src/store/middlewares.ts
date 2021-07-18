@@ -1,8 +1,8 @@
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
-import { createUndoMiddleware } from 'redux-undo-redo'
+import createUndoMiddleware from './history/middleware'
 import logger from '../common/utils/logger'
 import request from '../common/utils/fetch-api'
-import { selectUndoable, selectLayers, selectTileset } from './editor/selectors'
+import { selectUndoable, selectTileset, selectRawLayers } from './editor/selectors'
 import { changeLayerData, changeTilesetImageSuccess, historyAction } from './editor/actions'
 import { getCacheItem, setCacheBlob } from '../common/utils/storage'
 import {
@@ -93,11 +93,11 @@ const undoMiddleware = createUndoMiddleware({
     revertingActions: {
         [EDITOR_SET_TILESET_IMAGE]: {
             action: (action: AnyAction, { image }: any) => changeTilesetImageSuccess(image),
-            createArgs: (state: any) => ({ oldTileset: selectTileset(state) })
+            createArgs: (state: any) => ({ tileset: selectTileset(state) })
         },
         [EDITOR_CHANGE_LAYER_DATA]: {
             action: (action: AnyAction, { layerId, data }: any) => changeLayerData(layerId, data),
-            createArgs: (state: any) => ({ oldLayers: selectLayers(state) })
+            createArgs: (state: any) => ({ layers: selectRawLayers(state) })
         }
     }
 })

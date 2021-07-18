@@ -24,7 +24,6 @@ export const createEmptyTile = (tileset: Tileset, tilesetCanvas: HTMLCanvasEleme
     canvasElement.height = pos.y + tileheight
     canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height)
     canvasContext.drawImage(tilesetCanvas, 0, 0)
-
     canvasElement.toBlob((blob: Blob) => {
         blob && onSave(blob, newTileId)
     }, 'image/png')

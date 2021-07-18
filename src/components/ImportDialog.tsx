@@ -21,6 +21,7 @@ import {
 } from '@material-ui/core'
 import { IMPORT_MODES } from '../common/constants'
 import { INITIAL_STATE } from '../store/editor/constants'
+import { clear } from '../store/history/actions'
 import { changeAppIsLoading } from '../store/app/actions'
 import {
     changeCanvasSize,
@@ -68,9 +69,10 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
     const onChangeGridSize = (width, height) => dispatch(changeGridSize(width, height))
     const onChangeSelectedLayer = value => dispatch(changeSelectedLayer(value))
     const onChangeTileset = value => dispatch(changeTileset(value))
+    const onClearHistory = () => dispatch(clear())
     const onSaveChanges = () => dispatch(saveChanges())
     const onSaveLayers = value => dispatch(changeLayers(value))
-    const onSaveTilesetImage = value => dispatch(changeTilesetImage(value))
+    const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
 
     const [gridSize, setGridSize] = useState({
         w: tileset.tilewidth,
@@ -100,9 +102,6 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
     }, [mode])
 
     const onSave = () => {
-        setIsProcessing(true)
-        onChangeAppIsLoading(true)
-        // setTimeout(() => {
         const { w: layerwidth, h: layerheight } = imageDimensions
         const { w: tilewidth, h: tileheight } = gridSize
         const { image, tilecount } = mode === IMPORT_MODES.NEW_PROJECT ? INITIAL_STATE.tileset : tileset
@@ -210,9 +209,10 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
             tilesetCanvas.toBlob(blob => {
                 onSaveTilesetImage(blob)
                 onChangeSelectedLayer(layer.id)
+                onSaveChanges()
+                onClearHistory()
                 setIsProcessing(false)
                 onChangeAppIsLoading(false)
-                onSaveChanges()
                 onClose()
             }, 'image/png')
         }
@@ -227,7 +227,6 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
         } else {
             processNewTileset()
         }
-        // }, 100)
     }
 
     const onChange = e => {
@@ -419,7 +418,14 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                     Cancel
                 </Button>
                 {isLoaded ? (
-                    <Button onClick={onSave} variant="contained">
+                    <Button
+                        onClick={() => {
+                            setIsProcessing(true)
+                            onChangeAppIsLoading(true)
+                            onSave()
+                        }}
+                        variant="contained"
+                    >
                         Save
                     </Button>
                 ) : (

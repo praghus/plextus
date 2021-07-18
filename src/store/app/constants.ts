@@ -1,6 +1,5 @@
 export const APP_RESOURCE_NAME = 'app'
 export const APP_STORAGE_KEY = 'griderState'
-export const APP_UNDO_HISTORY_RESOURCE_NAME = 'undoHistory'
 export const APP_UNDO_HISTORY_LIMIT = 20
 
 export const APP_CHANGE_LAST_UPDATE_TIME = `${APP_RESOURCE_NAME}/APP_CHANGE_LAST_UPDATE_TIME`

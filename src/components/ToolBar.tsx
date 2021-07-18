@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import { Divider, IconButton, Menu, MenuItem, Paper } from '@material-ui/core'
-import { actions as undoActions } from 'redux-undo-redo'
 import {
     Colorize as ColorizeIcon,
     Create as CreateIcon,
@@ -22,6 +21,7 @@ import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store
 import { selectCanvas, selectLayers, selectTileset, selectSelected } from '../store/editor/selectors'
 import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
 import { clearProject, changePrimaryColor, changeTool, saveChanges } from '../store/editor/actions'
+import { undo, redo } from '../store/history/actions'
 import { EraserIcon, LineIcon, StampIcon } from './Icons'
 import ImportDialog from './ImportDialog'
 import NewProjectDialog from './NewProjectDialog'
@@ -90,8 +90,8 @@ const ToolBar = (): JSX.Element => {
     const onSaveChanges = () => dispatch(saveChanges())
     const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
     const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
-    const onUndo = () => dispatch(undoActions.undo())
-    const onRedo = () => dispatch(undoActions.redo())
+    const onUndo = () => dispatch(undo())
+    const onRedo = () => dispatch(redo())
     const onCloseProject = () => dispatch(clearProject())
 
     return (
