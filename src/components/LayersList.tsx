@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { makeStyles } from '@material-ui/core/styles'
 import styled from '@emotion/styled'
 import {
+    Button,
     List,
     ListItem,
     ListItemIcon,
@@ -23,10 +24,11 @@ import {
     ArrowUpward as ArrowUpwardIcon,
     DeleteForever as DeleteForeverIcon,
     Image as ImageIcon,
+    ImageSearch as ImageSearchIcon,
     Visibility as VisibilityIcon,
     VisibilityOff as VisibilityOffIcon
 } from '@material-ui/icons'
-
+import { getImageDimensions } from '../common/utils/image'
 import { changeItemPosition } from '../common/utils/array'
 import { createEmptyLayer, createImageLayer, getLayerById } from '../store/editor/utils'
 import { Layer } from '../store/editor/types'
@@ -153,7 +155,37 @@ const LayersList = (): JSX.Element => {
             (blob: Blob) => blob && onChangeLayers([...layers, createImageLayer('New image Layer', blob)]),
             'image/png'
         )
+        handleClose()
+    }
 
+    const onImageUpload = async e => {
+        const canvasElement: any = document.createElement('canvas')
+        const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
+        const img = new window.Image()
+        const imageReader = new FileReader()
+        const file = e.target.files[0]
+
+        imageReader.readAsDataURL(file)
+        imageReader.onload = async ev => {
+            if (ev.target) {
+                const { result } = ev.target
+                if (result) {
+                    const { w, h } = await getImageDimensions(result)
+                    canvasElement.width = w
+                    canvasElement.height = h
+                    img.src = result as string
+                    img.onload = () => {
+                        ctx.clearRect(0, 0, w, h)
+                        ctx.drawImage(img, 0, 0)
+                        canvasElement.toBlob(
+                            (blob: Blob) =>
+                                blob && onChangeLayers([...layers, createImageLayer('New image Layer', blob)]),
+                            'image/png'
+                        )
+                    }
+                }
+            }
+        }
         handleClose()
     }
 
@@ -265,11 +297,26 @@ const LayersList = (): JSX.Element => {
                         </ListItemSecondaryAction>
                     </MenuItem>
                     <MenuItem onClick={onCreateImageLayer}>
-                        Image layer
+                        Image layer (empty)
                         <ListItemSecondaryAction>
                             <ImageIcon fontSize="small" />
                         </ListItemSecondaryAction>
                     </MenuItem>
+                    <input
+                        type="file"
+                        hidden
+                        id="upload-input"
+                        accept="image/png, image/gif, image/jpeg"
+                        onChange={onImageUpload}
+                    />
+                    <label htmlFor="upload-input">
+                        <MenuItem>
+                            Image layer (import)
+                            <ListItemSecondaryAction>
+                                <ImageSearchIcon fontSize="small" />
+                            </ListItemSecondaryAction>
+                        </MenuItem>
+                    </label>
                 </Menu>
             </StyledBottomContainer>
         </>

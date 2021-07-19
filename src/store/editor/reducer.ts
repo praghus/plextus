@@ -1,14 +1,10 @@
 import { AnyAction } from 'redux'
-import { DeflatedLayer, EditorState } from './types'
+import { EditorState } from './types'
 import {
     INITIAL_STATE,
     EDITOR_CHANGE_CANVAS_SIZE,
     EDITOR_CHANGE_GRID_COLOR,
     EDITOR_CHANGE_GRID_SIZE,
-    EDITOR_CHANGE_LAYER_NAME,
-    EDITOR_CHANGE_LAYER_OPACITY,
-    EDITOR_CHANGE_LAYER_VISIBLE,
-    EDITOR_REMOVE_LAYER,
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
@@ -111,32 +107,6 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
             }
         case EDITOR_CHANGE_LAYERS_SUCCESS:
             return { ...state, layers: action.payload.layers }
-        case EDITOR_CHANGE_LAYER_NAME:
-            return {
-                ...state,
-                layers: state.layers.map((l: DeflatedLayer) =>
-                    l.id === action.payload.layerId ? { ...l, name: action.payload.name } : l
-                )
-            }
-        case EDITOR_CHANGE_LAYER_OPACITY:
-            return {
-                ...state,
-                layers: state.layers.map((l: DeflatedLayer) =>
-                    l.id === action.payload.layerId ? { ...l, opacity: action.payload.opacity } : l
-                )
-            }
-        case EDITOR_CHANGE_LAYER_VISIBLE:
-            return {
-                ...state,
-                layers: state.layers.map((l: DeflatedLayer) =>
-                    l.id === action.payload.layerId ? { ...l, visible: action.payload.visible } : l
-                )
-            }
-        case EDITOR_REMOVE_LAYER:
-            return {
-                ...state,
-                layers: state.layers.filter(({ id }) => id !== action.payload.layerId)
-            }
         case EDITOR_HISTORY_ACTION:
             return {
                 ...state,

@@ -13,24 +13,26 @@ type Props = {
 
 const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, scale, dash }: Props, ref) => {
     const lines: any[] = []
-    const line = (key: string, points: any[]) => (
+    const line = (key: string, points: any[], strokeWidth) => (
         <Line
-            dash={dash && grid.width * scale > 8 ? [2 / scale, 2 / scale] : undefined}
+            dash={dash && grid.width * scale > 8 ? [2 / scale, 1 / scale] : undefined}
             {...{
                 key,
                 points,
                 stroke: getRgbaValue(grid.color),
-                strokeWidth: (grid.width * scale > 8 ? 0.5 : 0.2) / scale
+                strokeWidth
             }}
         />
     )
 
     for (let i = 1; i < width / grid.width; i += 1) {
-        lines.push(line(`w${i}`, [Math.round(i * grid.width), 0, Math.round(i * grid.width), height]))
+        const width = i % 10 === 0 ? 0.6 / scale : 0.2 / scale
+        lines.push(line(`w${i}`, [Math.round(i * grid.width), 0, Math.round(i * grid.width), height], width))
     }
 
     for (let j = 1; j < height / grid.height; j += 1) {
-        lines.push(line(`h${j}`, [0, Math.round(j * grid.height), width, Math.round(j * grid.height)]))
+        const height = j % 10 === 0 ? 0.6 / scale : 0.2 / scale
+        lines.push(line(`h${j}`, [0, Math.round(j * grid.height), width, Math.round(j * grid.height)], height))
     }
 
     return (

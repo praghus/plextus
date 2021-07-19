@@ -87,6 +87,14 @@ const ImageLayer = ({
         }
     }, [ctx, layer.image])
 
+    const getPos = (): Konva.Vector2d => {
+        const { x, y } = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+        return {
+            x: Math.floor(x),
+            y: Math.floor(y)
+        }
+    }
+
     // const drawTile = (gid: number | null, i: number): void => {
     //     // if (ctx) {
     //     //     const x = (i % layer.width) * grid.width
@@ -123,12 +131,13 @@ const ImageLayer = ({
             ctx.clearRect(0, 0, width, height)
             ctx.drawImage(bufferImage, 0, 0)
             hasChanged.current = true
+            stage.batchDraw()
         }
     }
 
     const onMouseDown = async (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (ctx && visible && isSelected) {
-            lastPos.current = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+            lastPos.current = getPos()
 
             clearBuffer()
 
@@ -174,7 +183,7 @@ const ImageLayer = ({
 
     const onMouseMove = () => {
         const prevPos = lastPos.current as Konva.Vector2d
-        const currentPos = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+        const currentPos = getPos()
         // const { x, y } = getCoordsFromPos(grid, currentPos)
 
         if (isMouseDown) {

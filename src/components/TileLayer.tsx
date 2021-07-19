@@ -131,6 +131,7 @@ const TileLayer = ({
             ctx.drawImage(bufferImage, selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
             hasChanged.current = true
             update && renderBufferToImage(selectedTile)
+            stage.batchDraw()
         }
     }
 
@@ -221,6 +222,7 @@ const TileLayer = ({
                         if (e.evt.button === 2) {
                             onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
                         } else if (bufferCtx) {
+                            console.info(getBufferPos(lastPos.current))
                             actionDraw(
                                 getBufferPos(lastPos.current),
                                 selected.color,

@@ -11,8 +11,8 @@ export const getCoordsFromPos = (grid: Grid, pos: Konva.Vector2d): Konva.Vector2
 })
 
 export const getPointerRelativePos = (workspace: Workspace, pos: Konva.Vector2d): Konva.Vector2d => ({
-    x: Math.floor((pos.x - workspace.x) / workspace.scale),
-    y: Math.floor((pos.y - workspace.y) / workspace.scale)
+    x: (pos.x - workspace.x) / workspace.scale,
+    y: (pos.y - workspace.y) / workspace.scale
 })
 
 export const centerStage = (
