@@ -6,6 +6,7 @@ import {
     EDITOR_CHANGE_GRID_COLOR,
     EDITOR_CHANGE_GRID_SIZE,
     EDITOR_CHANGE_LAYER_DATA,
+    EDITOR_CHANGE_LAYER_IMAGE,
     EDITOR_CHANGE_LAYER_NAME,
     EDITOR_CHANGE_LAYER_OPACITY,
     EDITOR_CHANGE_LAYER_VISIBLE,
@@ -26,9 +27,10 @@ import {
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID,
     EDITOR_HISTORY_ACTION,
-    EDITOR_SAVE_CHANGES
+    EDITOR_SAVE_CHANGES,
+    EDITOR_CHANGE_LAYERS_SUCCESS
 } from './constants'
-import { Layer, Pallete, Tileset } from './types'
+import { DeflatedLayer, Layer, Pallete, Tileset } from './types'
 
 export const clearProject = () =>
     ({
@@ -104,7 +106,7 @@ export const changeTileset = (tileset: Tileset) =>
         payload: { tileset }
     } as const)
 
-export const changeTilesetImage = (blob: Blob | null) =>
+export const changeTilesetImage = (blob: Blob) =>
     ({
         type: EDITOR_SET_TILESET_IMAGE,
         payload: { blob }
@@ -126,6 +128,18 @@ export const changeLayerData = (layerId: string, data: (number | null)[]) =>
     ({
         type: EDITOR_CHANGE_LAYER_DATA,
         payload: { layerId, data }
+    } as const)
+
+export const changeLayerImage = (layerId: string, blob: Blob) =>
+    ({
+        type: EDITOR_CHANGE_LAYER_IMAGE,
+        payload: { layerId, blob }
+    } as const)
+
+export const changeLayersSuccess = (layers: DeflatedLayer[] | null[]) =>
+    ({
+        type: EDITOR_CHANGE_LAYERS_SUCCESS,
+        payload: { layers }
     } as const)
 
 export const changeLayerName = (layerId: string, name: string) =>

@@ -4,11 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { makeStyles } from '@material-ui/core/styles'
 import styled from '@emotion/styled'
 import {
+    Button,
     List,
     ListItem,
     ListItemIcon,
     ListItemSecondaryAction,
     ListItemText,
+    Menu,
+    MenuItem,
     IconButton,
     TextField,
     Typography,
@@ -20,12 +23,14 @@ import {
     ArrowDownward as ArrowDownwardIcon,
     ArrowUpward as ArrowUpwardIcon,
     DeleteForever as DeleteForeverIcon,
+    Image as ImageIcon,
+    ImageSearch as ImageSearchIcon,
     Visibility as VisibilityIcon,
     VisibilityOff as VisibilityOffIcon
 } from '@material-ui/icons'
-
+import { getImageDimensions } from '../common/utils/image'
 import { changeItemPosition } from '../common/utils/array'
-import { createEmptyLayer, getLayerById } from '../store/editor/utils'
+import { createEmptyLayer, createImageLayer, getLayerById } from '../store/editor/utils'
 import { Layer } from '../store/editor/types'
 import {
     changeSelectedLayer,
@@ -95,6 +100,15 @@ const LayersList = (): JSX.Element => {
     const onOpacityChangeCommitted = (event: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
 
     const [editingLayer, setEditingLayer] = useState<EditingLayer | null>()
+    const [anchorEl, setAnchorEl] = React.useState(null)
+
+    const handleClick = event => {
+        setAnchorEl(event.currentTarget)
+    }
+
+    const handleClose = () => {
+        setAnchorEl(null)
+    }
 
     const onConfirmRemoveLayer = () => {
         const index = layers.indexOf(currentLayer)
@@ -123,11 +137,56 @@ const LayersList = (): JSX.Element => {
         onChangeLayers(changeItemPosition([...layers], from, to))
     }
 
-    const onCreateNewLayer = () => {
+    const onCreateTileLayer = () => {
         const width = Math.round(canvas.width / tileset.tilewidth)
         const height = Math.round(canvas.height / tileset.tileheight)
-        const newLayer = createEmptyLayer('New Layer', width, height)
+        const newLayer = createEmptyLayer('New tile Layer', width, height)
         onChangeLayers([...layers, newLayer])
+        handleClose()
+    }
+
+    const onCreateImageLayer = () => {
+        const canvasElement: any = document.createElement('canvas')
+        const width = Math.round(canvas.width / tileset.tilewidth)
+        const height = Math.round(canvas.height / tileset.tileheight)
+        canvasElement.width = width
+        canvasElement.height = height
+        canvasElement.toBlob(
+            (blob: Blob) => blob && onChangeLayers([...layers, createImageLayer('New image Layer', blob)]),
+            'image/png'
+        )
+        handleClose()
+    }
+
+    const onImageUpload = async e => {
+        const canvasElement: any = document.createElement('canvas')
+        const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
+        const img = new window.Image()
+        const imageReader = new FileReader()
+        const file = e.target.files[0]
+
+        imageReader.readAsDataURL(file)
+        imageReader.onload = async ev => {
+            if (ev.target) {
+                const { result } = ev.target
+                if (result) {
+                    const { w, h } = await getImageDimensions(result)
+                    canvasElement.width = w
+                    canvasElement.height = h
+                    img.src = result as string
+                    img.onload = () => {
+                        ctx.clearRect(0, 0, w, h)
+                        ctx.drawImage(img, 0, 0)
+                        canvasElement.toBlob(
+                            (blob: Blob) =>
+                                blob && onChangeLayers([...layers, createImageLayer('New image Layer', blob)]),
+                            'image/png'
+                        )
+                    }
+                }
+            }
+        }
+        handleClose()
     }
 
     return (
@@ -141,7 +200,7 @@ const LayersList = (): JSX.Element => {
                 onClose={onCancelRemoveLayer}
             />
             <List className={classes.layersList}>
-                {reversedList.map(({ id, name, visible }) => (
+                {reversedList.map(({ id, image, name, visible }) => (
                     <ListItem
                         dense
                         button
@@ -159,7 +218,7 @@ const LayersList = (): JSX.Element => {
                         }}
                     >
                         <ListItemIcon>
-                            <AppsIcon fontSize="small" />
+                            {image ? <ImageIcon fontSize="small" /> : <AppsIcon fontSize="small" />}
                         </ListItemIcon>
                         {id === editingLayer?.id ? (
                             <TextField
@@ -188,7 +247,6 @@ const LayersList = (): JSX.Element => {
                         <ListItemSecondaryAction>
                             <IconButton
                                 edge="end"
-                                aria-label="comments"
                                 onClick={() => {
                                     onChangeLayerVisible(id, !visible)
                                 }}
@@ -210,7 +268,7 @@ const LayersList = (): JSX.Element => {
                     />
                 </StyledSliderContainer>
                 <StyledButtonContainer>
-                    <IconButton size="small" onClick={onCreateNewLayer}>
+                    <IconButton size="small" onClick={handleClick}>
                         <AddIcon fontSize="small" />
                     </IconButton>
                     <IconButton
@@ -231,6 +289,35 @@ const LayersList = (): JSX.Element => {
                         <DeleteForeverIcon fontSize="small" />
                     </IconButton>
                 </StyledButtonContainer>
+                <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+                    <MenuItem onClick={onCreateTileLayer}>
+                        Tile layer
+                        <ListItemSecondaryAction>
+                            <AppsIcon fontSize="small" />
+                        </ListItemSecondaryAction>
+                    </MenuItem>
+                    <MenuItem onClick={onCreateImageLayer}>
+                        Image layer (empty)
+                        <ListItemSecondaryAction>
+                            <ImageIcon fontSize="small" />
+                        </ListItemSecondaryAction>
+                    </MenuItem>
+                    <input
+                        type="file"
+                        hidden
+                        id="upload-input"
+                        accept="image/png, image/gif, image/jpeg"
+                        onChange={onImageUpload}
+                    />
+                    <label htmlFor="upload-input">
+                        <MenuItem>
+                            Image layer (import)
+                            <ListItemSecondaryAction>
+                                <ImageSearchIcon fontSize="small" />
+                            </ListItemSecondaryAction>
+                        </MenuItem>
+                    </label>
+                </Menu>
             </StyledBottomContainer>
         </>
     )

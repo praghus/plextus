@@ -1,12 +1,13 @@
 import { combineReducers, AnyAction, Reducer } from 'redux'
 import { connectRouter } from 'connected-react-router'
-import { undoHistoryReducerCreator } from 'redux-undo-redo'
-import { APP_UNDO_HISTORY_RESOURCE_NAME, APP_REHYDRATE_STORE_SUCCESS, APP_RESOURCE_NAME } from './app/constants'
+import { APP_REHYDRATE_STORE_SUCCESS, APP_RESOURCE_NAME } from './app/constants'
 import { EDITOR_RESOURCE_NAME } from './editor/constants'
+import { HISTORY_RESOURCE_NAME } from './history/constants'
 import { store } from './store'
 import history from '../common/utils/history'
 import appReducer from './app/reducer'
 import editorReducer from './editor/reducer'
+import historyReducer from './history/reducer'
 
 type RootState = ReturnType<typeof store.getState>
 
@@ -19,7 +20,7 @@ export default function createReducer(injectedReducers = {}): Reducer {
             router: connectRouter(history),
             [APP_RESOURCE_NAME]: appReducer,
             [EDITOR_RESOURCE_NAME]: editorReducer,
-            [APP_UNDO_HISTORY_RESOURCE_NAME]: undoHistoryReducerCreator({ undoHistoryLimit: 10 }),
+            [HISTORY_RESOURCE_NAME]: historyReducer,
             ...injectedReducers
         })
     )

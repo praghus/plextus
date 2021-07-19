@@ -15,32 +15,54 @@ const encodeLayer = async (data: Buffer) =>
 
 export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tileset) => {
     const { columns, tilewidth, tileheight, tilecount } = tileset
-
+    const layerImages: any = []
     const mapLayers = await Promise.all(
-        layers.map(async ({ data, name, visible, opacity, width, height }, i) => {
-            const layerData = new Uint32Array(data)
-            const buffer = Buffer.from(layerData.buffer)
-            return {
-                '@': {
-                    id: i + 1,
-                    name,
-                    visible,
-                    opacity,
-                    width,
-                    height
-                },
-                data: {
-                    '@': {
-                        encoding: 'base64',
-                        compression: 'zlib'
-                    },
-                    '#': await encodeLayer(buffer)
+        layers.map(async ({ data, image, name, visible, opacity, width, height }, i) => {
+            if (image) {
+                const filename = `layer-${i + 1}.png`
+                layerImages.push({ filename, data: await fetch(image).then(r => r.blob()) })
+                return {
+                    imagelayer: {
+                        '@': {
+                            id: i + 1,
+                            name,
+                            opacity,
+                            visible: visible ? 1 : 0
+                        },
+                        image: {
+                            '@': {
+                                source: `./images/${filename}`
+                            }
+                        }
+                    }
+                }
+            } else {
+                const layerData = new Uint32Array(data || [])
+                const buffer = Buffer.from(layerData.buffer)
+                return {
+                    layer: {
+                        '@': {
+                            id: i + 1,
+                            name,
+                            opacity,
+                            width,
+                            height,
+                            visible: visible ? 1 : 0
+                        },
+                        data: {
+                            '@': {
+                                encoding: 'base64',
+                                compression: 'zlib'
+                            },
+                            '#': await encodeLayer(buffer)
+                        }
+                    }
                 }
             }
         })
     )
 
-    const map = {
+    const doc = create({
         map: {
             '@': {
                 version: 1.7,
@@ -66,25 +88,26 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
                 },
                 image: {
                     '@': {
-                        source: './tileset/tileset.png',
+                        source: './images/tileset.png',
                         width: columns * tilewidth,
                         height: (1 + Math.round(tilecount / columns)) * tileheight
                     }
                 }
-            },
-            layer: mapLayers
+            }
         }
-    }
+    })
 
-    const doc = create(map)
+    mapLayers.forEach(l => doc.root().ele(l).up())
+
     const xml = doc.end({ prettyPrint: true })
     const tiledmapTmx = new Blob([xml], { type: 'application/xml' })
     const tilesetImage = await fetch(tileset.image).then(r => r.blob())
-    const tilesetFolder = zip.folder('tileset') as JSZip
+    const imagesFolder = zip.folder('images') as JSZip
 
     zip.file('ReadMe.txt', 'Exported from Plextus!\n--\nDownload Tiled from https://www.mapeditor.org/\n')
     zip.file('tiledmap.tmx', tiledmapTmx)
-    tilesetFolder.file('tileset.png', tilesetImage)
+    imagesFolder.file('tileset.png', tilesetImage)
+    layerImages.map(({ filename, data }) => imagesFolder.file(filename, data))
 
     zip.generateAsync({ type: 'blob' })
         .then(content => saveAs(content, 'exported-tiledmap.zip'))

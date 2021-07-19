@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
-import { Divider, IconButton, Menu, MenuItem, Paper } from '@material-ui/core'
-import { actions as undoActions } from 'redux-undo-redo'
+import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar } from '@material-ui/core'
+import MuiAlert from '@material-ui/lab/Alert'
 import {
     Colorize as ColorizeIcon,
     Create as CreateIcon,
@@ -22,6 +22,7 @@ import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store
 import { selectCanvas, selectLayers, selectTileset, selectSelected } from '../store/editor/selectors'
 import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
 import { clearProject, changePrimaryColor, changeTool, saveChanges } from '../store/editor/actions'
+import { undo, redo } from '../store/history/actions'
 import { EraserIcon, LineIcon, StampIcon } from './Icons'
 import ImportDialog from './ImportDialog'
 import NewProjectDialog from './NewProjectDialog'
@@ -80,6 +81,7 @@ const ToolBar = (): JSX.Element => {
     const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
 
     const [confirmationDialogOpen, setConfirmationDialogOpen] = React.useState(false)
+    const [isSaved, setIsSaved] = React.useState(false)
     const [r, g, b]: number[] = selected.color || [0, 0, 0]
 
     const dispatch = useDispatch()
@@ -90,8 +92,8 @@ const ToolBar = (): JSX.Element => {
     const onSaveChanges = () => dispatch(saveChanges())
     const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
     const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
-    const onUndo = () => dispatch(undoActions.undo())
-    const onRedo = () => dispatch(undoActions.redo())
+    const onUndo = () => dispatch(undo())
+    const onRedo = () => dispatch(redo())
     const onCloseProject = () => dispatch(clearProject())
 
     return (
@@ -156,11 +158,20 @@ const ToolBar = (): JSX.Element => {
                         >
                             {t('export_map')}
                         </MenuItem>
+                        {/* <MenuItem
+                            onClick={() => {
+                                canvas && exportToTmx(canvas, layers, tileset)
+                                handleClose()
+                            }}
+                        >
+                            {t('export_png')}
+                        </MenuItem> */}
                         <Divider orientation="horizontal" />
                         <MenuItem
                             onClick={() => {
                                 handleClose()
                                 onSaveChanges()
+                                setIsSaved(true)
                             }}
                         >
                             {t('save')}
@@ -201,6 +212,19 @@ const ToolBar = (): JSX.Element => {
                     </IconButton>
                 </StyledToggleButtonGroup>
             </Paper>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                }}
+                open={isSaved}
+                autoHideDuration={6000}
+                onClose={() => setIsSaved(false)}
+            >
+                <MuiAlert elevation={6} variant="filled" severity="success">
+                    Map saved!
+                </MuiAlert>
+            </Snackbar>
         </StyledContainer>
     )
 }

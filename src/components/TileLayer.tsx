@@ -23,7 +23,7 @@ type Props = {
     onChangePrimaryColor: (color: number[]) => void
     onChangeSelectedTile: (tileId: number) => void
     onChangeTileset: (tileset: any) => void
-    onSaveTilesetImage: (blob: Blob | null) => void
+    onSaveTilesetImage: (blob: Blob) => void
     selected: Selected
     stage: Konva.Stage
     tileset: Tileset
@@ -31,9 +31,9 @@ type Props = {
     workspace: Workspace
 }
 
-type SelectedTile = { gid: number; x: number; y: number }
+type SelectedTile = { gid: number | null; x: number; y: number }
 
-const MapLayer = ({
+const TileLayer = ({
     canvas,
     grid,
     isMouseDown,
@@ -52,13 +52,14 @@ const MapLayer = ({
     const [bufferCtx, setBufferCtx] = useState<CanvasRenderingContext2D | undefined>()
     const [bufferImage, setBufferImage] = useState<HTMLCanvasElement>()
     const [ctx, setCtx] = useState<CanvasRenderingContext2D | undefined>()
-    const [data, setData] = useState<(number | null)[]>(layer.data)
+    const [data, setData] = useState<(number | null)[]>()
     const [image, setImage] = useState<CanvasImageSource>()
     const [selectedTile, setSelectedTile] = useState<SelectedTile>({} as SelectedTile)
 
     const imageRef = useRef<Konva.Image>(null)
     const lastPos = useRef<Konva.Vector2d | null>()
     const lastLinePos = useRef<Konva.Vector2d | null>()
+    const hasChanged = useRef<boolean>(false)
     const tilesetContext = tilesetCanvas.getContext('2d')
     const isSelected = selected.layerId === layer.id
 
@@ -100,7 +101,7 @@ const MapLayer = ({
     }
 
     const drawTile = (gid: number | null, i: number): void => {
-        if (ctx) {
+        if (ctx && layer.width) {
             const x = (i % layer.width) * grid.width
             const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
             ctx.clearRect(x, y, tilewidth, tileheight)
@@ -128,19 +129,21 @@ const MapLayer = ({
             )
             ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
             ctx.drawImage(bufferImage, selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
+            hasChanged.current = true
             update && renderBufferToImage(selectedTile)
+            stage.batchDraw()
         }
     }
 
     const redraw = (): void => {
-        if (ctx && isValidArray(layer.data)) {
+        if (ctx && layer.data && isValidArray(layer.data)) {
             ctx.clearRect(0, 0, width, height)
             layer.data.map((gid, i) => drawTile(gid, i))
             stage.batchDraw()
         }
     }
 
-    const renderBuffer = (gid: number): void => {
+    const renderBuffer = (gid: number | null): void => {
         if (bufferCtx) {
             bufferCtx.clearRect(0, 0, tilewidth, tileheight)
             if (gid) {
@@ -152,32 +155,38 @@ const MapLayer = ({
 
     const renderBufferToImage = (tile: SelectedTile): void => {
         const { gid, x, y } = tile
-        const { x: tx, y: ty } = getTilePos(gid, tileset)
-        if (ctx && bufferImage && tilesetContext) {
+        if (ctx && gid && bufferImage && tilesetContext) {
+            const { x: tx, y: ty } = getTilePos(gid, tileset)
             ctx.clearRect(x * tilewidth, y * tileheight, tilewidth, tileheight)
             ctx.drawImage(bufferImage, x * tilewidth, y * tileheight, tilewidth, tileheight)
             tilesetContext.clearRect(tx, ty, tilewidth, tileheight)
             tilesetContext.drawImage(bufferImage, tx, ty)
+            hasChanged.current = true
         }
     }
 
     const updateLayer = (x: number, y: number, gid: number | null): void => {
-        const pos = x + ((layer.width * tilewidth) / grid.width) * y
-        if (data[pos] !== gid) {
-            const tempData = [...data]
-            tempData[pos] = gid
-            setData(tempData)
-            stage.batchDraw()
+        if (layer.width) {
+            const pos = x + ((layer.width * tilewidth) / grid.width) * y
+            if (data && data[pos] !== gid) {
+                const tempData = [...data]
+                tempData[pos] = gid
+                setData(tempData)
+                stage.batchDraw()
+                hasChanged.current = true
+            }
+            drawTile(gid, pos)
         }
-        drawTile(gid, pos)
     }
 
     const createNewEmptyTile = async (x: number, y: number): Promise<number> => {
-        const newLayerData = [...layer.data]
+        const newLayerData = [...(layer.data || [])]
         return new Promise(resolve => {
             createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
-                newLayerData[x + ((layer.width * tilewidth) / grid.width) * y] = newTileId
-                setData(newLayerData)
+                if (layer.width) {
+                    newLayerData[x + ((layer.width * tilewidth) / grid.width) * y] = newTileId
+                    setData(newLayerData)
+                }
                 onChangeTileset({ ...tileset, tilecount: newTileId })
                 onChangeSelectedTile(newTileId)
                 onChangeLayerData(layer.id, newLayerData)
@@ -188,7 +197,7 @@ const MapLayer = ({
     }
 
     const onMouseDown = async (e: Konva.KonvaEventObject<MouseEvent>) => {
-        if (ctx && visible && isSelected) {
+        if (ctx && visible && isSelected && layer.data && layer.width) {
             lastPos.current = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
             const { x, y } = getCoordsFromPos(grid, lastPos.current)
             const tileId = layer.data[x + ((layer.width * tilewidth) / grid.width) * y]
@@ -203,7 +212,7 @@ const MapLayer = ({
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
                     e.evt.button === 2
-                        ? onChangeSelectedTile(gid)
+                        ? gid && onChangeSelectedTile(gid)
                         : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     break
                 case TOOLS.PENCIL:
@@ -213,6 +222,7 @@ const MapLayer = ({
                         if (e.evt.button === 2) {
                             onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
                         } else if (bufferCtx) {
+                            console.info(getBufferPos(lastPos.current))
                             actionDraw(
                                 getBufferPos(lastPos.current),
                                 selected.color,
@@ -237,9 +247,8 @@ const MapLayer = ({
                 case TOOLS.LINE:
                     if (e.evt.button === 2) {
                         onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
-                    } else {
-                        lastLinePos.current = lastPos.current
                     }
+                    lastLinePos.current = lastPos.current
                     break
                 default:
                     break
@@ -281,25 +290,28 @@ const MapLayer = ({
     }
 
     const onMouseUp = () => {
-        switch (selected.tool) {
-            case TOOLS.DELETE:
-            case TOOLS.STAMP:
-                onChangeLayerData(layer.id, data)
-                break
-            case TOOLS.ERASER:
-            case TOOLS.LINE:
-            case TOOLS.PENCIL:
-                if (bufferImage && selectedTile && tilesetContext) {
-                    const { x, y } = getTilePos(selectedTile.gid, tileset)
-                    tilesetContext.drawImage(bufferImage, x, y)
-                    tilesetCanvas.toBlob(onSaveTilesetImage, 'image/png')
-                }
-                break
-            case TOOLS.FILL:
-                tilesetCanvas.toBlob(onSaveTilesetImage, 'image/png')
-                break
-            default:
-                break
+        if (hasChanged.current) {
+            switch (selected.tool) {
+                case TOOLS.DELETE:
+                case TOOLS.STAMP:
+                    data && onChangeLayerData(layer.id, data)
+                    break
+                case TOOLS.ERASER:
+                case TOOLS.LINE:
+                case TOOLS.PENCIL:
+                    if (bufferImage && selectedTile.gid && tilesetContext) {
+                        const { x, y } = getTilePos(selectedTile.gid, tileset)
+                        tilesetContext.drawImage(bufferImage, x, y)
+                        tilesetCanvas.toBlob(blob => blob && onSaveTilesetImage(blob), 'image/png')
+                    }
+                    break
+                case TOOLS.FILL:
+                    tilesetCanvas.toBlob(blob => blob && onSaveTilesetImage(blob), 'image/png')
+                    break
+                default:
+                    break
+            }
+            hasChanged.current = false
         }
     }
 
@@ -322,14 +334,6 @@ const MapLayer = ({
     )
 }
 
-MapLayer.displayName = 'MapLayer'
+TileLayer.displayName = 'TileLayer'
 
-export default MapLayer
-// export default React.memo(
-//     MapLayer,
-//     (prevProps, nextProps) =>
-//         prevProps.selected === nextProps.selected &&
-//         prevProps.workspace === nextProps.workspace &&
-//         prevProps.tilesetCanvas === nextProps.tilesetCanvas &&
-//         prevProps.layer === nextProps.layer
-// )
+export default TileLayer

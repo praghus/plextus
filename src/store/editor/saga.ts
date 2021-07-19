@@ -1,31 +1,100 @@
 import { AnyAction } from 'redux'
-import { put, StrictEffect, select, takeLatest } from 'redux-saga/effects'
-
+import { put, StrictEffect, select, takeLatest, call } from 'redux-saga/effects'
 import logger from '../../common/utils/logger'
-import { clearCache } from '../../common/utils/storage'
-import { selectHistoryTilesets } from '../app/selectors'
-import { resetToDefaults, changeTilesetImageSuccess } from './actions'
-import { EDITOR_CLEAR_PROJECT, EDITOR_SET_TILESET_IMAGE } from './constants'
+import { clearCache, setCacheBlob } from '../../common/utils/storage'
+import { compressLayerData } from '../../common/utils/pako'
+import { selectRawLayers } from './selectors'
+import { resetToDefaults, changeTilesetImageSuccess, changeLayersSuccess } from './actions'
+import { APP_STORAGE_KEY } from '../app/constants'
+import {
+    EDITOR_CHANGE_LAYERS,
+    EDITOR_CHANGE_LAYER_DATA,
+    EDITOR_CHANGE_LAYER_IMAGE,
+    EDITOR_CHANGE_LAYER_NAME,
+    EDITOR_CHANGE_LAYER_OPACITY,
+    EDITOR_CHANGE_LAYER_VISIBLE,
+    EDITOR_CLEAR_PROJECT,
+    EDITOR_REMOVE_LAYER,
+    EDITOR_SAVE_CHANGES,
+    EDITOR_SET_TILESET_IMAGE
+} from './constants'
+import { DeflatedLayer, Layer } from './types'
+import { getStateToSave } from './utils'
 
-const historyData: any[] = []
+export function* saveChanges(): Generator<StrictEffect, void, any> {
+    try {
+        const state = yield select(state => state)
+        const toSave = yield call(() => getStateToSave(state))
+        yield call(() => setCacheBlob(APP_STORAGE_KEY, JSON.stringify(toSave), 'application/json'))
+        logger.info('Saving to store')
+    } catch (err) {
+        logger.error(err)
+    }
+}
 
 export function* setTilesetImage(action: AnyAction): Generator<StrictEffect, void, any> {
     const { blob } = action.payload
     try {
-        const historyTilesets: any[] = yield select(selectHistoryTilesets)
         const image: any = window.URL.createObjectURL(blob)
-
-        if (historyTilesets) {
-            historyData.forEach((img, i) => {
-                if (!historyTilesets.includes(img)) {
-                    historyData.splice(i, 1)
-                    URL.revokeObjectURL(img)
-                }
-            })
-        }
-        historyData.push(image)
-
         yield put(changeTilesetImageSuccess(image))
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* changeLayers(action: AnyAction): Generator<StrictEffect, void, any> {
+    const { layers } = action.payload
+    try {
+        const changedLayers = layers.map((layer: Layer) =>
+            layer.data ? ({ ...layer, data: compressLayerData(layer.data) } as DeflatedLayer) : layer
+        )
+        yield put(changeLayersSuccess(changedLayers))
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+function* changeLayerProp(layerId: string, value: any): Generator<StrictEffect, void, any> {
+    try {
+        const layers: DeflatedLayer[] = yield select(selectRawLayers)
+        const changedLayers = layers.map(layer => (layer.id === layerId ? { ...layer, ...value } : layer))
+        yield put(changeLayersSuccess(changedLayers))
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* changeLayerData(action: AnyAction): Generator {
+    const { layerId, data } = action.payload
+    yield changeLayerProp(layerId, { data: compressLayerData(data) })
+}
+
+export function* changeLayerImage(action: AnyAction): Generator {
+    const { layerId, blob } = action.payload
+    yield changeLayerProp(layerId, { image: window.URL.createObjectURL(blob) })
+}
+
+export function* changeLayerName(action: AnyAction): Generator {
+    const { layerId, name } = action.payload
+    yield changeLayerProp(layerId, { name })
+}
+
+export function* changeLayerOpacity(action: AnyAction): Generator {
+    const { layerId, opacity } = action.payload
+    yield changeLayerProp(layerId, { opacity })
+}
+
+export function* changeLayerVisible(action: AnyAction): Generator {
+    const { layerId, visible } = action.payload
+    yield changeLayerProp(layerId, { visible })
+}
+
+export function* removeLayer(action: AnyAction): Generator<StrictEffect, void, any> {
+    const { layerId } = action.payload
+    try {
+        const layers: DeflatedLayer[] = yield select(selectRawLayers)
+        const changedLayers = layers.filter(({ id }) => id !== layerId)
+        yield put(changeLayersSuccess(changedLayers))
     } catch (err) {
         logger.error(err)
     }
@@ -33,7 +102,7 @@ export function* setTilesetImage(action: AnyAction): Generator<StrictEffect, voi
 
 export function* clearProject(): Generator<StrictEffect, void, any> {
     try {
-        historyData.forEach(URL.revokeObjectURL)
+        // historyData.forEach(URL.revokeObjectURL)
         clearCache()
         yield put(resetToDefaults())
     } catch (err) {
@@ -42,5 +111,14 @@ export function* clearProject(): Generator<StrictEffect, void, any> {
 }
 
 export default function* editorSaga(): Generator {
-    yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage), yield takeLatest(EDITOR_CLEAR_PROJECT, clearProject)
+    yield takeLatest(EDITOR_SAVE_CHANGES, saveChanges),
+        yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage),
+        yield takeLatest(EDITOR_CHANGE_LAYERS, changeLayers),
+        yield takeLatest(EDITOR_CHANGE_LAYER_DATA, changeLayerData),
+        yield takeLatest(EDITOR_CHANGE_LAYER_IMAGE, changeLayerImage),
+        yield takeLatest(EDITOR_CHANGE_LAYER_NAME, changeLayerName),
+        yield takeLatest(EDITOR_CHANGE_LAYER_OPACITY, changeLayerOpacity),
+        yield takeLatest(EDITOR_CHANGE_LAYER_VISIBLE, changeLayerVisible),
+        yield takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
+        yield takeLatest(EDITOR_CLEAR_PROJECT, clearProject)
 }

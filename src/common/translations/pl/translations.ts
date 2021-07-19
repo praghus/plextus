@@ -8,6 +8,7 @@ export const TRANSLATIONS_PL = {
     new_project: 'Nowy projekt',
     import_image: 'Importuj obraz',
     export_map: 'Eksportuj do .tmx',
+    export_png: 'Eksportuj do .png',
     save: 'Zapisz',
     undo: 'Cofnij',
     redo: 'Powtórz',

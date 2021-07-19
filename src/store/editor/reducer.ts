@@ -5,12 +5,6 @@ import {
     EDITOR_CHANGE_CANVAS_SIZE,
     EDITOR_CHANGE_GRID_COLOR,
     EDITOR_CHANGE_GRID_SIZE,
-    EDITOR_CHANGE_LAYER_DATA,
-    EDITOR_CHANGE_LAYER_NAME,
-    EDITOR_CHANGE_LAYER_OPACITY,
-    EDITOR_CHANGE_LAYER_VISIBLE,
-    EDITOR_REMOVE_LAYER,
-    EDITOR_CHANGE_LAYERS,
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
@@ -23,7 +17,8 @@ import {
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_TOGGLE_SHOW_GRID,
-    EDITOR_HISTORY_ACTION
+    EDITOR_HISTORY_ACTION,
+    EDITOR_CHANGE_LAYERS_SUCCESS
 } from './constants'
 
 function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
@@ -34,7 +29,8 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 canvas: {
                     ...state.canvas,
                     width: action.payload.width,
-                    height: action.payload.height
+                    height: action.payload.height,
+                    background: action.payload.background
                 }
             }
         case EDITOR_CHANGE_GRID_COLOR:
@@ -109,46 +105,13 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                     lastUpdateTime: action.payload.lastUpdateTime
                 }
             }
-        case EDITOR_CHANGE_LAYERS:
+        case EDITOR_CHANGE_LAYERS_SUCCESS:
             return { ...state, layers: action.payload.layers }
-        case EDITOR_CHANGE_LAYER_DATA:
-            return {
-                ...state,
-                layers: state.layers.map(l =>
-                    l.id === action.payload.layerId ? { ...l, data: action.payload.data } : l
-                )
-            }
-        case EDITOR_CHANGE_LAYER_NAME:
-            return {
-                ...state,
-                layers: state.layers.map(l =>
-                    l.id === action.payload.layerId ? { ...l, name: action.payload.name } : l
-                )
-            }
-        case EDITOR_CHANGE_LAYER_OPACITY:
-            return {
-                ...state,
-                layers: state.layers.map(l =>
-                    l.id === action.payload.layerId ? { ...l, opacity: action.payload.opacity } : l
-                )
-            }
-        case EDITOR_CHANGE_LAYER_VISIBLE:
-            return {
-                ...state,
-                layers: state.layers.map(l =>
-                    l.id === action.payload.layerId ? { ...l, visible: action.payload.visible } : l
-                )
-            }
-        case EDITOR_REMOVE_LAYER:
-            return {
-                ...state,
-                layers: state.layers.filter(({ id }) => id !== action.payload.layerId)
-            }
         case EDITOR_HISTORY_ACTION:
             return {
                 ...state,
-                layers: action.payload.layers,
-                tileset: action.payload.tileset
+                layers: action.payload.layers || state.layers,
+                tileset: action.payload.tileset || state.tileset
             }
         case EDITOR_RESET_TO_DEFAULTS:
             return {

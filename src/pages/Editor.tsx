@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { Helmet } from 'react-helmet'
-import { actions as undoActions } from 'redux-undo-redo'
+// import { actions as undoActions } from 'redux-undo-redo'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from '../common/constants'
 import { EDITOR_RESOURCE_NAME } from '../store/editor/constants'
 import { getTilesetDimensions } from '../store/editor/utils'
 import { selectIsLoaded, selectIsImportDialogOpen } from '../store/app/selectors'
 import { selectCanvas, selectTileset } from '../store/editor/selectors'
 import { adjustWorkspaceSize } from '../store/editor/actions'
+import { undo, redo, clear } from '../store/history/actions'
 import reducer from '../store/editor/reducer'
 import saga from '../store/editor/saga'
 import logger from '../common/utils/logger'
@@ -72,9 +73,9 @@ const Editor = (): JSX.Element => {
     const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
 
     // Undo/Redo actions
-    const onClear = () => dispatch(undoActions.clear())
-    const onUndo = () => dispatch(undoActions.undo())
-    const onRedo = () => dispatch(undoActions.redo())
+    const onClearHistory = () => dispatch(clear())
+    const onUndo = () => dispatch(undo())
+    const onRedo = () => dispatch(redo())
 
     const onKeyDown = e => {
         if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) {
@@ -87,7 +88,7 @@ const Editor = (): JSX.Element => {
             window.addEventListener('resize', onAdjustWorkspaceSize)
             window.addEventListener('keydown', onKeyDown)
             onAdjustWorkspaceSize()
-            onClear()
+            onClearHistory()
         }
         return () => {
             window.removeEventListener('resize', onAdjustWorkspaceSize)
