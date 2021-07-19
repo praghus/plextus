@@ -16,19 +16,21 @@ export type Canvas = {
 export type Layer = {
     id: string
     name: string
-    width: number
-    height: number
+    width?: number
+    height?: number
     visible: boolean
     opacity: number
-    data: number[]
+    image?: string
+    data?: number[]
 }
 
 export type DeflatedLayer = {
     id: string
     name: string
-    width: number
-    height: number
+    width?: number
+    height?: number
     visible: boolean
     opacity: number
-    data: string
+    image?: string
+    data?: string
 }

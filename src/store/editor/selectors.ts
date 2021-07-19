@@ -19,13 +19,7 @@ export const selectRawLayers = createSelector<typeof selectEditor, EditorState, 
 )
 
 export const selectLayers = createSelector<typeof selectEditor, EditorState, Layer[]>(selectEditor, ({ layers }) =>
-    layers.map(
-        (layer: DeflatedLayer) =>
-            ({
-                ...layer,
-                data: parseLayerData(layer.data)
-            } as Layer)
-    )
+    layers.map((layer: DeflatedLayer) => (layer.data ? { ...layer, data: parseLayerData(layer.data) } : layer) as Layer)
 )
 
 export const selectPalette = createSelector<typeof selectEditor, EditorState, Pallete>(

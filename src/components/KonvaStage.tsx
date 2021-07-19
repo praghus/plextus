@@ -18,6 +18,7 @@ import {
 } from '../store/editor/selectors'
 import {
     changeLayerData,
+    changeLayerImage,
     changePosition,
     changePrimaryColor,
     changeScale,
@@ -26,10 +27,11 @@ import {
     changeTilesetImage
 } from '../store/editor/actions'
 import GridLines from './GridLines'
-import MapLayer from './MapLayer'
+import TileLayer from './TileLayer'
 import StatusBar from './StatusBar'
 import KonvaTransformer from './KonvaTransformer'
 import Pointer from './Pointer'
+import ImageLayer from './ImageLayer'
 // import TilesIds from './TilesIds'
 
 const styles = ({ selected }) => css`
@@ -72,6 +74,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
+    const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
 
     const onChangePosition = useCallback(
@@ -191,27 +194,46 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                             fillPatternScaleY={1 / workspace.scale}
                         />
                         {stage &&
-                            layers.map(layer => (
-                                <MapLayer
-                                    key={`layer-${layer.id}`}
-                                    {...{
-                                        canvas,
-                                        grid,
-                                        isMouseDown,
-                                        layer,
-                                        onChangeLayerData,
-                                        onChangePrimaryColor,
-                                        onChangeSelectedTile,
-                                        onChangeTileset,
-                                        onSaveTilesetImage,
-                                        selected,
-                                        stage,
-                                        tileset,
-                                        tilesetCanvas,
-                                        workspace
-                                    }}
-                                />
-                            ))}
+                            layers.map(layer =>
+                                layer.image ? (
+                                    <ImageLayer
+                                        key={`layer-${layer.id}`}
+                                        {...{
+                                            canvas,
+                                            grid,
+                                            isMouseDown,
+                                            layer,
+                                            onChangeLayerImage,
+                                            onChangePrimaryColor,
+                                            selected,
+                                            stage,
+                                            tileset,
+                                            tilesetCanvas,
+                                            workspace
+                                        }}
+                                    />
+                                ) : (
+                                    <TileLayer
+                                        key={`layer-${layer.id}`}
+                                        {...{
+                                            canvas,
+                                            grid,
+                                            isMouseDown,
+                                            layer,
+                                            onChangeLayerData,
+                                            onChangePrimaryColor,
+                                            onChangeSelectedTile,
+                                            onChangeTileset,
+                                            onSaveTilesetImage,
+                                            selected,
+                                            stage,
+                                            tileset,
+                                            tilesetCanvas,
+                                            workspace
+                                        }}
+                                    />
+                                )
+                            )}
                         {selected.tool === TOOLS.CROP && <KonvaTransformer {...{ canvas, grid }} />}
                         {/* <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} /> */}
                         <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />

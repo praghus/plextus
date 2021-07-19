@@ -74,7 +74,9 @@ const StatusBar = ({ pointerRelPosition, selectedLayer, stage }: Props): JSX.Ele
     const { scale } = workspace
     const { x, y } = getCoordsFromPos(grid, pointerRelPosition as Konva.Vector2d)
     const gid = selectedLayer
-        ? selectedLayer.data[x + ((selectedLayer.width * tileset.tilewidth) / grid.width) * y]
+        ? selectedLayer.data &&
+          selectedLayer.width &&
+          selectedLayer.data[x + ((selectedLayer.width * tileset.tilewidth) / grid.width) * y]
         : null
 
     const [value, setValue] = useState(scale)

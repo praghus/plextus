@@ -158,6 +158,14 @@ const ToolBar = (): JSX.Element => {
                         >
                             {t('export_map')}
                         </MenuItem>
+                        {/* <MenuItem
+                            onClick={() => {
+                                canvas && exportToTmx(canvas, layers, tileset)
+                                handleClose()
+                            }}
+                        >
+                            {t('export_png')}
+                        </MenuItem> */}
                         <Divider orientation="horizontal" />
                         <MenuItem
                             onClick={() => {

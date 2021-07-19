@@ -1,55 +1,20 @@
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import createUndoMiddleware from './history/middleware'
 import logger from '../common/utils/logger'
-import request from '../common/utils/fetch-api'
 import { selectUndoable, selectTileset, selectRawLayers } from './editor/selectors'
-import { changeLayerData, changeTilesetImageSuccess, historyAction } from './editor/actions'
-import { getCacheItem } from '../common/utils/storage'
-import {
-    EDITOR_RESOURCE_NAME,
-    EDITOR_TILESET_RESOURCE_KEY,
-    EDITOR_CHANGE_LAYER_DATA,
-    EDITOR_SET_TILESET_IMAGE
-} from './editor/constants'
-import {
-    APP_REHYDRATE_STORE_SUCCESS,
-    APP_REHYDRATE_STORE_ERROR,
-    APP_REHYDRATE_STORE_START,
-    APP_STORAGE_KEY
-} from './app/constants'
-import { store } from './store'
-
-type RootState = ReturnType<typeof store.getState>
+import { changeLayersSuccess, changeTilesetImageSuccess, historyAction } from './editor/actions'
+import { EDITOR_SET_TILESET_IMAGE, EDITOR_CHANGE_LAYERS_SUCCESS } from './editor/constants'
+import { APP_REHYDRATE_STORE_SUCCESS, APP_REHYDRATE_STORE_ERROR, APP_REHYDRATE_STORE_START } from './app/constants'
+import { loadStateFromStore } from './editor/utils'
 
 let isLoadExecuted = false
-
-const loadStore = async (api: MiddlewareAPI): Promise<RootState> => {
-    const stateBlob = await getCacheItem(APP_STORAGE_KEY)
-    const tilesetBlob = await getCacheItem(EDITOR_TILESET_RESOURCE_KEY)
-    if (stateBlob && tilesetBlob) {
-        const state = await request.json(window.URL.createObjectURL(stateBlob))
-        const editorState = state && state[EDITOR_RESOURCE_NAME]
-        const image = window.URL.createObjectURL(tilesetBlob)
-
-        return {
-            ...api.getState(),
-            [EDITOR_RESOURCE_NAME]: {
-                ...editorState,
-                tileset: {
-                    ...editorState.tileset,
-                    image
-                }
-            }
-        }
-    }
-    return api.getState()
-}
 
 const handleLoad = async (api: MiddlewareAPI) => {
     const { dispatch } = api
     dispatch({ type: APP_REHYDRATE_STORE_START })
     try {
-        const state = await loadStore(api)
+        const loaded = await loadStateFromStore()
+        const state = { ...api.getState(), ...loaded }
         dispatch({
             type: APP_REHYDRATE_STORE_SUCCESS,
             payload: { state }
@@ -75,13 +40,13 @@ const undoMiddleware = createUndoMiddleware({
     getViewState: selectUndoable,
     setViewState: historyAction,
     revertingActions: {
+        [EDITOR_CHANGE_LAYERS_SUCCESS]: {
+            action: (action: AnyAction, { layers }: any) => changeLayersSuccess(layers),
+            getBefore: (state: any) => ({ layers: selectRawLayers(state) })
+        },
         [EDITOR_SET_TILESET_IMAGE]: {
             action: (action: AnyAction, { image }: any) => changeTilesetImageSuccess(image),
             getBefore: (state: any) => ({ tileset: selectTileset(state) })
-        },
-        [EDITOR_CHANGE_LAYER_DATA]: {
-            action: (action: AnyAction, { layerId, data }: any) => changeLayerData(layerId, data),
-            getBefore: (state: any) => ({ layers: selectRawLayers(state) })
         }
     }
 })

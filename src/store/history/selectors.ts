@@ -23,11 +23,11 @@ export const selectIsPristine = createSelector<typeof selectHistory, RootState, 
     ({ undo, redo }) => isEmpty(undo) && isEmpty(redo)
 )
 
-export const selectHistoryTilesets = createSelector<typeof selectHistory, RootState, string[]>(
-    selectHistory,
-    ({ undo, redo }) => {
-        const undoImages = undo.map(({ before }) => before.tileset && before.tileset.image)
-        const redoImages = redo.map(({ before }) => before.tileset && before.tileset.image)
-        return [...undoImages, ...redoImages]
-    }
-)
+// export const selectHistoryTilesets = createSelector<typeof selectHistory, RootState, string[]>(
+//     selectHistory,
+//     ({ undo, redo }) => {
+//         const undoImages = undo.map(({ before }) => before.tileset && before.tileset.image)
+//         const redoImages = redo.map(({ before }) => before.tileset && before.tileset.image)
+//         return [...undoImages, ...redoImages]
+//     }
+// )

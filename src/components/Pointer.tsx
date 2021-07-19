@@ -41,7 +41,7 @@ const Pointer = ({
     const [posX, posY] =
         selected.tool === TOOLS.STAMP || selected.tool === TOOLS.DELETE
             ? [x * width, y * height]
-            : [Math.ceil(pointerRelPosition.x / TOOL_SIZE) - 1, Math.ceil(pointerRelPosition.y / TOOL_SIZE) - 1]
+            : [Math.ceil(pointerRelPosition.x / TOOL_SIZE), Math.ceil(pointerRelPosition.y / TOOL_SIZE)]
 
     useEffect(() => {
         if (pointerRef.current && pointerOverlayRef.current && fillPatternImage) {
