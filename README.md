@@ -4,9 +4,9 @@ Plextus is a pixel art editor designed to make tiled maps and tilesets. In addit
 
 **Plextus is fully compatible with [Tiled](https://www.mapeditor.org/) map editor and allows you to export your finished project to `.tmx` format.**
 
-## [Demo](http://plextus.surge.sh/)
+## [Demo](https://praghus.github.io/)
 
-![showcase](https://user-images.githubusercontent.com/5312169/125956013-1d561a40-bafb-481b-8ddd-8234318b5c92.gif)
+![showcase](https://user-images.githubusercontent.com/5312169/126199565-7960b91f-c6d9-4fc0-939f-95c07061c791.gif)
 
 ## Installation
 
@@ -45,19 +45,19 @@ Plextus is a pixel art editor designed to make tiled maps and tilesets. In addit
 
 ## TODO
 
+-   [ ] Bucket fill tool for tiles
+-   [ ] Copy, paste
+-   [ ] Change grid color
+-   [ ] Crop and resize map
+-   [x] Image layers
 -   [x] Line tool
+-   [ ] More pixel tools (Circle, Rectangle)
 -   [x] Paint bucket tool
 -   [ ] Pixel tool size change
--   [ ] More pixel tools (Circle, Rectangle)
--   [ ] Image layers
--   [ ] Copy, paste
--   [ ] Crop and resize map
--   [ ] Change grid color
--   [ ] Support tile flips
--   [ ] Tile clone
--   [ ] Bucket fill tool for tiles
 -   [ ] Remove tile from tileset
 -   [ ] Set and change map background color
+-   [ ] Support tile flips
+-   [ ] Tile clone
 
 ## See also
 
