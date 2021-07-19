@@ -26,12 +26,12 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
     )
 
     for (let i = 1; i < width / grid.width; i += 1) {
-        const width = i % 10 === 0 ? 0.6 / scale : 0.2 / scale
+        const width = i % 10 === 0 ? 0.6 / scale : 0.3 / scale
         lines.push(line(`w${i}`, [Math.round(i * grid.width), 0, Math.round(i * grid.width), height], width))
     }
 
     for (let j = 1; j < height / grid.height; j += 1) {
-        const height = j % 10 === 0 ? 0.6 / scale : 0.2 / scale
+        const height = j % 10 === 0 ? 0.6 / scale : 0.3 / scale
         lines.push(line(`h${j}`, [0, Math.round(j * grid.height), width, Math.round(j * grid.height)], height))
     }
 

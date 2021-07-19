@@ -21,6 +21,7 @@ export const EDITOR_CHANGE_POSITION = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_POS
 export const EDITOR_CHANGE_PRIMARY_COLOR = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_PRIMARY_COLOR`
 export const EDITOR_CHANGE_SCALE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_SCALE`
 export const EDITOR_CHANGE_TOOL = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_TOOL`
+export const EDITOR_CHANGE_TOOL_SIZE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_TOOL_SIZE`
 export const EDITOR_CHANGE_TILESET = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_TILESET`
 export const EDITOR_CHANGE_WORKSPACE_SIZE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_WORKSPACE_SIZE`
 export const EDITOR_CLEAR_PROJECT = `${EDITOR_RESOURCE_NAME}/EDITOR_CLEAR_PROJECT`
@@ -44,7 +45,7 @@ export const INITIAL_STATE = {
         width: 16,
         height: 16,
         visible: true,
-        color: [255, 255, 255, 128]
+        color: [255, 255, 255, 200]
     },
     layers: [] as DeflatedLayer[] | [],
     palette: DEFAULT_PALLETE,
@@ -56,11 +57,11 @@ export const INITIAL_STATE = {
             rows: 0
         },
         color: DEFAULT_PALLETE[0],
-        color2: null,
-        data: null,
+        co: null,
         layerId,
         tileId: 1,
-        tool: TOOLS.DRAG
+        tool: TOOLS.DRAG,
+        toolSize: [1, 1]
     },
     tileset: {
         columns: 10,

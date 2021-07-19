@@ -13,6 +13,7 @@ import {
     EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_TILESET,
     EDITOR_CHANGE_TOOL,
+    EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
@@ -79,6 +80,11 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
             return {
                 ...state,
                 selected: { ...state.selected, tool: action.payload.tool }
+            }
+        case EDITOR_CHANGE_TOOL_SIZE:
+            return {
+                ...state,
+                selected: { ...state.selected, toolSize: action.payload.toolSize }
             }
         case EDITOR_CHANGE_WORKSPACE_SIZE:
             return {

@@ -8,8 +8,6 @@ import { getCoordsFromPos } from '../common/utils/konva'
 import { getTilePos } from '../store/editor/utils'
 import { Grid, Selected, Tileset } from '../store/editor/types'
 
-const TOOL_SIZE = 1
-
 type Props = {
     grid: Grid
     isMouseDown: boolean
@@ -41,7 +39,7 @@ const Pointer = ({
     const [posX, posY] =
         selected.tool === TOOLS.STAMP || selected.tool === TOOLS.DELETE
             ? [x * width, y * height]
-            : [Math.floor(pointerRelPosition.x / TOOL_SIZE), Math.floor(pointerRelPosition.y / TOOL_SIZE)]
+            : [Math.floor(pointerRelPosition.x), Math.floor(pointerRelPosition.y)]
 
     useEffect(() => {
         if (pointerRef.current && pointerOverlayRef.current && fillPatternImage) {
@@ -69,11 +67,14 @@ const Pointer = ({
                     fill: 'rgba(255,128,128,0.3)'
                 })
             } else {
+                const [w, h] = [TOOLS.LINE, TOOLS.PENCIL, TOOLS.ERASER].includes(selected.tool)
+                    ? selected.toolSize
+                    : [1, 1]
                 overlay.setAttrs({
-                    width: 1,
-                    height: 1,
+                    width: w,
+                    height: h,
                     stroke: 'rgba(255,255,255,0.8)',
-                    fill: getRgbaValue(selected.color)
+                    fill: selected.tool !== TOOLS.ERASER && getRgbaValue(selected.color)
                 })
             }
         }

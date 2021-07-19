@@ -1,6 +1,6 @@
 import Konva from 'konva'
-import { FONT_SPRITE } from '../../common/constants'
-import { Canvas, Grid, Workspace } from '../../store/editor/types'
+import { FONT_SPRITE, TOOLS } from '../../common/constants'
+import { Canvas, Grid, Selected, Workspace } from '../../store/editor/types'
 import { getRgbaValue } from './colors'
 
 const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
@@ -124,20 +124,23 @@ export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx):
     }
 }
 
-export function actionDraw(pos: Konva.Vector2d, selectedColor: number[], ctx: CanvasRenderingContext2D, erase = false) {
-    ctx.fillStyle = getRgbaValue(selectedColor)
-    erase ? ctx.clearRect(pos.x, pos.y, 1, 1) : ctx.fillRect(pos.x, pos.y, 1, 1)
+export function actionDraw(pos: Konva.Vector2d, selected: Selected, ctx: CanvasRenderingContext2D) {
+    const erase = selected.tool === TOOLS.ERASER
+    const [w, h] = selected.toolSize
+    ctx.fillStyle = getRgbaValue(selected.color)
+    erase ? ctx.clearRect(pos.x, pos.y, w, h) : ctx.fillRect(pos.x, pos.y, w, h)
 }
 
 export function actionLine(
     startPos: Konva.Vector2d,
     endPos: Konva.Vector2d,
-    selectedColor: number[],
-    ctx: CanvasRenderingContext2D,
-    erase = false
+    selected: Selected,
+    ctx: CanvasRenderingContext2D
 ) {
     const tri = {} as { x: number; y: number; long: number }
     const ang = getAngle(endPos.x - startPos.x, endPos.y - startPos.y)
+    const erase = selected.tool === TOOLS.ERASER
+    const [w, h] = selected.toolSize
 
     const drawPixel = (x: number, y: number, w: number, h: number): void =>
         erase ? ctx.clearRect(x, y, w, h) : ctx.fillRect(x, y, w, h)
@@ -152,17 +155,17 @@ export function actionLine(
         tri.long = Math.abs(startPos.y - endPos.y)
     }
 
-    ctx.fillStyle = getRgbaValue(selectedColor)
+    ctx.fillStyle = getRgbaValue(selected.color)
 
     for (let i = 0; i < tri.long; i++) {
         const thispoint = {
             x: Math.round(startPos.x + tri.x * i),
             y: Math.round(startPos.y + tri.y * i)
         }
-        drawPixel(thispoint.x, thispoint.y, 1, 1)
+        drawPixel(thispoint.x, thispoint.y, w, h)
     }
 
-    drawPixel(Math.round(endPos.x), Math.round(endPos.y), 1, 1)
+    drawPixel(Math.round(endPos.x), Math.round(endPos.y), w, h)
 }
 
 export const renderText = (text: string, x: number, y: number, ctx: CanvasRenderingContext2D): void => {

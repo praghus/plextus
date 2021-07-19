@@ -21,6 +21,7 @@ import {
     EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_TILESET,
     EDITOR_CHANGE_TOOL,
+    EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
@@ -84,9 +85,23 @@ export const changePrimaryColor = (color: number[]) =>
         payload: { color }
     } as const)
 
-export const changeScale = (scale: number) => ({ type: EDITOR_CHANGE_SCALE, payload: { scale } } as const)
+export const changeScale = (scale: number) =>
+    ({
+        type: EDITOR_CHANGE_SCALE,
+        payload: { scale }
+    } as const)
 
-export const changeTool = (tool: string) => ({ type: EDITOR_CHANGE_TOOL, payload: { tool } } as const)
+export const changeTool = (tool: string) =>
+    ({
+        type: EDITOR_CHANGE_TOOL,
+        payload: { tool }
+    } as const)
+
+export const changeToolSize = (toolSize: number[]) =>
+    ({
+        type: EDITOR_CHANGE_TOOL_SIZE,
+        payload: { toolSize }
+    } as const)
 
 export const changeSelectedTile = (tileId: number) =>
     ({
@@ -172,9 +187,16 @@ export const toggleShowGrid = (visible: boolean) =>
         payload: { visible }
     } as const)
 
-export const saveChanges = () => ({ type: EDITOR_SAVE_CHANGES } as const)
+export const saveChanges = () =>
+    ({
+        type: EDITOR_SAVE_CHANGES
+    } as const)
 
-export const historyAction = <T>(payload: StringTMap<T>) => ({ type: EDITOR_HISTORY_ACTION, payload } as const)
+export const historyAction = <T>(payload: StringTMap<T>) =>
+    ({
+        type: EDITOR_HISTORY_ACTION,
+        payload
+    } as const)
 
 export const adjustWorkspaceSize = (): AnyAction =>
     changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT - FOOTER_HEIGHT)

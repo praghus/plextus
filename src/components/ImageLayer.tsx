@@ -127,7 +127,7 @@ const ImageLayer = ({
 
     const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d): void => {
         if (ctx && bufferCtx && bufferImage) {
-            actionLine(pos1, pos2, selected.color, bufferCtx, selected.tool === TOOLS.ERASER)
+            actionLine(pos1, pos2, selected, bufferCtx)
             ctx.clearRect(0, 0, width, height)
             ctx.drawImage(bufferImage, 0, 0)
             hasChanged.current = true
@@ -153,7 +153,7 @@ const ImageLayer = ({
                     if (e.evt.button === 2) {
                         onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
                     } else if (bufferCtx) {
-                        actionDraw(lastPos.current, selected.color, ctx, selected.tool === TOOLS.ERASER)
+                        actionDraw(lastPos.current, selected, bufferCtx)
                         renderBufferToImage()
                     }
 
@@ -217,7 +217,7 @@ const ImageLayer = ({
 
     const onMouseUp = () => {
         if (hasChanged.current && image) {
-            // renderBufferToImage()
+            renderBufferToImage()
             image.toBlob(blob => blob && onChangeLayerImage(layer.id, blob), 'image/png')
             hasChanged.current = false
         }
