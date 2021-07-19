@@ -76,13 +76,10 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
     const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
+    const onChangeScale = (scale: number) => dispatch(changeScale(scale))
 
     const onChangePosition = useCallback(
         debounce((x, y) => dispatch(changePosition(x, y)), 300),
-        []
-    )
-    const onChangeScale = useCallback(
-        debounce(scale => dispatch(changeScale(scale)), 300),
         []
     )
 
