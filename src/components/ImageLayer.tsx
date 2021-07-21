@@ -11,6 +11,7 @@ import {
     fillColor,
     pickColor
 } from '../common/utils/konva'
+import { getRgbaValue } from '../common/utils/colors'
 import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
     isMouseDown: boolean
     layer: Layer
     onChangeLayerImage: (layerId: string, blob: Blob) => void
+    onChangeLayerOffset: (layerId: string, x: number, y: number) => void
     onChangePrimaryColor: (color: number[]) => void
     selected: Selected
     stage: Konva.Stage
@@ -28,11 +30,12 @@ type Props = {
 }
 
 const ImageLayer = ({
-    canvas,
-    // grid,
+    // canvas,
+    grid,
     isMouseDown,
     layer,
     onChangeLayerImage,
+    onChangeLayerOffset,
     onChangePrimaryColor,
     selected,
     stage,
@@ -44,8 +47,7 @@ const ImageLayer = ({
     const [bufferImage, setBufferImage] = useState<HTMLCanvasElement>()
     const [ctx, setCtx] = useState<CanvasRenderingContext2D | undefined>()
     const [image, setImage] = useState<HTMLCanvasElement>()
-
-    const [img, setImg] = useState<HTMLImageElement>()
+    const [layerImage, setLayerImage] = useState<HTMLImageElement>()
 
     const imageRef = useRef<Konva.Image>(null)
     const lastPos = useRef<Konva.Vector2d | null>()
@@ -54,8 +56,7 @@ const ImageLayer = ({
     // const tilesetContext = tilesetCanvas.getContext('2d')
     const isSelected = selected.layerId === layer.id
 
-    const { width, height } = canvas
-    const { opacity, visible } = layer
+    const { opacity, visible, width, height } = layer
 
     useEffect(() => {
         const canvasElement: any = document.createElement('canvas')
@@ -81,14 +82,14 @@ const ImageLayer = ({
             img.onload = () => {
                 ctx.clearRect(0, 0, width, height)
                 ctx.drawImage(img, 0, 0)
-                setImg(img)
+                setLayerImage(img)
                 stage.batchDraw()
             }
         }
     }, [ctx, layer.image])
 
     const getPos = (): Konva.Vector2d => {
-        const { x, y } = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+        const { x, y } = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d, layer.offset)
         return {
             x: Math.floor(x),
             y: Math.floor(y)
@@ -96,9 +97,9 @@ const ImageLayer = ({
     }
 
     const clearBuffer = (): void => {
-        if (bufferCtx && img) {
+        if (bufferCtx && layerImage) {
             bufferCtx.clearRect(0, 0, width, height)
-            bufferCtx.drawImage(img, 0, 0) //, 0, 0, tilewidth, tileheight
+            bufferCtx.drawImage(layerImage, 0, 0) //, 0, 0, tilewidth, tileheight
         }
     }
 
@@ -141,7 +142,6 @@ const ImageLayer = ({
                         actionDraw(lastPos.current, selected, bufferCtx)
                         renderBufferToImage()
                     }
-
                     break
                 case TOOLS.PICKER:
                     onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
@@ -208,14 +208,27 @@ const ImageLayer = ({
         }
     }
 
+    const onDragEnd = () => {
+        if (imageRef.current) {
+            onChangeLayerOffset(layer.id, Math.round(imageRef.current.x()), Math.round(imageRef.current.y()))
+        }
+    }
+
     return (
         <Image
             key={layer.id}
             ref={imageRef}
             listening={isSelected && visible}
             opacity={opacity / 255}
+            stroke={getRgbaValue(grid.color)}
+            strokeWidth={1 / workspace.scale}
+            strokeEnabled={selected.tool === TOOLS.OFFSET}
+            draggable={isSelected && visible && selected.tool === TOOLS.OFFSET}
+            x={layer.offset.x || 0}
+            y={layer.offset.y || 0}
             {...{
                 image,
+                onDragEnd,
                 onMouseDown,
                 onMouseMove,
                 onMouseUp,

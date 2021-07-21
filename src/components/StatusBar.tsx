@@ -13,8 +13,7 @@ import {
 import { changePosition, changeScale, toggleShowGrid } from '../store/editor/actions'
 import { SCALE_MIN, SCALE_MAX, SCALE_BY, SCALE_STEP } from '../common/constants'
 import { selectCanvas, selectGrid, selectTileset, selectWorkspace } from '../store/editor/selectors'
-import { centerStage, getCoordsFromPos } from '../common/utils/konva'
-
+import { centerStage, getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
 import { Layer } from '../store/editor/types'
 
 const StyledStatusBar = styled.div`
@@ -60,19 +59,22 @@ const StyledCol = styled.div`
 `
 
 type Props = {
-    pointerRelPosition: Konva.Vector2d | null
+    pointerPosition: Konva.Vector2d | null
     selectedLayer: Layer | null
     stage: Konva.Stage
 }
 
-const StatusBar = ({ pointerRelPosition, selectedLayer, stage }: Props): JSX.Element => {
+const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Element => {
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
 
     const { scale } = workspace
-    const { x, y } = getCoordsFromPos(grid, pointerRelPosition as Konva.Vector2d)
+    const offset = selectedLayer?.offset || { x: 0, y: 0 }
+    const pointerRelPosition = getPointerRelativePos(workspace, pointerPosition as Konva.Vector2d, offset)
+    const { x, y } = getCoordsFromPos(grid, pointerRelPosition)
+
     const gid = selectedLayer
         ? selectedLayer.data &&
           selectedLayer.width &&
@@ -86,7 +88,15 @@ const StatusBar = ({ pointerRelPosition, selectedLayer, stage }: Props): JSX.Ele
     const onChangeScale = (scale: number) => dispatch(changeScale(scale))
     const onToggleShowGrid = (showGrid: boolean) => dispatch(toggleShowGrid(showGrid))
 
-    const onChange = (event: any, value: any) => {
+    const onCenter = () => {
+        canvas &&
+            centerStage(stage, canvas, workspace, (x, y, scale) => {
+                onChangePosition(x, y)
+                onChangeScale(scale)
+            })
+    }
+
+    const onZoom = (event: any, value: any) => {
         const sx = workspace.width / 2
         const sy = workspace.height / 2
         const oldScale = stage.scaleX()
@@ -99,31 +109,23 @@ const StatusBar = ({ pointerRelPosition, selectedLayer, stage }: Props): JSX.Ele
         setValue(value)
     }
 
-    const onChangeCommitted = () => {
+    const onZoomCommitted = () => {
         onChangeScale(stage.scaleX())
         onChangePosition(stage.x(), stage.y())
     }
 
     const onZoomIn = () => {
         if (scale < SCALE_MAX) {
-            onChange(null, stage.scaleX() * SCALE_BY)
-            onChangeCommitted()
+            onZoom(null, stage.scaleX() * SCALE_BY)
+            onZoomCommitted()
         }
     }
 
     const onZoomOut = () => {
         if (scale > SCALE_MIN) {
-            onChange(null, stage.scaleX() / SCALE_BY)
-            onChangeCommitted()
+            onZoom(null, stage.scaleX() / SCALE_BY)
+            onZoomCommitted()
         }
-    }
-
-    const onCenter = () => {
-        canvas &&
-            centerStage(stage, canvas, workspace, (x, y, scale) => {
-                onChangePosition(x, y)
-                onChangeScale(scale)
-            })
     }
 
     useEffect(() => {
@@ -144,13 +146,22 @@ const StatusBar = ({ pointerRelPosition, selectedLayer, stage }: Props): JSX.Ele
                             canvas.height / grid.height
                         }]`}
                 </StyledCol>
-                <StyledCol>
-                    {x}, {y} [{gid || 'empty'}]
-                </StyledCol>
+                {selectedLayer && selectedLayer.data && (
+                    <StyledCol>
+                        {x}, {y} [{gid || 'empty'}]
+                    </StyledCol>
+                )}
             </StyledInfoContainer>
             <StyledSliderContainer>
                 <ZoomOutIcon onClick={onZoomOut} />
-                <Slider step={SCALE_STEP} min={SCALE_MIN} max={SCALE_MAX} {...{ value, onChange, onChangeCommitted }} />
+                <Slider
+                    {...{ value }}
+                    step={SCALE_STEP}
+                    min={SCALE_MIN}
+                    max={SCALE_MAX}
+                    onChange={onZoom}
+                    onChangeCommitted={onZoomCommitted}
+                />
                 <StyledScaleContainer>{Math.round(100 * scale)}%</StyledScaleContainer>
                 <ZoomInIcon onClick={onZoomIn} />
             </StyledSliderContainer>

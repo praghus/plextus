@@ -25,8 +25,10 @@ export enum TOOLS {
     ERASER = 'ERASER',
     FILL = 'FILL',
     LINE = 'LINE',
+    OFFSET = 'OFFSET',
     PENCIL = 'PENCIL',
     PICKER = 'PICKER',
+    REPLACE = 'REPLACE',
     STAMP = 'STAMP',
     ZOOM = 'ZOOM'
 }

@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { debounce } from 'lodash'
 import { RgbaColorPicker } from 'react-colorful'
 import { makeStyles } from '@material-ui/core/styles'
-
 import { AppBar, Tab, Tabs } from '@material-ui/core'
 import { selectSelected } from '../store/editor/selectors'
 import { changePrimaryColor } from '../store/editor/actions'

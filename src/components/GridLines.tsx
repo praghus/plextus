@@ -9,13 +9,15 @@ type Props = {
     scale: number
     width: number
     dash?: boolean
+    x?: number
+    y?: number
 }
 
-const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, scale, dash }: Props, ref) => {
+const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, scale, dash, x, y }: Props, ref) => {
     const lines: any[] = []
 
     const getStrokeWidth = useCallback(
-        (i: number) => (grid.pitch && i % grid.pitch === 0 ? 0.6 / scale : 0.3 / scale),
+        (i: number) => (grid.pitch && i % grid.pitch === 0 ? 0.5 / scale : 0.2 / scale),
         [grid.pitch, scale]
     )
 
@@ -45,7 +47,7 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
 
     return (
         grid.visible && (
-            <Group {...{ ref, width, height }} listening={false}>
+            <Group {...{ ref, width, height }} listening={false} {...{ x, y }}>
                 {lines}
                 <Rect stroke={getRgbaValue(grid.color)} strokeWidth={0.5 / scale} {...{ width, height }} />
             </Group>

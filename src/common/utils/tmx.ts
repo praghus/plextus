@@ -17,7 +17,9 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
     const { columns, tilewidth, tileheight, tilecount } = tileset
     const layerImages: any = []
     const mapLayers = await Promise.all(
-        layers.map(async ({ data, image, name, visible, opacity, width, height }, i) => {
+        layers.map(async ({ data, image, name, visible, offset, opacity, width, height }, i) => {
+            const offsetx = offset.x !== 0 ? { offsetx: offset.x } : {}
+            const offsety = offset.y !== 0 ? { offsety: offset.y } : {}
             if (image) {
                 const filename = `layer-${i + 1}.png`
                 layerImages.push({ filename, data: await fetch(image).then(r => r.blob()) })
@@ -27,11 +29,15 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
                             id: i + 1,
                             name,
                             opacity,
-                            visible: visible ? 1 : 0
+                            visible: visible ? 1 : 0,
+                            ...offsetx,
+                            ...offsety
                         },
                         image: {
                             '@': {
-                                source: `./images/${filename}`
+                                source: `./images/${filename}`,
+                                width,
+                                height
                             }
                         }
                     }
@@ -47,7 +53,9 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
                             opacity,
                             width,
                             height,
-                            visible: visible ? 1 : 0
+                            visible: visible ? 1 : 0,
+                            ...offsetx,
+                            ...offsety
                         },
                         data: {
                             '@': {

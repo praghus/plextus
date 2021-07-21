@@ -11,8 +11,9 @@ import {
     fillColor,
     pickColor
 } from '../common/utils/konva'
-import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 import { isValidArray } from '../common/utils/array'
+import { getRgbaValue } from '../common/utils/colors'
+import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
 type Props = {
     canvas: Canvas
@@ -20,6 +21,7 @@ type Props = {
     isMouseDown: boolean
     layer: Layer
     onChangeLayerData: (layerId: string, data: (number | null)[]) => void
+    onChangeLayerOffset: (layerId: string, x: number, y: number) => void
     onChangePrimaryColor: (color: number[]) => void
     onChangeSelectedTile: (tileId: number) => void
     onChangeTileset: (tileset: any) => void
@@ -39,6 +41,7 @@ const TileLayer = ({
     isMouseDown,
     layer,
     onChangeLayerData,
+    onChangeLayerOffset,
     onChangePrimaryColor,
     onChangeSelectedTile,
     onChangeTileset,
@@ -91,6 +94,10 @@ const TileLayer = ({
     useEffect(() => {
         redraw()
     }, [ctx, layer, tilesetCanvas])
+
+    const getPos = (): Konva.Vector2d => {
+        return getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d, layer.offset)
+    }
 
     const getBufferPos = (pointerPos: Konva.Vector2d): Konva.Vector2d => {
         const { x, y } = getCoordsFromPos(grid, pointerPos)
@@ -188,9 +195,18 @@ const TileLayer = ({
         })
     }
 
+    const replaceTile = (gid: number) => {
+        if (data && selected.tileId) {
+            const tempData = data.map(tile => (tile === gid ? selected.tileId : tile))
+            setData(tempData)
+            redraw()
+            hasChanged.current = true
+        }
+    }
+
     const onMouseDown = async (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (ctx && visible && isSelected && layer.data && layer.width) {
-            lastPos.current = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+            lastPos.current = getPos()
             const { x, y } = getCoordsFromPos(grid, lastPos.current)
             const tileId = layer.data[x + ((layer.width * tilewidth) / grid.width) * y]
             const gid =
@@ -201,6 +217,9 @@ const TileLayer = ({
             clearBuffer(gid)
 
             switch (selected.tool) {
+                case TOOLS.REPLACE:
+                    replaceTile(gid)
+                    break
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
                     e.evt.button === 2
@@ -245,7 +264,7 @@ const TileLayer = ({
 
     const onMouseMove = () => {
         const prevPos = lastPos.current as Konva.Vector2d
-        const currentPos = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
+        const currentPos = getPos()
         const { x, y } = getCoordsFromPos(grid, currentPos)
 
         if (isMouseDown) {
@@ -282,6 +301,7 @@ const TileLayer = ({
         if (hasChanged.current) {
             switch (selected.tool) {
                 case TOOLS.DELETE:
+                case TOOLS.REPLACE:
                 case TOOLS.STAMP:
                     data && onChangeLayerData(layer.id, data)
                     break
@@ -303,14 +323,27 @@ const TileLayer = ({
         }
     }
 
+    const onDragEnd = () => {
+        if (imageRef.current) {
+            onChangeLayerOffset(layer.id, Math.round(imageRef.current.x()), Math.round(imageRef.current.y()))
+        }
+    }
+
     return (
         <Image
             key={layer.id}
             ref={imageRef}
             listening={isSelected && visible}
             opacity={opacity / 255}
+            stroke={getRgbaValue(grid.color)}
+            strokeWidth={1 / workspace.scale}
+            strokeEnabled={selected.tool === TOOLS.OFFSET}
+            draggable={isSelected && visible && selected.tool === TOOLS.OFFSET}
+            x={layer.offset.x || 0}
+            y={layer.offset.y || 0}
             {...{
                 image,
+                onDragEnd,
                 onMouseDown,
                 onMouseMove,
                 onMouseUp,

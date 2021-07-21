@@ -114,6 +114,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
             id: uuidv4(),
             opacity: 255,
             visible: true,
+            offset: { x: 0, y: 0 },
             width: (Math.ceil(layerwidth / tilewidth) * tilewidth) / tilewidth,
             height: (Math.ceil(layerheight / tileheight) * tileheight) / tileheight,
             data: [] as number[]
