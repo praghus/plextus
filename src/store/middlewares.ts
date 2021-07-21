@@ -2,8 +2,8 @@ import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import createUndoMiddleware from './history/middleware'
 import logger from '../common/utils/logger'
 import { selectUndoable, selectTileset, selectRawLayers } from './editor/selectors'
-import { changeLayersSuccess, changeTilesetImageSuccess, historyAction } from './editor/actions'
-import { EDITOR_SET_TILESET_IMAGE, EDITOR_CHANGE_LAYERS_SUCCESS } from './editor/constants'
+import { changeLayersSuccess, changeTilesetImageSuccess, historyAction, removeTileSuccess } from './editor/actions'
+import { EDITOR_SET_TILESET_IMAGE, EDITOR_CHANGE_LAYERS_SUCCESS, EDITOR_REMOVE_TILE_SUCCESS } from './editor/constants'
 import { APP_REHYDRATE_STORE_SUCCESS, APP_REHYDRATE_STORE_ERROR, APP_REHYDRATE_STORE_START } from './app/constants'
 import { loadStateFromStore } from './editor/utils'
 
@@ -47,6 +47,10 @@ const undoMiddleware = createUndoMiddleware({
         [EDITOR_SET_TILESET_IMAGE]: {
             action: (action: AnyAction, { image }: any) => changeTilesetImageSuccess(image),
             getBefore: (state: any) => ({ tileset: selectTileset(state) })
+        },
+        [EDITOR_REMOVE_TILE_SUCCESS]: {
+            action: (action: AnyAction, { layers, tileset }: any) => removeTileSuccess(layers, tileset),
+            getBefore: (state: any) => ({ layers: selectRawLayers(state), tileset: selectTileset(state) })
         }
     }
 })

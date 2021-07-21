@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import styled from '@emotion/styled'
+import { debounce } from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
-import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar } from '@material-ui/core'
+import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar, Tooltip } from '@material-ui/core'
+import { ColorPicker } from 'material-ui-color'
 import MuiAlert from '@material-ui/lab/Alert'
 import {
     Colorize as ColorizeIcon,
@@ -17,7 +19,7 @@ import {
 } from '@material-ui/icons'
 import { TOOLS } from '../common/constants'
 import { exportToTmx } from '../common/utils/tmx'
-import { hexToRgba, rgbToHex } from '../common/utils/colors'
+import { rgbaToHex } from '../common/utils/colors'
 import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
 import { selectCanvas, selectLayers, selectTileset, selectSelected } from '../store/editor/selectors'
 import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
@@ -54,6 +56,12 @@ const StyledContainer = styled.div`
     z-index: 100;
 `
 
+const StyledColorPicker = styled.div`
+    padding-top: 2px;
+    padding-left: 6px;
+    padding-bottom: 5px;
+`
+
 const StyledToggleButtonGroup = withStyles(theme => ({
     grouped: {
         margin: theme.spacing(0.5),
@@ -80,14 +88,13 @@ const ToolBar = (): JSX.Element => {
     const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
     const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
 
-    const [confirmationDialogOpen, setConfirmationDialogOpen] = React.useState(false)
-    const [isSaved, setIsSaved] = React.useState(false)
-    const [r, g, b]: number[] = selected.color || [0, 0, 0]
+    const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
+    const [isSaved, setIsSaved] = useState(false)
+    const [primaryColor, setPrimaryColor] = useState<any>(rgbaToHex(selected.color))
 
     const dispatch = useDispatch()
     const handleClose = () => setAnchorEl(null)
     const handleClick = event => setAnchorEl(event.currentTarget)
-    const onChangePrimaryColor = ({ target }) => dispatch(changePrimaryColor(hexToRgba(target.value)))
     const onChangeTool = (tool: string) => tool && dispatch(changeTool(tool))
     const onSaveChanges = () => dispatch(saveChanges())
     const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
@@ -95,6 +102,15 @@ const ToolBar = (): JSX.Element => {
     const onUndo = () => dispatch(undo())
     const onRedo = () => dispatch(redo())
     const onCloseProject = () => dispatch(clearProject())
+
+    const onChangePrimaryColor = useCallback(
+        debounce(color => dispatch(changePrimaryColor(color)), 500),
+        []
+    )
+
+    useEffect(() => {
+        setPrimaryColor(rgbaToHex(selected.color))
+    }, [selected.color])
 
     return (
         <StyledContainer>
@@ -177,40 +193,67 @@ const ToolBar = (): JSX.Element => {
                             {t('save')}
                         </MenuItem>
                     </Menu>
+
                     <Divider orientation="horizontal" className={classes.divider} />
-                    <ToggleButton value={TOOLS.DRAG}>
-                        <PanToolIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.ERASER}>
-                        <EraserIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.PENCIL}>
-                        <CreateIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.LINE}>
-                        <LineIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.PICKER}>
-                        <ColorizeIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.FILL}>
-                        <FormatColorFillIcon className={classes.icon} />
-                    </ToggleButton>
+
+                    <Tooltip title="Drag" placement="right">
+                        <ToggleButton value={TOOLS.DRAG}>
+                            <PanToolIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
+                    <Tooltip title="Pixel eraser" placement="right">
+                        <ToggleButton value={TOOLS.ERASER}>
+                            <EraserIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
+                    <Tooltip title="Pixel pencil" placement="right">
+                        <ToggleButton value={TOOLS.PENCIL}>
+                            <CreateIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
+                    <Tooltip title="Pixel line" placement="right">
+                        <ToggleButton value={TOOLS.LINE}>
+                            <LineIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
+                    <Tooltip title="Color picker" placement="right">
+                        <ToggleButton value={TOOLS.PICKER}>
+                            <ColorizeIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
+                    <Tooltip title="Pixel bucket fill" placement="right">
+                        <ToggleButton value={TOOLS.FILL}>
+                            <FormatColorFillIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
+
                     <Divider orientation="horizontal" className={classes.divider} />
-                    <ToggleButton value={TOOLS.STAMP}>
-                        <StampIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.DELETE}>
-                        <DeleteForeverIcon className={classes.icon} />
-                    </ToggleButton>
+                    <Tooltip title="Tile stamp" placement="right">
+                        <ToggleButton value={TOOLS.STAMP}>
+                            <StampIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
+                    <Tooltip title="Tile remove" placement="right">
+                        <ToggleButton value={TOOLS.DELETE}>
+                            <DeleteForeverIcon className={classes.icon} />
+                        </ToggleButton>
+                    </Tooltip>
                     {/* <ToggleButton value={TOOLS.CROP}>
                         <CropIcon className={classes.icon} />
                     </ToggleButton> */}
+
                     <Divider orientation="horizontal" className={classes.divider} />
-                    <IconButton>
-                        <input type="color" value={rgbToHex(r, g, b)} onChange={onChangePrimaryColor} />
-                    </IconButton>
                 </StyledToggleButtonGroup>
+                <StyledColorPicker>
+                    <ColorPicker
+                        hideTextfield
+                        value={primaryColor}
+                        onChange={color => {
+                            setPrimaryColor(color)
+                            color.rgb && onChangePrimaryColor(color.rgb)
+                        }}
+                    />
+                </StyledColorPicker>
             </Paper>
             <Snackbar
                 anchorOrigin={{

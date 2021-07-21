@@ -30,7 +30,6 @@ const Pointer = ({
     if (isMouseDown || !isMouseOver || selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP) {
         return null
     }
-
     const { tilewidth: width, tileheight: height } = tileset
     const pointerRef = useRef<Konva.Rect>(null)
     const pointerOverlayRef = useRef<Konva.Rect>(null)
@@ -67,12 +66,12 @@ const Pointer = ({
                     fill: 'rgba(255,128,128,0.3)'
                 })
             } else {
-                const [w, h] = [TOOLS.LINE, TOOLS.PENCIL, TOOLS.ERASER].includes(selected.tool)
+                const toolSize = [TOOLS.LINE, TOOLS.PENCIL, TOOLS.ERASER].includes(selected.tool)
                     ? selected.toolSize
-                    : [1, 1]
+                    : 1
                 overlay.setAttrs({
-                    width: w,
-                    height: h,
+                    width: toolSize,
+                    height: toolSize,
                     stroke: 'rgba(255,255,255,0.8)',
                     fill: selected.tool !== TOOLS.ERASER && getRgbaValue(selected.color)
                 })

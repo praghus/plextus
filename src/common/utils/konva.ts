@@ -125,10 +125,10 @@ export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx):
 }
 
 export function actionDraw(pos: Konva.Vector2d, selected: Selected, ctx: CanvasRenderingContext2D) {
+    const { toolSize } = selected
     const erase = selected.tool === TOOLS.ERASER
-    const [w, h] = selected.toolSize
     ctx.fillStyle = getRgbaValue(selected.color)
-    erase ? ctx.clearRect(pos.x, pos.y, w, h) : ctx.fillRect(pos.x, pos.y, w, h)
+    erase ? ctx.clearRect(pos.x, pos.y, toolSize, toolSize) : ctx.fillRect(pos.x, pos.y, toolSize, toolSize)
 }
 
 export function actionLine(
@@ -137,10 +137,10 @@ export function actionLine(
     selected: Selected,
     ctx: CanvasRenderingContext2D
 ) {
+    const { toolSize } = selected
     const tri = {} as { x: number; y: number; long: number }
     const ang = getAngle(endPos.x - startPos.x, endPos.y - startPos.y)
     const erase = selected.tool === TOOLS.ERASER
-    const [w, h] = selected.toolSize
 
     const drawPixel = (x: number, y: number, w: number, h: number): void =>
         erase ? ctx.clearRect(x, y, w, h) : ctx.fillRect(x, y, w, h)
@@ -162,10 +162,10 @@ export function actionLine(
             x: Math.round(startPos.x + tri.x * i),
             y: Math.round(startPos.y + tri.y * i)
         }
-        drawPixel(thispoint.x, thispoint.y, w, h)
+        drawPixel(thispoint.x, thispoint.y, toolSize, toolSize)
     }
 
-    drawPixel(Math.round(endPos.x), Math.round(endPos.y), w, h)
+    drawPixel(Math.round(endPos.x), Math.round(endPos.y), toolSize, toolSize)
 }
 
 export const renderText = (text: string, x: number, y: number, ctx: CanvasRenderingContext2D): void => {

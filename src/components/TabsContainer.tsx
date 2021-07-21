@@ -5,7 +5,7 @@ import { debounce } from 'lodash'
 import { RgbaColorPicker } from 'react-colorful'
 import { makeStyles } from '@material-ui/core/styles'
 
-import { AppBar, Card, CardContent, Tab, Tabs, Typography } from '@material-ui/core'
+import { AppBar, Tab, Tabs } from '@material-ui/core'
 import { selectSelected } from '../store/editor/selectors'
 import { changePrimaryColor } from '../store/editor/actions'
 import Palette from './Palette'

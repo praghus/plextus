@@ -6,7 +6,11 @@ export function componentToHex(c: number): string {
 export const rgbToHex = (r: number, g: number, b: number): string =>
     `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`
 
-export const getRgbaValue = (c: number[]): string => `rgba(${c[0]},${c[1]},${c[2]},${(c[3] / 255).toPrecision(1)})`
+export const rgbaToHex = (c: number[]): string =>
+    `#${componentToHex(c[0])}${componentToHex(c[1])}${componentToHex(c[2])}${c[3] >= 0 ? componentToHex(c[3]) : ''}`
+
+export const getRgbaValue = (c: number[]): string =>
+    `rgba(${c[0]},${c[1]},${c[2]},${(c[3] && (c[3] / 255).toPrecision(1)) || 255})`
 
 export const hexToRgb = (hex: string): number[] => {
     const value = hex.substring(1, hex.length)

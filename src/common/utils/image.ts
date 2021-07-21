@@ -1,7 +1,42 @@
+const imageElement: any = document.createElement('canvas')
+const ctx: CanvasRenderingContext2D = imageElement.getContext('2d')
+
 export const getImageDimensions = (file: any): Promise<{ w: number; h: number }> =>
     new Promise((resolve, reject) => {
         const i = new Image()
         i.src = file
         i.onload = () => resolve({ w: i.width, h: i.height })
         i.onerror = reject
+    })
+
+export const createEmptyImage = (width: number, height: number): Promise<Blob> =>
+    new Promise(resolve => {
+        imageElement.width = width
+        imageElement.height = height
+        ctx.clearRect(0, 0, imageElement.width, imageElement.height)
+        imageElement.toBlob((blob: Blob) => resolve(blob), 'image/png')
+    })
+
+export const uploadImage = (file: Blob): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+        const img = new window.Image()
+        const imageReader = new FileReader()
+
+        imageReader.readAsDataURL(file)
+        imageReader.onload = async ev => {
+            if (ev.target) {
+                const { result } = ev.target
+                if (result) {
+                    const { w, h } = await getImageDimensions(result)
+                    imageElement.width = w
+                    imageElement.height = h
+                    img.src = result as string
+                    img.onload = () => {
+                        ctx.clearRect(0, 0, imageElement.width, imageElement.height)
+                        ctx.drawImage(img, 0, 0)
+                        imageElement.toBlob((blob: Blob) => resolve(blob), 'image/png')
+                    }
+                }
+            } else reject()
+        }
     })

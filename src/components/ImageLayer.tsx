@@ -95,21 +95,6 @@ const ImageLayer = ({
         }
     }
 
-    // const drawTile = (gid: number | null, i: number): void => {
-    //     // if (ctx) {
-    //     //     const x = (i % layer.width) * grid.width
-    //     //     const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
-    //     //     ctx.clearRect(x, y, tilewidth, tileheight)
-    //     //     if (gid) {
-    //     //         const { x: posX, y: posY } = getTilePos(gid, tileset)
-    //     //         ctx.drawImage(tilesetCanvas, posX, posY, tilewidth, tileheight, x, y, tilewidth, tileheight)
-    //     //     } else if (isSelected) {
-    //     //         ctx.fillStyle = 'rgba(0,0,0,0.2)'
-    //     //         ctx.fillRect(x, y, tilewidth, tileheight)
-    //     //     }
-    //     // }
-    // }
-
     const clearBuffer = (): void => {
         if (bufferCtx && img) {
             bufferCtx.clearRect(0, 0, width, height)
@@ -184,12 +169,12 @@ const ImageLayer = ({
     const onMouseMove = () => {
         const prevPos = lastPos.current as Konva.Vector2d
         const currentPos = getPos()
-        // const { x, y } = getCoordsFromPos(grid, currentPos)
 
         if (isMouseDown) {
             switch (selected.tool) {
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
+                    // const { x, y } = getCoordsFromPos(grid, currentPos)
                     //updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     break
                 case TOOLS.ERASER:

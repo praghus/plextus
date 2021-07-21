@@ -11,7 +11,7 @@ import { getTilesetDimensions } from '../store/editor/utils'
 import { selectIsLoaded, selectIsImportDialogOpen } from '../store/app/selectors'
 import { selectCanvas, selectTileset } from '../store/editor/selectors'
 import { adjustWorkspaceSize } from '../store/editor/actions'
-import { undo, redo, clear } from '../store/history/actions'
+import { undo, redo } from '../store/history/actions'
 import reducer from '../store/editor/reducer'
 import saga from '../store/editor/saga'
 import logger from '../common/utils/logger'
@@ -73,7 +73,7 @@ const Editor = (): JSX.Element => {
     const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
 
     // Undo/Redo actions
-    const onClearHistory = () => dispatch(clear())
+    // const onClearHistory = () => dispatch(clear())
     const onUndo = () => dispatch(undo())
     const onRedo = () => dispatch(redo())
 
@@ -88,7 +88,6 @@ const Editor = (): JSX.Element => {
             window.addEventListener('resize', onAdjustWorkspaceSize)
             window.addEventListener('keydown', onKeyDown)
             onAdjustWorkspaceSize()
-            onClearHistory()
         }
         return () => {
             window.removeEventListener('resize', onAdjustWorkspaceSize)

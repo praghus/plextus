@@ -4,14 +4,13 @@ import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/
 import {
     EDITOR_CHANGE_CANVAS_SIZE,
     EDITOR_CHANGE_GRID_COLOR,
+    EDITOR_CHANGE_GRID_PITCH,
     EDITOR_CHANGE_GRID_SIZE,
     EDITOR_CHANGE_LAYER_DATA,
     EDITOR_CHANGE_LAYER_IMAGE,
     EDITOR_CHANGE_LAYER_NAME,
     EDITOR_CHANGE_LAYER_OPACITY,
     EDITOR_CHANGE_LAYER_VISIBLE,
-    EDITOR_CLEAR_PROJECT,
-    EDITOR_REMOVE_LAYER,
     EDITOR_CHANGE_LAYERS,
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
@@ -23,6 +22,10 @@ import {
     EDITOR_CHANGE_TOOL,
     EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
+    EDITOR_CLEAR_PROJECT,
+    EDITOR_REMOVE_LAYER,
+    EDITOR_REMOVE_TILE,
+    EDITOR_REMOVE_TILE_SUCCESS,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_SET_TILESET_IMAGE,
@@ -49,10 +52,16 @@ export const changeCanvasSize = (width: number | null, height: number | null) =>
         payload: { width, height }
     } as const)
 
-export const changeGridColor = (color: number) =>
+export const changeGridColor = (color: number[]) =>
     ({
         type: EDITOR_CHANGE_GRID_COLOR,
         payload: { color }
+    } as const)
+
+export const changeGridPitch = pitch =>
+    ({
+        type: EDITOR_CHANGE_GRID_PITCH,
+        payload: { pitch }
     } as const)
 
 export const changeGridSize = (width: number, height: number) =>
@@ -97,7 +106,7 @@ export const changeTool = (tool: string) =>
         payload: { tool }
     } as const)
 
-export const changeToolSize = (toolSize: number[]) =>
+export const changeToolSize = (toolSize: number) =>
     ({
         type: EDITOR_CHANGE_TOOL_SIZE,
         payload: { toolSize }
@@ -179,6 +188,18 @@ export const removeLayer = (layerId: string) =>
     ({
         type: EDITOR_REMOVE_LAYER,
         payload: { layerId }
+    } as const)
+
+export const removeTile = (tileId: number, tileset: Tileset) =>
+    ({
+        type: EDITOR_REMOVE_TILE,
+        payload: { tileId, tileset }
+    } as const)
+
+export const removeTileSuccess = (layers: DeflatedLayer[], tileset: Tileset) =>
+    ({
+        type: EDITOR_REMOVE_TILE_SUCCESS,
+        payload: { layers, tileset }
     } as const)
 
 export const toggleShowGrid = (visible: boolean) =>
