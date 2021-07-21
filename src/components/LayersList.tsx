@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { makeStyles } from '@material-ui/core/styles'
 import styled from '@emotion/styled'
 import {
-    Button,
     List,
     ListItem,
     ListItemIcon,
@@ -28,7 +27,7 @@ import {
     Visibility as VisibilityIcon,
     VisibilityOff as VisibilityOffIcon
 } from '@material-ui/icons'
-import { getImageDimensions } from '../common/utils/image'
+import { createEmptyImage, uploadImage } from '../common/utils/image'
 import { changeItemPosition } from '../common/utils/array'
 import { createEmptyLayer, createImageLayer, getLayerById } from '../store/editor/utils'
 import { Layer } from '../store/editor/types'
@@ -83,8 +82,8 @@ const LayersList = (): JSX.Element => {
     const reversedList = [...layers].reverse()
     const currentLayer = getLayerById(layers, selected.layerId) || layers[0]
 
-    const [opacity, setOpacity] = React.useState(currentLayer ? currentLayer.opacity : 255)
-    const [confirmationDialogOpen, setConfirmationDialogOpen] = React.useState(false)
+    const [opacity, setOpacity] = useState(currentLayer ? currentLayer.opacity : 255)
+    const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
 
     const { t } = useTranslation()
 
@@ -100,7 +99,7 @@ const LayersList = (): JSX.Element => {
     const onOpacityChangeCommitted = (event: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
 
     const [editingLayer, setEditingLayer] = useState<EditingLayer | null>()
-    const [anchorEl, setAnchorEl] = React.useState(null)
+    const [anchorEl, setAnchorEl] = useState(null)
 
     const handleClick = event => {
         setAnchorEl(event.currentTarget)
@@ -133,58 +132,35 @@ const LayersList = (): JSX.Element => {
         const index = layers.indexOf(currentLayer)
         const from = dir > 0 ? index - 1 : index
         const to = dir > 0 ? index : index + 1
-
         onChangeLayers(changeItemPosition([...layers], from, to))
     }
 
     const onCreateTileLayer = () => {
-        const width = Math.round(canvas.width / tileset.tilewidth)
-        const height = Math.round(canvas.height / tileset.tileheight)
-        const newLayer = createEmptyLayer('New tile Layer', width, height)
+        const newLayer = createEmptyLayer(
+            'New tile Layer',
+            Math.round(canvas.width / tileset.tilewidth),
+            Math.round(canvas.height / tileset.tileheight)
+        )
         onChangeLayers([...layers, newLayer])
         handleClose()
     }
 
-    const onCreateImageLayer = () => {
-        const canvasElement: any = document.createElement('canvas')
-        const width = Math.round(canvas.width / tileset.tilewidth)
-        const height = Math.round(canvas.height / tileset.tileheight)
-        canvasElement.width = width
-        canvasElement.height = height
-        canvasElement.toBlob(
-            (blob: Blob) => blob && onChangeLayers([...layers, createImageLayer('New image Layer', blob)]),
-            'image/png'
+    const onCreateImageLayer = async () => {
+        const imageBlob = await createEmptyImage(
+            Math.round(canvas.width / tileset.tilewidth),
+            Math.round(canvas.height / tileset.tileheight)
         )
+        if (imageBlob) {
+            onChangeLayers([...layers, createImageLayer('New image Layer', imageBlob)])
+        }
         handleClose()
     }
 
     const onImageUpload = async e => {
-        const canvasElement: any = document.createElement('canvas')
-        const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
-        const img = new window.Image()
-        const imageReader = new FileReader()
         const file = e.target.files[0]
-
-        imageReader.readAsDataURL(file)
-        imageReader.onload = async ev => {
-            if (ev.target) {
-                const { result } = ev.target
-                if (result) {
-                    const { w, h } = await getImageDimensions(result)
-                    canvasElement.width = w
-                    canvasElement.height = h
-                    img.src = result as string
-                    img.onload = () => {
-                        ctx.clearRect(0, 0, w, h)
-                        ctx.drawImage(img, 0, 0)
-                        canvasElement.toBlob(
-                            (blob: Blob) =>
-                                blob && onChangeLayers([...layers, createImageLayer('New image Layer', blob)]),
-                            'image/png'
-                        )
-                    }
-                }
-            }
+        const imageBlob = await uploadImage(file)
+        if (imageBlob) {
+            onChangeLayers([...layers, createImageLayer(file.name.split('.').slice(0, -1).join('.'), imageBlob)])
         }
         handleClose()
     }

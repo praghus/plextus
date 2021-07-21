@@ -4,6 +4,7 @@ import {
     INITIAL_STATE,
     EDITOR_CHANGE_CANVAS_SIZE,
     EDITOR_CHANGE_GRID_COLOR,
+    EDITOR_CHANGE_GRID_PITCH,
     EDITOR_CHANGE_GRID_SIZE,
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
@@ -13,7 +14,9 @@ import {
     EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_TILESET,
     EDITOR_CHANGE_TOOL,
+    EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
+    EDITOR_REMOVE_TILE_SUCCESS,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_TOGGLE_SHOW_GRID,
@@ -35,6 +38,8 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
             }
         case EDITOR_CHANGE_GRID_COLOR:
             return { ...state, grid: { ...state.grid, color: action.payload.color } }
+        case EDITOR_CHANGE_GRID_PITCH:
+            return { ...state, grid: { ...state.grid, pitch: action.payload.pitch } }
         case EDITOR_CHANGE_GRID_SIZE:
             return {
                 ...state,
@@ -44,16 +49,8 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                     height: action.payload.height
                 }
             }
-        case EDITOR_CHANGE_SELECTED_LAYER:
-            return {
-                ...state,
-                selected: { ...state.selected, layerId: action.payload.layerId }
-            }
-        case EDITOR_CHANGE_SELECTED_TILE:
-            return {
-                ...state,
-                selected: { ...state.selected, tileId: action.payload.tileId }
-            }
+        case EDITOR_CHANGE_LAYERS_SUCCESS:
+            return { ...state, layers: action.payload.layers }
         case EDITOR_CHANGE_PALETTE:
             return { ...state, palette: action.payload.palette }
         case EDITOR_CHANGE_POSITION:
@@ -70,15 +67,32 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 ...state,
                 selected: { ...state.selected, color: action.payload.color }
             }
+        case EDITOR_CHANGE_SELECTED_LAYER:
+            return {
+                ...state,
+                selected: { ...state.selected, layerId: action.payload.layerId }
+            }
+        case EDITOR_CHANGE_SELECTED_TILE:
+            return {
+                ...state,
+                selected: { ...state.selected, tileId: action.payload.tileId }
+            }
         case EDITOR_CHANGE_SCALE:
             return {
                 ...state,
                 workspace: { ...state.workspace, scale: action.payload.scale }
             }
+        case EDITOR_CHANGE_TILESET:
+            return { ...state, tileset: action.payload.tileset }
         case EDITOR_CHANGE_TOOL:
             return {
                 ...state,
                 selected: { ...state.selected, tool: action.payload.tool }
+            }
+        case EDITOR_CHANGE_TOOL_SIZE:
+            return {
+                ...state,
+                selected: { ...state.selected, toolSize: action.payload.toolSize }
             }
         case EDITOR_CHANGE_WORKSPACE_SIZE:
             return {
@@ -94,24 +108,17 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 ...state,
                 grid: { ...state.grid, visible: action.payload.visible }
             }
-        case EDITOR_CHANGE_TILESET:
-            return { ...state, tileset: action.payload.tileset }
-        case EDITOR_SET_TILESET_IMAGE_SUCCESS:
-            return {
-                ...state,
-                tileset: {
-                    ...state.tileset,
-                    image: action.payload.image,
-                    lastUpdateTime: action.payload.lastUpdateTime
-                }
-            }
-        case EDITOR_CHANGE_LAYERS_SUCCESS:
-            return { ...state, layers: action.payload.layers }
         case EDITOR_HISTORY_ACTION:
             return {
                 ...state,
                 layers: action.payload.layers || state.layers,
                 tileset: action.payload.tileset || state.tileset
+            }
+        case EDITOR_REMOVE_TILE_SUCCESS:
+            return {
+                ...state,
+                layers: action.payload.layers,
+                tileset: action.payload.tileset
             }
         case EDITOR_RESET_TO_DEFAULTS:
             return {
@@ -120,6 +127,15 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 layers: [],
                 selected: INITIAL_STATE.selected,
                 tileset: INITIAL_STATE.tileset
+            }
+        case EDITOR_SET_TILESET_IMAGE_SUCCESS:
+            return {
+                ...state,
+                tileset: {
+                    ...state.tileset,
+                    image: action.payload.image,
+                    lastUpdateTime: action.payload.lastUpdateTime
+                }
             }
         default:
             return state

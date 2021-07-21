@@ -81,6 +81,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         debounce((x, y) => dispatch(changePosition(x, y)), 300),
         []
     )
+
     const onChangeScale = useCallback(
         debounce(scale => dispatch(changeScale(scale)), 300),
         []
@@ -160,8 +161,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
 
     const onMouseMove = () => {
         if (stage) {
-            const localPos = getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d)
-            setPointerRelPosition(localPos)
+            setPointerRelPosition(getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d))
         }
     }
 

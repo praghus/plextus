@@ -1,19 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Konva from 'konva'
+import styled from '@emotion/styled'
+import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Image, Layer, Rect, Stage } from 'react-konva'
-import AddIcon from '@material-ui/icons/Add'
-import SaveAltIcon from '@material-ui/icons/SaveAlt'
-import RemoveIcon from '@material-ui/icons/Remove'
-import IconButton from '@material-ui/core/IconButton'
-import Slider from '@material-ui/core/Slider'
-import styled from '@emotion/styled'
-import { getTilesetDimensions, createEmptyTile } from '../store/editor/utils'
-import { changeSelectedTile, changeTilesetImage, changeTileset } from '../store/editor/actions'
+import { Add as AddIcon, DeleteForever as DeleteForeverIcon, SaveAlt as SaveAltIcon } from '@material-ui/icons'
+import { IconButton, Slider, Tooltip } from '@material-ui/core'
+import { getTilesetDimensions, createEmptyTile, getTilePos } from '../store/editor/utils'
+import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } from '../store/editor/actions'
 import { selectGrid, selectSelected, selectTileset } from '../store/editor/selectors'
 import { getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
 import { RIGHT_BAR_WIDTH, SCALE_STEP } from '../common/constants'
-import { Workspace } from 'store/editor/types'
+import { Workspace, Tileset as TilesetType } from '../store/editor/types'
+import ConfirmationDialog from './ConfirmationDialog'
 
 const StyledTilesetImageContainer = styled.div`
     overflow: auto;
@@ -48,11 +47,15 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     const containerRef = useRef<HTMLDivElement>(null)
     const stageRef = useRef<Konva.Stage>(null)
 
+    const { t } = useTranslation()
+
     const grid = useSelector(selectGrid)
     const tileset = useSelector(selectTileset)
     const selected = useSelector(selectSelected)
     const imageDimensions = getTilesetDimensions(tileset)
+    const tilesetContext = tilesetCanvas.getContext('2d')
 
+    const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
     const [scale, setScale] = useState({ x: 2, y: 2 })
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [size, setSize] = useState({
@@ -65,7 +68,10 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     const dispatch = useDispatch()
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
+    const onRemoveTile = (tileId: number, tileset: TilesetType) => dispatch(removeTile(tileId, tileset))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
+    const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
+    const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
 
     const onMouseDown = () => {
         const stage = stageRef.current
@@ -138,6 +144,45 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         })
     }
 
+    const onDeleteTile = () => {
+        if (tilesetContext) {
+            const newTileCount = tilecount > 1 ? tilecount - 1 : 1
+            const newWidth = columns * tilewidth
+            const newHeight = Math.ceil(newTileCount / columns) * tileheight
+            if (tilecount > 1) {
+                for (let gid = selected.tileId; gid <= tilecount; gid += 1) {
+                    const { x, y } = getTilePos(gid, tileset)
+                    const { x: newX, y: newY } = getTilePos(gid - 1, tileset)
+                    const tile = tilesetContext.getImageData(x, y, tilewidth, tileheight)
+
+                    tilesetContext.clearRect(x, y, tilewidth, tileheight)
+                    if (gid > selected.tileId) {
+                        tilesetContext.putImageData(tile, newX, newY)
+                    }
+                }
+                const newTilesetData = tilesetContext.getImageData(0, 0, newWidth, newHeight)
+                tilesetCanvas.width = newWidth
+                tilesetCanvas.height = newHeight
+                tilesetContext.clearRect(0, 0, newWidth, newHeight)
+                tilesetContext.putImageData(newTilesetData, 0, 0)
+            } else {
+                tilesetContext.clearRect(0, 0, tilewidth, tileheight)
+            }
+            tilesetCanvas.toBlob(blob => {
+                onRemoveTile(selected.tileId, {
+                    ...tileset,
+                    image: window.URL.createObjectURL(blob),
+                    tilecount: newTileCount
+                })
+                if (selected.tileId > newTileCount) {
+                    onChangeSelectedTile(selected.tileId - 1)
+                }
+            })
+            stageRef.current?.batchDraw()
+        }
+        setConfirmationDialogOpen(false)
+    }
+
     const onDownloadTilesetImage = () => {
         const downloadLink = document.createElement('a')
         const dataURL = tilesetCanvas.toDataURL('image/png')
@@ -163,6 +208,13 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
 
     return (
         <>
+            <ConfirmationDialog
+                title={t('hold_on')}
+                message={t('delete_tile_confirmation')}
+                open={confirmationDialogOpen}
+                onConfirm={onDeleteTile}
+                onClose={onCancelRemoveLayer}
+            />
             <StyledTilesetImageContainer ref={containerRef} {...{ onScroll }}>
                 <div
                     style={{
@@ -199,15 +251,21 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                     />
                 </StyledSliderContainer>
                 <StyledButtonContainer>
-                    <IconButton size="small" onClick={onAddTile}>
-                        <AddIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small">
-                        <RemoveIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" onClick={onDownloadTilesetImage}>
-                        <SaveAltIcon fontSize="small" />
-                    </IconButton>
+                    <Tooltip title="Add new tile" placement="bottom-end">
+                        <IconButton size="small" onClick={onAddTile}>
+                            <AddIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete selected tile" placement="bottom-end">
+                        <IconButton size="small" onClick={onOpenConfirmationDialog}>
+                            <DeleteForeverIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Download tileset" placement="bottom-end">
+                        <IconButton size="small" onClick={onDownloadTilesetImage}>
+                            <SaveAltIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
                 </StyledButtonContainer>
             </StyledBottomContainer>
         </>

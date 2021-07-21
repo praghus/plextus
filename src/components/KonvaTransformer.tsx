@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
 import { Canvas, Grid } from '../store/editor/types'
@@ -20,14 +20,14 @@ const KonvaTransformer = ({ canvas, grid }: Props): JSX.Element => {
         y: Math.round(e.target.y() / height) * height
     })
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (shapeRef.current) {
             shapeRef.current.scaleX(canvas.width / width)
             shapeRef.current.scaleY(canvas.height / height)
         }
     }, [])
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (isResizing && trRef.current && shapeRef.current) {
             const layer = trRef.current.getLayer()
             trRef.current.nodes([shapeRef.current])
@@ -38,7 +38,7 @@ const KonvaTransformer = ({ canvas, grid }: Props): JSX.Element => {
     }, [isResizing])
 
     return (
-        <React.Fragment>
+        <>
             <Rect
                 {...{ width, height }}
                 draggable
@@ -80,7 +80,7 @@ const KonvaTransformer = ({ canvas, grid }: Props): JSX.Element => {
                     }}
                 />
             )}
-        </React.Fragment>
+        </>
     )
 }
 

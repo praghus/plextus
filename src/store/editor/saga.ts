@@ -3,8 +3,9 @@ import { put, StrictEffect, select, takeLatest, call } from 'redux-saga/effects'
 import logger from '../../common/utils/logger'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
-import { selectRawLayers } from './selectors'
-import { resetToDefaults, changeTilesetImageSuccess, changeLayersSuccess } from './actions'
+import { changeAppIsLoading } from '../app/actions'
+import { selectLayers, selectRawLayers } from './selectors'
+import { resetToDefaults, changeTilesetImageSuccess, changeLayersSuccess, removeTileSuccess } from './actions'
 import { APP_STORAGE_KEY } from '../app/constants'
 import {
     EDITOR_CHANGE_LAYERS,
@@ -15,6 +16,7 @@ import {
     EDITOR_CHANGE_LAYER_VISIBLE,
     EDITOR_CLEAR_PROJECT,
     EDITOR_REMOVE_LAYER,
+    EDITOR_REMOVE_TILE,
     EDITOR_SAVE_CHANGES,
     EDITOR_SET_TILESET_IMAGE
 } from './constants'
@@ -100,6 +102,28 @@ export function* removeLayer(action: AnyAction): Generator<StrictEffect, void, a
     }
 }
 
+export function* removeTile(action: AnyAction): Generator<StrictEffect, void, any> {
+    const { tileId, tileset } = action.payload
+    try {
+        yield put(changeAppIsLoading(true))
+        const layers: Layer[] = yield select(selectLayers)
+        const changedLayers = layers.map(layer => {
+            if (layer.data) {
+                const changedData = layer.data.map(tile =>
+                    tile === tileId ? null : (tile > tileId && tile - 1) || tile
+                )
+                return { ...layer, data: compressLayerData(changedData) } as DeflatedLayer
+            } else {
+                return layer as DeflatedLayer
+            }
+        })
+        yield put(removeTileSuccess(changedLayers, tileset))
+        yield put(changeAppIsLoading(false))
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
 export function* clearProject(): Generator<StrictEffect, void, any> {
     try {
         // historyData.forEach(URL.revokeObjectURL)
@@ -120,5 +144,6 @@ export default function* editorSaga(): Generator {
         yield takeLatest(EDITOR_CHANGE_LAYER_OPACITY, changeLayerOpacity),
         yield takeLatest(EDITOR_CHANGE_LAYER_VISIBLE, changeLayerVisible),
         yield takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
+        yield takeLatest(EDITOR_REMOVE_TILE, removeTile),
         yield takeLatest(EDITOR_CLEAR_PROJECT, clearProject)
 }

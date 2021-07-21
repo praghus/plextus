@@ -5,12 +5,13 @@ import { debounce } from 'lodash'
 import { RgbaColorPicker } from 'react-colorful'
 import { makeStyles } from '@material-ui/core/styles'
 
-import { AppBar, Card, CardContent, Tab, Tabs, Typography } from '@material-ui/core'
+import { AppBar, Tab, Tabs } from '@material-ui/core'
 import { selectSelected } from '../store/editor/selectors'
 import { changePrimaryColor } from '../store/editor/actions'
+import Palette from './Palette'
+import PropertiesTab from './PropertiesTab'
 import TabPanel from './TabPanel'
 import Tileset from './Tileset'
-import Palette from './Palette'
 
 const StyledColorPicker = styled(RgbaColorPicker)`
     width: auto !important;
@@ -57,13 +58,7 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
                 <Palette />
             </TabPanel>
             <TabPanel value={tab} index={2}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h5" component="h2">
-                            Properties (work in progress)
-                        </Typography>
-                    </CardContent>
-                </Card>
+                <PropertiesTab />
             </TabPanel>
         </>
     )
