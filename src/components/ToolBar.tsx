@@ -5,17 +5,18 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
-import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar, Tooltip } from '@material-ui/core'
+import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar } from '@material-ui/core'
 import { ColorPicker } from 'material-ui-color'
 import MuiAlert from '@material-ui/lab/Alert'
 import {
     Colorize as ColorizeIcon,
     Create as CreateIcon,
     // Crop as CropIcon,
-    DeleteForever as DeleteForeverIcon,
+    CancelPresentation as CancelPresentationIcon,
     FormatColorFill as FormatColorFillIcon,
     Menu as MenuIcon,
-    PanTool as PanToolIcon
+    PanTool as PanToolIcon,
+    ControlCamera as ControlCameraIcon
 } from '@material-ui/icons'
 import { TOOLS } from '../common/constants'
 import { exportToTmx } from '../common/utils/tmx'
@@ -25,7 +26,7 @@ import { selectCanvas, selectLayers, selectTileset, selectSelected } from '../st
 import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
 import { clearProject, changePrimaryColor, changeTool, saveChanges } from '../store/editor/actions'
 import { undo, redo } from '../store/history/actions'
-import { EraserIcon, LineIcon, StampIcon } from './Icons'
+import { EraserIcon, LineIcon, StampIcon, TileReplaceIcon } from './Icons'
 import ImportDialog from './ImportDialog'
 import NewProjectDialog from './NewProjectDialog'
 import ConfirmationDialog from './ConfirmationDialog'
@@ -196,48 +197,39 @@ const ToolBar = (): JSX.Element => {
 
                     <Divider orientation="horizontal" className={classes.divider} />
 
-                    <Tooltip title="Drag" placement="right">
-                        <ToggleButton value={TOOLS.DRAG}>
-                            <PanToolIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
-                    <Tooltip title="Pixel eraser" placement="right">
-                        <ToggleButton value={TOOLS.ERASER}>
-                            <EraserIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
-                    <Tooltip title="Pixel pencil" placement="right">
-                        <ToggleButton value={TOOLS.PENCIL}>
-                            <CreateIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
-                    <Tooltip title="Pixel line" placement="right">
-                        <ToggleButton value={TOOLS.LINE}>
-                            <LineIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
-                    <Tooltip title="Color picker" placement="right">
-                        <ToggleButton value={TOOLS.PICKER}>
-                            <ColorizeIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
-                    <Tooltip title="Pixel bucket fill" placement="right">
-                        <ToggleButton value={TOOLS.FILL}>
-                            <FormatColorFillIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
+                    <ToggleButton value={TOOLS.DRAG}>
+                        <PanToolIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.ERASER}>
+                        <EraserIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.PENCIL}>
+                        <CreateIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.LINE}>
+                        <LineIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.PICKER}>
+                        <ColorizeIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.FILL}>
+                        <FormatColorFillIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.OFFSET}>
+                        <ControlCameraIcon className={classes.icon} />
+                    </ToggleButton>
 
                     <Divider orientation="horizontal" className={classes.divider} />
-                    <Tooltip title="Tile stamp" placement="right">
-                        <ToggleButton value={TOOLS.STAMP}>
-                            <StampIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
-                    <Tooltip title="Tile remove" placement="right">
-                        <ToggleButton value={TOOLS.DELETE}>
-                            <DeleteForeverIcon className={classes.icon} />
-                        </ToggleButton>
-                    </Tooltip>
+
+                    <ToggleButton value={TOOLS.STAMP}>
+                        <StampIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.REPLACE}>
+                        <TileReplaceIcon className={classes.icon} />
+                    </ToggleButton>
+                    <ToggleButton value={TOOLS.DELETE}>
+                        <CancelPresentationIcon className={classes.icon} />
+                    </ToggleButton>
                     {/* <ToggleButton value={TOOLS.CROP}>
                         <CropIcon className={classes.icon} />
                     </ToggleButton> */}
@@ -248,9 +240,11 @@ const ToolBar = (): JSX.Element => {
                     <ColorPicker
                         hideTextfield
                         value={primaryColor}
-                        onChange={color => {
+                        onChange={(color: any) => {
                             setPrimaryColor(color)
-                            color.rgb && onChangePrimaryColor(color.rgb)
+                            if (!color.error) {
+                                onChangePrimaryColor(color.rgb)
+                            }
                         }}
                     />
                 </StyledColorPicker>

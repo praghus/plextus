@@ -17,7 +17,7 @@ export const createEmptyImage = (width: number, height: number): Promise<Blob> =
         imageElement.toBlob((blob: Blob) => resolve(blob), 'image/png')
     })
 
-export const uploadImage = (file: Blob): Promise<Blob> =>
+export const uploadImage = (file: Blob): Promise<{ blob: Blob; width: number; height: number }> =>
     new Promise((resolve, reject) => {
         const img = new window.Image()
         const imageReader = new FileReader()
@@ -27,14 +27,14 @@ export const uploadImage = (file: Blob): Promise<Blob> =>
             if (ev.target) {
                 const { result } = ev.target
                 if (result) {
-                    const { w, h } = await getImageDimensions(result)
-                    imageElement.width = w
-                    imageElement.height = h
+                    const { w: width, h: height } = await getImageDimensions(result)
+                    imageElement.width = width
+                    imageElement.height = height
                     img.src = result as string
                     img.onload = () => {
                         ctx.clearRect(0, 0, imageElement.width, imageElement.height)
                         ctx.drawImage(img, 0, 0)
-                        imageElement.toBlob((blob: Blob) => resolve(blob), 'image/png')
+                        imageElement.toBlob((blob: Blob) => resolve({ blob, width, height }), 'image/png')
                     }
                 }
             } else reject()

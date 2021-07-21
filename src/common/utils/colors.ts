@@ -1,5 +1,5 @@
 export function componentToHex(c: number): string {
-    const hex = c.toString(16)
+    const hex = Math.round(c).toString(16)
     return hex.length === 1 ? `0${hex}` : hex
 }
 
@@ -24,4 +24,27 @@ export const hexToRgb = (hex: string): number[] => {
 export const hexToRgba = (hex: string, a = 255): number[] => {
     const [r, g, b] = hexToRgb(hex)
     return [r, g, b, a]
+}
+
+export const normalize = (n: number, min: number, max: number): number => {
+    let normalized = n
+    while (n < min) {
+        normalized += max - min
+    }
+    while (n >= max) {
+        normalized -= max - min
+    }
+    return normalized
+}
+
+export const brighten = (hex: string, percent: number): string => {
+    const a = Math.round((255 * percent) / 100)
+    const r = normalize(a + parseInt(hex.substr(1, 2), 16), 0, 256)
+    const g = normalize(a + parseInt(hex.substr(3, 2), 16), 0, 256)
+    const b = normalize(a + parseInt(hex.substr(5, 2), 16), 0, 256)
+    return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`
+}
+
+export const darken = (hex: string, percent: number): string => {
+    return brighten(hex, -percent)
 }

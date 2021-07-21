@@ -146,21 +146,21 @@ const LayersList = (): JSX.Element => {
     }
 
     const onCreateImageLayer = async () => {
-        const imageBlob = await createEmptyImage(
-            Math.round(canvas.width / tileset.tilewidth),
-            Math.round(canvas.height / tileset.tileheight)
-        )
+        const imageBlob = await createEmptyImage(canvas.width, canvas.height)
         if (imageBlob) {
-            onChangeLayers([...layers, createImageLayer('New image Layer', imageBlob)])
+            onChangeLayers([...layers, createImageLayer('New image Layer', imageBlob, canvas.width, canvas.height)])
         }
         handleClose()
     }
 
     const onImageUpload = async e => {
         const file = e.target.files[0]
-        const imageBlob = await uploadImage(file)
-        if (imageBlob) {
-            onChangeLayers([...layers, createImageLayer(file.name.split('.').slice(0, -1).join('.'), imageBlob)])
+        const { blob, width, height } = await uploadImage(file)
+        if (blob) {
+            onChangeLayers([
+                ...layers,
+                createImageLayer(file.name.split('.').slice(0, -1).join('.'), blob, width, height)
+            ])
         }
         handleClose()
     }

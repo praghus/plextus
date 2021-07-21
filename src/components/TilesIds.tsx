@@ -2,7 +2,6 @@ import React, { forwardRef } from 'react'
 import Konva from 'konva'
 import { Group, Text } from 'react-konva'
 import { getRgbaValue } from '../common/utils/colors'
-// import { BG_IMAGE_DARK } from '../common/constants'
 
 type Props = {
     grid: any

@@ -6,7 +6,7 @@ import { jsx, css } from '@emotion/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
 import { SCALE_BY, TOOLS, BG_IMAGE } from '../common/constants'
-import { centerStage, getPointerRelativePos } from '../common/utils/konva'
+import { centerStage } from '../common/utils/konva'
 
 import {
     selectCanvas,
@@ -19,6 +19,7 @@ import {
 import {
     changeLayerData,
     changeLayerImage,
+    changeLayerOffset,
     changePosition,
     changePrimaryColor,
     changeScale,
@@ -49,6 +50,7 @@ const styles = ({ selected }) => css`
     }
   `) ||
     ((selected.tool === TOOLS.PENCIL || selected.tool === TOOLS.ERASER) && `cursor: crosshair;`) ||
+    (selected.tool === TOOLS.OFFSET && `cursor: move;`) ||
     `cursor: auto;`}
 `
 
@@ -67,7 +69,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
 
     const [isMouseDown, setIsMouseDown] = useState(false)
     const [isMouseOver, setIsMouseOver] = useState(false)
-    const [pointerRelPosition, setPointerRelPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
+    const [pointerPosition, setPointerPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
 
     const dispatch = useDispatch()
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
@@ -75,6 +77,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
     const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
+    const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
 
     const onChangePosition = useCallback(
@@ -106,7 +109,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                 })
             }
         }
-    }, [tileset.lastUpdateTime]) // workspace
+    }, [tileset.lastUpdateTime])
 
     useEffect(() => {
         if (stageRef.current && selected.tool == TOOLS.CROP) {
@@ -156,12 +159,14 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     }
 
     const onDragEnd = () => {
-        stage && onChangePosition(stage.x(), stage.y())
+        if (stage) {
+            onChangePosition(stage.x(), stage.y())
+        }
     }
 
     const onMouseMove = () => {
         if (stage) {
-            setPointerRelPosition(getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d))
+            setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
         }
     }
 
@@ -204,6 +209,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                                             isMouseDown,
                                             layer,
                                             onChangeLayerImage,
+                                            onChangeLayerOffset,
                                             onChangePrimaryColor,
                                             selected,
                                             stage,
@@ -221,6 +227,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                                             isMouseDown,
                                             layer,
                                             onChangeLayerData,
+                                            onChangeLayerOffset,
                                             onChangePrimaryColor,
                                             onChangeSelectedTile,
                                             onChangeTileset,
@@ -236,22 +243,31 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                             )}
                         {selected.tool === TOOLS.CROP && <KonvaTransformer {...{ canvas, grid }} />}
                         {/* <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} /> */}
-                        <GridLines width={canvas.width} height={canvas.height} scale={workspace.scale} {...{ grid }} />
+                        <GridLines
+                            x={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.x : 0}
+                            y={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.y : 0}
+                            width={(selectedLayer?.image && selectedLayer?.width) || canvas.width}
+                            height={(selectedLayer?.image && selectedLayer?.height) || canvas.height}
+                            scale={workspace.scale}
+                            {...{ grid }}
+                        />
                         <Pointer
                             scale={workspace.scale}
                             {...{
                                 grid,
                                 isMouseDown,
                                 isMouseOver,
-                                pointerRelPosition,
+                                pointerPosition,
                                 selected,
-                                tileset
+                                selectedLayer,
+                                tileset,
+                                workspace
                             }}
                         />
                     </Layer>
                 </Stage>
             </div>
-            {stage && <StatusBar {...{ pointerRelPosition, selectedLayer, stage }} />}
+            {stage && <StatusBar {...{ pointerPosition, selectedLayer, stage }} />}
         </div>
     )
 }

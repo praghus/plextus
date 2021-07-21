@@ -37,19 +37,23 @@ export const createEmptyTile = (tileset: Tileset, tilesetCanvas: HTMLCanvasEleme
 export const createEmptyLayer = (name: string, width: number, height: number): Layer => ({
     id: uuidv4(),
     data: new Array(width * height).fill(null),
-    height,
+    offset: { x: 0, y: 0 },
+    visible: true,
     opacity: 255,
     name,
-    visible: true,
+    height,
     width
 })
 
-export const createImageLayer = (name: string, blob: Blob): Layer => ({
+export const createImageLayer = (name: string, blob: Blob, width: number, height: number): Layer => ({
     id: uuidv4(),
     image: window.URL.createObjectURL(blob),
-    name,
+    offset: { x: 0, y: 0 },
+    visible: true,
     opacity: 255,
-    visible: true
+    name,
+    width,
+    height
 })
 
 export const getTilesetDimensions = (tileset: Tileset) => ({

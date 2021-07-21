@@ -10,31 +10,35 @@ import {
     EDITOR_CHANGE_LAYER_IMAGE,
     EDITOR_CHANGE_LAYER_NAME,
     EDITOR_CHANGE_LAYER_OPACITY,
+    EDITOR_CHANGE_LAYER_OFFSET,
     EDITOR_CHANGE_LAYER_VISIBLE,
     EDITOR_CHANGE_LAYERS,
+    EDITOR_CHANGE_LAYERS_SUCCESS,
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
+    EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_SELECTED_LAYER,
     EDITOR_CHANGE_SELECTED_TILE,
-    EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_TILESET,
     EDITOR_CHANGE_TOOL,
     EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
     EDITOR_CLEAR_PROJECT,
+    EDITOR_HISTORY_ACTION,
     EDITOR_REMOVE_LAYER,
     EDITOR_REMOVE_TILE,
     EDITOR_REMOVE_TILE_SUCCESS,
     EDITOR_RESET_TO_DEFAULTS,
+    EDITOR_SAVE_CHANGES,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_SET_TILESET_IMAGE,
-    EDITOR_TOGGLE_SHOW_GRID,
-    EDITOR_HISTORY_ACTION,
-    EDITOR_SAVE_CHANGES,
-    EDITOR_CHANGE_LAYERS_SUCCESS
+    EDITOR_TOGGLE_SHOW_GRID
 } from './constants'
 import { DeflatedLayer, Layer, Pallete, Tileset } from './types'
+
+export const adjustWorkspaceSize = (): AnyAction =>
+    changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT - FOOTER_HEIGHT)
 
 export const clearProject = () =>
     ({
@@ -160,6 +164,12 @@ export const changeLayerImage = (layerId: string, blob: Blob) =>
         payload: { layerId, blob }
     } as const)
 
+export const changeLayerOffset = (layerId: string, x: number, y: number) =>
+    ({
+        type: EDITOR_CHANGE_LAYER_OFFSET,
+        payload: { layerId, offset: { x, y } }
+    } as const)
+
 export const changeLayersSuccess = (layers: DeflatedLayer[] | null[]) =>
     ({
         type: EDITOR_CHANGE_LAYERS_SUCCESS,
@@ -184,6 +194,12 @@ export const changeLayerVisible = (layerId: string, visible: boolean) =>
         payload: { layerId, visible }
     } as const)
 
+export const historyAction = <T>(payload: StringTMap<T>) =>
+    ({
+        type: EDITOR_HISTORY_ACTION,
+        payload
+    } as const)
+
 export const removeLayer = (layerId: string) =>
     ({
         type: EDITOR_REMOVE_LAYER,
@@ -202,22 +218,13 @@ export const removeTileSuccess = (layers: DeflatedLayer[], tileset: Tileset) =>
         payload: { layers, tileset }
     } as const)
 
-export const toggleShowGrid = (visible: boolean) =>
-    ({
-        type: EDITOR_TOGGLE_SHOW_GRID,
-        payload: { visible }
-    } as const)
-
 export const saveChanges = () =>
     ({
         type: EDITOR_SAVE_CHANGES
     } as const)
 
-export const historyAction = <T>(payload: StringTMap<T>) =>
+export const toggleShowGrid = (visible: boolean) =>
     ({
-        type: EDITOR_HISTORY_ACTION,
-        payload
+        type: EDITOR_TOGGLE_SHOW_GRID,
+        payload: { visible }
     } as const)
-
-export const adjustWorkspaceSize = (): AnyAction =>
-    changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT - FOOTER_HEIGHT)
