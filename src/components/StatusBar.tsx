@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux'
-import { Slider } from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
+import { Button, Slider, Tooltip } from '@material-ui/core'
 import {
     AspectRatio as AspectRatioIcon,
     GridOn as GridOnIcon,
@@ -15,6 +16,20 @@ import { SCALE_MIN, SCALE_MAX, SCALE_BY, SCALE_STEP } from '../common/constants'
 import { selectCanvas, selectGrid, selectTileset, selectWorkspace } from '../store/editor/selectors'
 import { centerStage, getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
 import { Layer } from '../store/editor/types'
+
+export const useStyles = makeStyles(() => ({
+    button: {
+        padding: '0 5px',
+        fontSize: 12,
+        color: '#666',
+        textTransform: 'lowercase',
+        backgroundColor: 'transparent',
+        whiteSpace: 'nowrap'
+    },
+    zoomButton: {
+        cursor: 'pointer'
+    }
+}))
 
 const StyledStatusBar = styled.div`
     display: flex;
@@ -65,6 +80,7 @@ type Props = {
 }
 
 const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Element => {
+    const classes = useStyles()
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
@@ -135,16 +151,24 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
     return (
         <StyledStatusBar>
             <StyledInfoContainer>
-                <StyledCol onClick={() => onToggleShowGrid(!grid.visible)}>
-                    {grid.visible ? <GridOnIcon /> : <GridOffIcon />}
-                    Grid [{grid.width} x {grid.height}]: {grid.visible ? `On` : `Off`}
+                <StyledCol>
+                    <Tooltip title="Toggle grid" placement="top">
+                        <Button onClick={() => onToggleShowGrid(!grid.visible)} className={classes.button}>
+                            {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width} x {grid.height}]:{' '}
+                            {grid.visible ? `On` : `Off`}
+                        </Button>
+                    </Tooltip>
                 </StyledCol>
                 <StyledCol>
-                    <AspectRatioIcon onClick={onCenter} />
-                    {canvas &&
-                        `${canvas.width} x ${canvas.height} px [${canvas.width / grid.width} x ${
-                            canvas.height / grid.height
-                        }]`}
+                    <Tooltip title="Center and fit to view size" placement="top">
+                        <Button onClick={onCenter} className={classes.button}>
+                            <AspectRatioIcon onClick={onCenter} />
+                            {canvas &&
+                                `${canvas.width} x ${canvas.height} px [${canvas.width / grid.width} x ${
+                                    canvas.height / grid.height
+                                }]`}
+                        </Button>
+                    </Tooltip>
                 </StyledCol>
                 {selectedLayer && selectedLayer.data && (
                     <StyledCol>
@@ -153,7 +177,7 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
                 )}
             </StyledInfoContainer>
             <StyledSliderContainer>
-                <ZoomOutIcon onClick={onZoomOut} />
+                <ZoomOutIcon onClick={onZoomOut} className={classes.zoomButton} />
                 <Slider
                     {...{ value }}
                     step={SCALE_STEP}
@@ -163,7 +187,7 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
                     onChangeCommitted={onZoomCommitted}
                 />
                 <StyledScaleContainer>{Math.round(100 * scale)}%</StyledScaleContainer>
-                <ZoomInIcon onClick={onZoomIn} />
+                <ZoomInIcon onClick={onZoomIn} className={classes.zoomButton} />
             </StyledSliderContainer>
         </StyledStatusBar>
     )

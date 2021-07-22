@@ -59,9 +59,6 @@ const Palette = (): JSX.Element => {
         setColors(palette)
     }, [palette])
 
-    // const col = PALETTES.PICO_8.colors.map((color) => hexToRgba(color));
-    // console.info(col);
-
     return (
         <>
             <StyledPalette>

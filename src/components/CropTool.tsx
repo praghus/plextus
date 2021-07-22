@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
 import { Canvas, Grid, Rectangle } from '../store/editor/types'
@@ -9,10 +9,9 @@ type Props = {
     onChangeSelectedArea: (rect: Rectangle) => void
 }
 
-const KonvaTransformer = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.Element => {
+const CropTool = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.Element => {
     const shapeRef = useRef<Konva.Rect>(null)
     const trRef = useRef<Konva.Transformer>(null)
-    const [isResizing, setIsResizing] = useState(true)
 
     const { width, height } = grid
 
@@ -31,9 +30,14 @@ const KonvaTransformer = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.El
         })
 
     useEffect(() => {
-        if (shapeRef.current) {
+        if (trRef.current && shapeRef.current) {
+            const layer = trRef.current.getLayer()
+            trRef.current.nodes([shapeRef.current])
             shapeRef.current.scaleX(canvas.width / width)
             shapeRef.current.scaleY(canvas.height / height)
+            if (layer) {
+                layer.batchDraw()
+            }
         }
         onChangeSelectedArea({
             x: 0,
@@ -43,16 +47,6 @@ const KonvaTransformer = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.El
         })
     }, [])
 
-    useEffect(() => {
-        if (isResizing && trRef.current && shapeRef.current) {
-            const layer = trRef.current.getLayer()
-            trRef.current.nodes([shapeRef.current])
-            if (layer) {
-                layer.batchDraw()
-            }
-        }
-    }, [isResizing])
-
     return (
         <>
             <Rect
@@ -61,8 +55,6 @@ const KonvaTransformer = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.El
                 ref={shapeRef}
                 id="selectRect"
                 fill="rgba(0,128,255,0.3)"
-                onClick={() => setIsResizing(!isResizing)}
-                onTap={() => setIsResizing(!isResizing)}
                 onTransform={e => {
                     e.target.scaleX(Math.round((e.target.scaleX() / width) * width))
                     e.target.scaleY(Math.round((e.target.scaleY() / height) * height))
@@ -74,23 +66,11 @@ const KonvaTransformer = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.El
                 onDragEnd={setArea}
                 onTransformEnd={setArea}
             />
-            {isResizing && (
-                <Transformer
-                    ref={trRef}
-                    rotateEnabled={false}
-                    boundBoxFunc={(oldBox, newBox) => {
-                        // limit resize
-                        if (newBox.width < width || newBox.height < height) {
-                            return oldBox
-                        }
-                        return newBox
-                    }}
-                />
-            )}
+            <Transformer ref={trRef} rotateEnabled={false} />
         </>
     )
 }
 
-KonvaTransformer.displayName = 'KonvaTransformer'
+CropTool.displayName = 'CropTool'
 
-export default KonvaTransformer
+export default CropTool

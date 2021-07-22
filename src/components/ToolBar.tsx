@@ -5,20 +5,21 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
-import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar } from '@material-ui/core'
+import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar, Tooltip } from '@material-ui/core'
 import { ColorPicker } from 'material-ui-color'
 import MuiAlert from '@material-ui/lab/Alert'
 import {
+    BrightnessMedium as BrightnessMediumIcon,
     Colorize as ColorizeIcon,
     Create as CreateIcon,
-    // Crop as CropIcon,
+    Crop as CropIcon,
     CancelPresentation as CancelPresentationIcon,
     FormatColorFill as FormatColorFillIcon,
     Menu as MenuIcon,
     PanTool as PanToolIcon,
     ControlCamera as ControlCameraIcon
 } from '@material-ui/icons'
-import { TOOLS } from '../common/constants'
+import { TOOLS, TOOLS_DESC } from '../common/constants'
 import { exportToTmx } from '../common/utils/tmx'
 import { rgbaToHex } from '../common/utils/colors'
 import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
@@ -38,8 +39,8 @@ export const useStyles = makeStyles(theme => ({
         padding: 0
     },
     paper: {
-        width: '48px',
-        marginBottom: '10px'
+        width: 48,
+        marginBottom: 10
     },
     divider: {
         width: '40px',
@@ -47,10 +48,13 @@ export const useStyles = makeStyles(theme => ({
     },
     icon: {
         filter: 'drop-shadow(1px 1px 1px rgba(0, 0, 0, .7))'
+    },
+    tooltip: {
+        maxWidth: 120
     }
 }))
 
-const StyledContainer = styled.div`
+const StyledMenuContainer = styled.div`
     position: absolute;
     top: 20px;
     left: 10px;
@@ -78,10 +82,6 @@ const StyledToggleButtonGroup = withStyles(theme => ({
 
 const ToolBar = (): JSX.Element => {
     const classes = useStyles()
-    const [anchorEl, setAnchorEl] = useState(null)
-
-    const { t } = useTranslation()
-
     const selected = useSelector(selectSelected)
     const canvas = useSelector(selectCanvas)
     const layers = useSelector(selectLayers)
@@ -89,13 +89,16 @@ const ToolBar = (): JSX.Element => {
     const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
     const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
 
+    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
     const [isSaved, setIsSaved] = useState(false)
     const [primaryColor, setPrimaryColor] = useState<any>(rgbaToHex(selected.color))
 
+    const { t } = useTranslation()
+
     const dispatch = useDispatch()
     const handleClose = () => setAnchorEl(null)
-    const handleClick = event => setAnchorEl(event.currentTarget)
+    const handleClick = (event: React.MouseEvent) => setAnchorEl(event.currentTarget as HTMLAnchorElement)
     const onChangeTool = (tool: string) => tool && dispatch(changeTool(tool))
     const onSaveChanges = () => dispatch(saveChanges())
     const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
@@ -113,142 +116,128 @@ const ToolBar = (): JSX.Element => {
         setPrimaryColor(rgbaToHex(selected.color))
     }, [selected.color])
 
+    const renderToolButton = (value: string, Icon: any) => (
+        <ToggleButton {...{ value }}>
+            <Tooltip title={TOOLS_DESC[value]} placement="right" classes={{ tooltip: classes.tooltip }}>
+                <div>
+                    <Icon fontSize="small" className={classes.icon} />
+                </div>
+            </Tooltip>
+        </ToggleButton>
+    )
+
     return (
-        <StyledContainer>
-            {isNewProjectDialogOpen && <NewProjectDialog onClose={() => onToggleNewProjectDialog(false)} />}
-            {isImportDialogOpen && <ImportDialog onClose={() => onToggleImportDialog(false)} />}
-            <ConfirmationDialog
-                title={t('hold_on')}
-                message={t('close_project_message')}
-                open={confirmationDialogOpen}
-                onConfirm={() => {
-                    setConfirmationDialogOpen(false)
-                    onCloseProject()
-                }}
-                onClose={() => setConfirmationDialogOpen(false)}
-            />
-            <Paper elevation={5} className={classes.paper}>
-                <StyledToggleButtonGroup
-                    exclusive
-                    value={selected.tool}
-                    size="small"
-                    orientation="vertical"
-                    onChange={(event, value) => onChangeTool(value)}
-                >
-                    <IconButton aria-haspopup="true" onClick={handleClick} className={classes.iconButton}>
-                        <MenuIcon className={classes.icon} />
-                    </IconButton>
-                    <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-                        <MenuItem
-                            onClick={() => {
-                                handleClose()
-                                onToggleNewProjectDialog(true)
-                            }}
-                        >
-                            {t('new_project')}
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => {
-                                handleClose()
-                                setConfirmationDialogOpen(true)
-                            }}
-                        >
-                            {t('close_project')}
-                        </MenuItem>
-                        <Divider orientation="horizontal" />
-                        <MenuItem onClick={onUndo}>{t('undo')}</MenuItem>
-                        <MenuItem onClick={onRedo}>{t('redo')}</MenuItem>
-                        <Divider orientation="horizontal" />
-                        <MenuItem
-                            onClick={() => {
-                                handleClose()
-                                onToggleImportDialog(true)
-                            }}
-                        >
-                            {t('import_image')}
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => {
-                                canvas && exportToTmx(canvas, layers, tileset)
-                                handleClose()
-                            }}
-                        >
-                            {t('export_map')}
-                        </MenuItem>
-                        {/* <MenuItem
-                            onClick={() => {
-                                canvas && exportToTmx(canvas, layers, tileset)
-                                handleClose()
-                            }}
-                        >
-                            {t('export_png')}
-                        </MenuItem> */}
-                        <Divider orientation="horizontal" />
-                        <MenuItem
-                            onClick={() => {
-                                handleClose()
-                                onSaveChanges()
-                                setIsSaved(true)
-                            }}
-                        >
-                            {t('save')}
-                        </MenuItem>
-                    </Menu>
+        <>
+            <StyledMenuContainer>
+                {isNewProjectDialogOpen && <NewProjectDialog onClose={() => onToggleNewProjectDialog(false)} />}
+                {isImportDialogOpen && <ImportDialog onClose={() => onToggleImportDialog(false)} />}
+                <ConfirmationDialog
+                    title={t('hold_on')}
+                    message={t('close_project_message')}
+                    open={confirmationDialogOpen}
+                    onConfirm={() => {
+                        setConfirmationDialogOpen(false)
+                        onCloseProject()
+                    }}
+                    onClose={() => setConfirmationDialogOpen(false)}
+                />
+                <Paper elevation={5} className={classes.paper}>
+                    <StyledToggleButtonGroup
+                        exclusive
+                        value={selected.tool}
+                        size="small"
+                        orientation="vertical"
+                        onChange={(event, value) => onChangeTool(value)}
+                    >
+                        <IconButton aria-haspopup="true" onClick={handleClick} className={classes.iconButton}>
+                            <MenuIcon fontSize="small" className={classes.icon} />
+                        </IconButton>
+                        <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+                            <MenuItem
+                                onClick={() => {
+                                    handleClose()
+                                    onToggleNewProjectDialog(true)
+                                }}
+                            >
+                                {t('new_project')}
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    handleClose()
+                                    setConfirmationDialogOpen(true)
+                                }}
+                            >
+                                {t('close_project')}
+                            </MenuItem>
+                            <Divider orientation="horizontal" />
+                            <MenuItem onClick={onUndo}>{t('undo')}</MenuItem>
+                            <MenuItem onClick={onRedo}>{t('redo')}</MenuItem>
+                            <Divider orientation="horizontal" />
+                            <MenuItem
+                                onClick={() => {
+                                    handleClose()
+                                    onToggleImportDialog(true)
+                                }}
+                            >
+                                {t('import_image')}
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    canvas && exportToTmx(canvas, layers, tileset)
+                                    handleClose()
+                                }}
+                            >
+                                {t('export_map')}
+                            </MenuItem>
+                            <Divider orientation="horizontal" />
+                            <MenuItem
+                                onClick={() => {
+                                    handleClose()
+                                    onSaveChanges()
+                                    setIsSaved(true)
+                                }}
+                            >
+                                {t('save')}
+                            </MenuItem>
+                        </Menu>
+                        <Divider orientation="horizontal" className={classes.divider} />
 
-                    <Divider orientation="horizontal" className={classes.divider} />
+                        {renderToolButton(TOOLS.DRAG, PanToolIcon)}
+                        {renderToolButton(TOOLS.ERASER, EraserIcon)}
+                        {renderToolButton(TOOLS.PENCIL, CreateIcon)}
+                        {renderToolButton(TOOLS.LINE, LineIcon)}
+                        {renderToolButton(TOOLS.PICKER, ColorizeIcon)}
+                        {renderToolButton(TOOLS.FILL, FormatColorFillIcon)}
+                        {renderToolButton(TOOLS.BRIGHTNESS, BrightnessMediumIcon)}
 
-                    <ToggleButton value={TOOLS.DRAG}>
-                        <PanToolIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.ERASER}>
-                        <EraserIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.PENCIL}>
-                        <CreateIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.LINE}>
-                        <LineIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.PICKER}>
-                        <ColorizeIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.FILL}>
-                        <FormatColorFillIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.OFFSET}>
-                        <ControlCameraIcon className={classes.icon} />
-                    </ToggleButton>
+                        <Divider orientation="horizontal" className={classes.divider} />
 
-                    <Divider orientation="horizontal" className={classes.divider} />
+                        {renderToolButton(TOOLS.STAMP, StampIcon)}
+                        {renderToolButton(TOOLS.REPLACE, TileReplaceIcon)}
+                        {renderToolButton(TOOLS.DELETE, CancelPresentationIcon)}
 
-                    <ToggleButton value={TOOLS.STAMP}>
-                        <StampIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.REPLACE}>
-                        <TileReplaceIcon className={classes.icon} />
-                    </ToggleButton>
-                    <ToggleButton value={TOOLS.DELETE}>
-                        <CancelPresentationIcon className={classes.icon} />
-                    </ToggleButton>
-                    {/* <ToggleButton value={TOOLS.CROP}>
-                        <CropIcon className={classes.icon} />
-                    </ToggleButton> */}
+                        <Divider orientation="horizontal" className={classes.divider} />
 
-                    <Divider orientation="horizontal" className={classes.divider} />
-                </StyledToggleButtonGroup>
-                <StyledColorPicker>
-                    <ColorPicker
-                        hideTextfield
-                        value={primaryColor}
-                        onChange={(color: any) => {
-                            setPrimaryColor(color)
-                            if (!color.error) {
-                                onChangePrimaryColor(color.rgb)
-                            }
-                        }}
-                    />
-                </StyledColorPicker>
-            </Paper>
+                        {renderToolButton(TOOLS.OFFSET, ControlCameraIcon)}
+                        {renderToolButton(TOOLS.CROP, CropIcon)}
+
+                        <Divider orientation="horizontal" className={classes.divider} />
+                    </StyledToggleButtonGroup>
+                    <StyledColorPicker>
+                        <ColorPicker
+                            hideTextfield
+                            value={primaryColor}
+                            onChange={(color: any) => {
+                                setPrimaryColor(color)
+                                if (!color.error) {
+                                    onChangePrimaryColor(color.rgb)
+                                }
+                            }}
+                        />
+                    </StyledColorPicker>
+                </Paper>
+            </StyledMenuContainer>
+
             <Snackbar
                 anchorOrigin={{
                     vertical: 'bottom',
@@ -262,7 +251,7 @@ const ToolBar = (): JSX.Element => {
                     Map saved!
                 </MuiAlert>
             </Snackbar>
-        </StyledContainer>
+        </>
     )
 }
 

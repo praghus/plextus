@@ -18,6 +18,7 @@ const StyledTilesetImageContainer = styled.div`
     overflow: auto;
     margin-bottom: 10px;
     height: calc(45vh);
+    background: #151515;
 `
 
 const StyledBottomContainer = styled.div`

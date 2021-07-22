@@ -48,9 +48,9 @@ Plextus is a pixel art editor designed to make tiled maps and tilesets. In addit
 -   [ ] Bucket fill tool for tiles
 -   [x] Change grid color
 -   [ ] Copy, paste
--   [ ] Crop and resize map
+-   [x] Crop and resize map
 -   [x] Image layers
--   [ ] Lighten / darken tool
+-   [x] Lighten / darken tool
 -   [x] Line tool
 -   [ ] More pixel tools (Circle, Rectangle)
 -   [x] Layer offset tool

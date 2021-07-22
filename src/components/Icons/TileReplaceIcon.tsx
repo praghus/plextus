@@ -1,11 +1,8 @@
 import React from 'react'
+import SvgIcon from '@material-ui/core/SvgIcon'
 
-type Props = {
-    className?: string
-}
-
-const TileReplaceIcon = ({ className }: Props): JSX.Element => (
-    <svg width="24" height="24" viewBox="0 0 1024 1024" className={className}>
+const TileReplaceIcon = (props): JSX.Element => (
+    <SvgIcon viewBox="0 0 1024 1024" {...props}>
         <path
             d={`M620.544 137.6c103.936 10.432 187.328 72.96 205.12 180.224h-60.16l97.088 144.448 
         97.152-144.448h-67.008c-17.792-144.448-127.168-238.336-265.344-251.712-19.136-1.536-36.864 
@@ -19,7 +16,7 @@ const TileReplaceIcon = ({ className }: Props): JSX.Element => (
         34.176 37.184h337.728c19.136 0 34.112-16.384 34.112-37.184V597.824c0.064-20.8-16.32-37.248-34.048-37.248z 
         m-32.896 324.736H589.12V633.536h272.064v251.776z`}
         />
-    </svg>
+    </SvgIcon>
 )
 
 export default TileReplaceIcon

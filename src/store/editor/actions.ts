@@ -18,6 +18,7 @@ import {
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
     EDITOR_CHANGE_SCALE,
+    EDITOR_CHANGE_SELECTED_AREA,
     EDITOR_CHANGE_SELECTED_LAYER,
     EDITOR_CHANGE_SELECTED_TILE,
     EDITOR_CHANGE_TILESET,
@@ -25,6 +26,8 @@ import {
     EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
     EDITOR_CLEAR_PROJECT,
+    EDITOR_CROP,
+    EDITOR_CROP_SUCCESS,
     EDITOR_HISTORY_ACTION,
     EDITOR_REMOVE_LAYER,
     EDITOR_REMOVE_TILE,
@@ -35,7 +38,7 @@ import {
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID
 } from './constants'
-import { DeflatedLayer, Layer, Pallete, Tileset } from './types'
+import { Canvas, DeflatedLayer, Layer, Pallete, Rectangle, Tileset } from './types'
 
 export const adjustWorkspaceSize = (): AnyAction =>
     changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT - FOOTER_HEIGHT)
@@ -116,6 +119,12 @@ export const changeToolSize = (toolSize: number) =>
         payload: { toolSize }
     } as const)
 
+export const changeSelectedArea = (area: Rectangle | null) =>
+    ({
+        type: EDITOR_CHANGE_SELECTED_AREA,
+        payload: { area }
+    } as const)
+
 export const changeSelectedTile = (tileId: number) =>
     ({
         type: EDITOR_CHANGE_SELECTED_TILE,
@@ -192,6 +201,17 @@ export const changeLayerVisible = (layerId: string, visible: boolean) =>
     ({
         type: EDITOR_CHANGE_LAYER_VISIBLE,
         payload: { layerId, visible }
+    } as const)
+
+export const crop = () =>
+    ({
+        type: EDITOR_CROP
+    } as const)
+
+export const cropSuccess = (layers: DeflatedLayer[], canvas: Canvas) =>
+    ({
+        type: EDITOR_CROP_SUCCESS,
+        payload: { layers, canvas }
     } as const)
 
 export const historyAction = <T>(payload: StringTMap<T>) =>
