@@ -9,6 +9,7 @@ import {
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
+    EDITOR_CHANGE_SELECTED_AREA,
     EDITOR_CHANGE_SELECTED_LAYER,
     EDITOR_CHANGE_SELECTED_TILE,
     EDITOR_CHANGE_SCALE,
@@ -16,6 +17,7 @@ import {
     EDITOR_CHANGE_TOOL,
     EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
+    EDITOR_CROP_SUCCESS,
     EDITOR_REMOVE_TILE_SUCCESS,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
@@ -67,6 +69,11 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 ...state,
                 selected: { ...state.selected, color: action.payload.color }
             }
+        case EDITOR_CHANGE_SELECTED_AREA:
+            return {
+                ...state,
+                selected: { ...state.selected, area: action.payload.area }
+            }
         case EDITOR_CHANGE_SELECTED_LAYER:
             return {
                 ...state,
@@ -103,6 +110,12 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                     height: action.payload.height
                 }
             }
+        case EDITOR_CROP_SUCCESS:
+            return {
+                ...state,
+                canvas: action.payload.canvas,
+                layers: action.payload.layers
+            }
         case EDITOR_TOGGLE_SHOW_GRID:
             return {
                 ...state,
@@ -111,6 +124,7 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
         case EDITOR_HISTORY_ACTION:
             return {
                 ...state,
+                canvas: action.payload.canvas || state.canvas,
                 layers: action.payload.layers || state.layers,
                 tileset: action.payload.tileset || state.tileset
             }

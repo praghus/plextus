@@ -26,25 +26,31 @@ export const hexToRgba = (hex: string, a = 255): number[] => {
     return [r, g, b, a]
 }
 
-export const normalize = (n: number, min: number, max: number): number => {
-    let normalized = n
-    while (n < min) {
-        normalized += max - min
-    }
-    while (n >= max) {
-        normalized -= max - min
-    }
-    return normalized
+function adjustBrightness(color: number[], amount: number) {
+    let [r, g, b] = color
+
+    r = r + amount
+    g = g + amount
+    b = b + amount
+
+    if (r > 255) r = 255
+    else if (r < 0) r = 0
+
+    if (g > 255) g = 255
+    else if (g < 0) g = 0
+
+    if (b > 255) b = 255
+    else if (b < 0) b = 0
+
+    return [r, g, b]
 }
 
-export const brighten = (hex: string, percent: number): string => {
-    const a = Math.round((255 * percent) / 100)
-    const r = normalize(a + parseInt(hex.substr(1, 2), 16), 0, 256)
-    const g = normalize(a + parseInt(hex.substr(3, 2), 16), 0, 256)
-    const b = normalize(a + parseInt(hex.substr(5, 2), 16), 0, 256)
-    return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`
-}
-
-export const darken = (hex: string, percent: number): string => {
-    return brighten(hex, -percent)
+export const brightenDarken = (imageData: ImageData, amount: number): ImageData => {
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        const c = adjustBrightness([imageData.data[i], imageData.data[i + 1], imageData.data[i + 2]], amount)
+        imageData.data[i] = c[0]
+        imageData.data[i + 1] = c[1]
+        imageData.data[i + 2] = c[2]
+    }
+    return imageData
 }

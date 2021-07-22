@@ -47,7 +47,8 @@ export const selectWorkspace = createSelector<typeof selectEditor, EditorState, 
     ({ workspace }) => workspace
 )
 
-export const selectUndoable = createSelector(selectEditor, ({ tileset, layers }) => ({
+export const selectUndoable = createSelector(selectEditor, ({ canvas, tileset, layers }) => ({
+    canvas,
     tileset,
     layers
 }))

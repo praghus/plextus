@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import Konva from 'konva'
 import { Image } from 'react-konva'
 import { TOOLS } from '../common/constants'
-import { createEmptyTile, getTilePos } from '../store/editor/utils'
+import { getTilePos } from '../store/editor/utils'
 import {
     actionDraw,
     actionLine,
@@ -19,6 +19,7 @@ type Props = {
     canvas: Canvas
     grid: Grid
     isMouseDown: boolean
+    keyDown: KeyboardEvent | null
     layer: Layer
     onChangeLayerData: (layerId: string, data: (number | null)[]) => void
     onChangeLayerOffset: (layerId: string, x: number, y: number) => void
@@ -39,12 +40,13 @@ const TileLayer = ({
     canvas,
     grid,
     isMouseDown,
+    keyDown,
     layer,
     onChangeLayerData,
     onChangeLayerOffset,
     onChangePrimaryColor,
     onChangeSelectedTile,
-    onChangeTileset,
+    // onChangeTileset,
     onSaveTilesetImage,
     selected,
     stage,
@@ -122,20 +124,6 @@ const TileLayer = ({
         }
     }
 
-    const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d): void => {
-        const { x, y } = getCoordsFromPos(grid, pos2)
-        const inBounds = x === selectedTile.x && y === selectedTile.y
-        if (ctx && bufferCtx && bufferImage && inBounds) {
-            // renderBuffer(selectedTile.gid)
-            actionLine(getBufferPos(pos1), getBufferPos(pos2), selected, bufferCtx)
-            ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
-            ctx.drawImage(bufferImage, selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
-            hasChanged.current = true
-            // update && renderBufferToImage(selectedTile)
-            stage.batchDraw()
-        }
-    }
-
     const redraw = (): void => {
         if (ctx && layer.data && isValidArray(layer.data)) {
             ctx.clearRect(0, 0, width, height)
@@ -144,11 +132,25 @@ const TileLayer = ({
         }
     }
 
+    const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d): void => {
+        const { x, y } = getCoordsFromPos(grid, pos2)
+        const inBounds = x === selectedTile.x && y === selectedTile.y
+        if (ctx && bufferCtx && bufferImage && inBounds) {
+            // renderBuffer(selectedTile.gid)
+            actionLine(getBufferPos(pos1), getBufferPos(pos2), selected, bufferCtx, keyDown)
+            ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
+            ctx.drawImage(bufferImage, selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
+            hasChanged.current = true
+            // update && renderBufferToImage(selectedTile)
+            stage.batchDraw()
+        }
+    }
+
     const clearBuffer = (gid: number): void => {
-        if (bufferCtx && gid) {
-            const { x: posX, y: posY } = getTilePos(gid, tileset)
-            bufferCtx.clearRect(0, 0, tilewidth, tileheight)
-            bufferCtx.drawImage(tilesetCanvas, posX, posY, tilewidth, tileheight, 0, 0, tilewidth, tileheight)
+        bufferCtx?.clearRect(0, 0, tilewidth, tileheight)
+        if (gid) {
+            const { x, y } = getTilePos(gid, tileset)
+            bufferCtx?.drawImage(tilesetCanvas, x, y, tilewidth, tileheight, 0, 0, tilewidth, tileheight)
         }
     }
 
@@ -178,22 +180,22 @@ const TileLayer = ({
         }
     }
 
-    const createNewEmptyTile = async (x: number, y: number): Promise<number> => {
-        const newLayerData = [...(layer.data || [])]
-        return new Promise(resolve => {
-            createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
-                if (layer.width) {
-                    newLayerData[x + ((layer.width * tilewidth) / grid.width) * y] = newTileId
-                    setData(newLayerData)
-                }
-                onChangeTileset({ ...tileset, tilecount: newTileId })
-                onChangeSelectedTile(newTileId)
-                onChangeLayerData(layer.id, newLayerData)
-                onSaveTilesetImage(blob)
-                resolve(newTileId)
-            })
-        })
-    }
+    // const createNewEmptyTile = async (x: number, y: number): Promise<number> => {
+    //     const newLayerData = [...(layer.data || [])]
+    //     return new Promise(resolve => {
+    //         createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
+    //             if (layer.width) {
+    //                 newLayerData[x + ((layer.width * tilewidth) / grid.width) * y] = newTileId
+    //                 setData(newLayerData)
+    //             }
+    //             onChangeTileset({ ...tileset, tilecount: newTileId })
+    //             onChangeSelectedTile(newTileId)
+    //             onChangeLayerData(layer.id, newLayerData)
+    //             onSaveTilesetImage(blob)
+    //             resolve(newTileId)
+    //         })
+    //     })
+    // }
 
     const replaceTile = (gid: number) => {
         if (data && selected.tileId) {
@@ -208,11 +210,11 @@ const TileLayer = ({
         if (ctx && visible && isSelected && layer.data && layer.width) {
             lastPos.current = getPos()
             const { x, y } = getCoordsFromPos(grid, lastPos.current)
-            const tileId = layer.data[x + ((layer.width * tilewidth) / grid.width) * y]
-            const gid =
-                !tileId && [TOOLS.PENCIL, TOOLS.FILL, TOOLS.LINE].includes(selected.tool)
-                    ? await createNewEmptyTile(x, y)
-                    : tileId
+            const gid = layer.data[x + ((layer.width * tilewidth) / grid.width) * y]
+            // const gid =
+            //     !tileId && [TOOLS.PENCIL, TOOLS.FILL, TOOLS.LINE].includes(selected.tool)
+            //         ? await createNewEmptyTile(x, y)
+            //         : tileId
 
             clearBuffer(gid)
 
@@ -226,16 +228,14 @@ const TileLayer = ({
                         ? gid && onChangeSelectedTile(gid)
                         : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     break
+                case TOOLS.BRIGHTNESS:
                 case TOOLS.PENCIL:
                 case TOOLS.ERASER:
-                    if (gid) {
-                        onChangeSelectedTile(gid)
-                        if (e.evt.button === 2) {
-                            onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
-                        } else if (bufferCtx) {
-                            actionDraw(getBufferPos(lastPos.current), selected, bufferCtx)
-                            renderBufferToImage({ gid, x, y })
-                        }
+                    if (e.evt.button === 2) {
+                        onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
+                    } else if (gid && bufferCtx) {
+                        actionDraw(getBufferPos(lastPos.current), selected, bufferCtx, keyDown)
+                        renderBufferToImage({ gid, x, y })
                     }
                     break
                 case TOOLS.PICKER:
@@ -244,7 +244,7 @@ const TileLayer = ({
                 case TOOLS.FILL:
                     if (e.evt.button === 2) {
                         onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
-                    } else {
+                    } else if (gid && bufferCtx) {
                         fillColor(getBufferPos(lastPos.current), selected.color, bufferImage, bufferCtx)
                         renderBufferToImage({ gid, x, y })
                     }
@@ -273,16 +273,17 @@ const TileLayer = ({
                 case TOOLS.STAMP:
                     updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     break
+                case TOOLS.BRIGHTNESS:
                 case TOOLS.ERASER:
                 case TOOLS.PENCIL:
-                    if (selectedTile && (currentPos.x !== prevPos.x || currentPos.y !== prevPos.y)) {
+                    if (selectedTile?.gid && (currentPos.x !== prevPos.x || currentPos.y !== prevPos.y)) {
                         drawLine(prevPos, currentPos)
                         renderBufferToImage(selectedTile)
                     }
                     break
                 case TOOLS.LINE:
                     if (
-                        selectedTile &&
+                        selectedTile?.gid &&
                         lastLinePos.current &&
                         (lastLinePos.current.x !== prevPos.x || lastLinePos.current.y !== prevPos.y)
                     ) {
@@ -305,6 +306,7 @@ const TileLayer = ({
                 case TOOLS.STAMP:
                     data && onChangeLayerData(layer.id, data)
                     break
+                case TOOLS.BRIGHTNESS:
                 case TOOLS.ERASER:
                 case TOOLS.LINE:
                 case TOOLS.PENCIL:

@@ -1,17 +1,15 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { Helmet } from 'react-helmet'
-// import { actions as undoActions } from 'redux-undo-redo'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from '../common/constants'
 import { EDITOR_RESOURCE_NAME } from '../store/editor/constants'
 import { getTilesetDimensions } from '../store/editor/utils'
 import { selectIsLoaded, selectIsImportDialogOpen } from '../store/app/selectors'
 import { selectCanvas, selectTileset } from '../store/editor/selectors'
-import { adjustWorkspaceSize } from '../store/editor/actions'
-import { undo, redo } from '../store/history/actions'
+
 import reducer from '../store/editor/reducer'
 import saga from '../store/editor/saga'
 import logger from '../common/utils/logger'
@@ -40,6 +38,7 @@ const StyledMiddleContainer = styled.div`
     width: 100%;
     height: 100%;
 `
+
 const StyledRightContainer = styled.div`
     width: ${RIGHT_BAR_WIDTH}px;
     min-width: ${RIGHT_BAR_WIDTH}px;
@@ -67,34 +66,8 @@ const Editor = (): JSX.Element => {
     const tileset = useSelector(selectTileset)
 
     const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
-    // const [stage, setStage] = useState<Konva.Stage>()
 
-    const dispatch = useDispatch()
-    const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
-
-    // Undo/Redo actions
-    // const onClearHistory = () => dispatch(clear())
-    const onUndo = () => dispatch(undo())
-    const onRedo = () => dispatch(redo())
-
-    const onKeyDown = e => {
-        if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) {
-            e.shiftKey ? onRedo() : onUndo()
-        }
-    }
-
-    useEffect(() => {
-        if (isLoaded) {
-            window.addEventListener('resize', onAdjustWorkspaceSize)
-            window.addEventListener('keydown', onKeyDown)
-            onAdjustWorkspaceSize()
-        }
-        return () => {
-            window.removeEventListener('resize', onAdjustWorkspaceSize)
-            window.removeEventListener('keydown', onKeyDown)
-        }
-    }, [isLoaded])
-
+    // todo: refactor
     useLayoutEffect(() => {
         if (tileset.image && !isImportDialogOpen) {
             const { w, h } = getTilesetDimensions(tileset)

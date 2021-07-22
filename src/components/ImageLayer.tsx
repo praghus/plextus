@@ -18,6 +18,7 @@ type Props = {
     canvas: Canvas
     grid: Grid
     isMouseDown: boolean
+    keyDown: KeyboardEvent | null
     layer: Layer
     onChangeLayerImage: (layerId: string, blob: Blob) => void
     onChangeLayerOffset: (layerId: string, x: number, y: number) => void
@@ -34,6 +35,7 @@ const ImageLayer = ({
     grid,
     isMouseDown,
     layer,
+    keyDown,
     onChangeLayerImage,
     onChangeLayerOffset,
     onChangePrimaryColor,
@@ -113,7 +115,7 @@ const ImageLayer = ({
 
     const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d): void => {
         if (ctx && bufferCtx && bufferImage) {
-            actionLine(pos1, pos2, selected, bufferCtx)
+            actionLine(pos1, pos2, selected, bufferCtx, keyDown)
             ctx.clearRect(0, 0, width, height)
             ctx.drawImage(bufferImage, 0, 0)
             hasChanged.current = true
@@ -134,12 +136,13 @@ const ImageLayer = ({
                     //     ? gid && onChangeSelectedTile(gid)
                     //     : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     break
+                case TOOLS.BRIGHTNESS:
                 case TOOLS.PENCIL:
                 case TOOLS.ERASER:
                     if (e.evt.button === 2) {
                         onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
                     } else if (bufferCtx) {
-                        actionDraw(lastPos.current, selected, bufferCtx)
+                        actionDraw(lastPos.current, selected, bufferCtx, keyDown)
                         renderBufferToImage()
                     }
                     break
@@ -177,6 +180,7 @@ const ImageLayer = ({
                     // const { x, y } = getCoordsFromPos(grid, currentPos)
                     //updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     break
+                case TOOLS.BRIGHTNESS:
                 case TOOLS.ERASER:
                 case TOOLS.PENCIL:
                     if (currentPos.x !== prevPos.x || currentPos.y !== prevPos.y) {

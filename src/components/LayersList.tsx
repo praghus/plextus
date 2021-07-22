@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { makeStyles } from '@material-ui/core/styles'
 import styled from '@emotion/styled'
 import {
+    IconButton,
     List,
     ListItem,
     ListItemIcon,
@@ -11,10 +12,10 @@ import {
     ListItemText,
     Menu,
     MenuItem,
-    IconButton,
+    Slider,
     TextField,
-    Typography,
-    Slider
+    Tooltip,
+    Typography
 } from '@material-ui/core'
 import {
     Add as AddIcon,
@@ -142,13 +143,16 @@ const LayersList = (): JSX.Element => {
             Math.round(canvas.height / tileset.tileheight)
         )
         onChangeLayers([...layers, newLayer])
+        onChangeSelectedLayer(newLayer.id)
         handleClose()
     }
 
     const onCreateImageLayer = async () => {
         const imageBlob = await createEmptyImage(canvas.width, canvas.height)
         if (imageBlob) {
-            onChangeLayers([...layers, createImageLayer('New image Layer', imageBlob, canvas.width, canvas.height)])
+            const newLayer = createImageLayer('New image Layer', imageBlob, canvas.width, canvas.height)
+            onChangeLayers([...layers, newLayer])
+            onChangeSelectedLayer(newLayer.id)
         }
         handleClose()
     }
@@ -245,24 +249,34 @@ const LayersList = (): JSX.Element => {
                 </StyledSliderContainer>
                 <StyledButtonContainer>
                     <IconButton size="small" onClick={handleClick}>
-                        <AddIcon fontSize="small" />
+                        <Tooltip title="New Layer" placement="top">
+                            <AddIcon fontSize="small" />
+                        </Tooltip>
                     </IconButton>
+
                     <IconButton
                         size="small"
                         disabled={layers.indexOf(currentLayer) === 0}
                         onClick={() => onChangeLayerOrder(1)}
                     >
-                        <ArrowDownwardIcon fontSize="small" />
+                        <Tooltip title="Layer Order Down" placement="top">
+                            <ArrowDownwardIcon fontSize="small" />
+                        </Tooltip>
                     </IconButton>
+
                     <IconButton
                         size="small"
                         disabled={layers.indexOf(currentLayer) === layers.length - 1}
                         onClick={() => onChangeLayerOrder(-1)}
                     >
-                        <ArrowUpwardIcon fontSize="small" />
+                        <Tooltip title="Layer Order Up" placement="top">
+                            <ArrowUpwardIcon fontSize="small" />
+                        </Tooltip>
                     </IconButton>
                     <IconButton size="small" onClick={onOpenConfirmationDialog}>
-                        <DeleteForeverIcon fontSize="small" />
+                        <Tooltip title="Delete Layer" placement="top">
+                            <DeleteForeverIcon fontSize="small" />
+                        </Tooltip>
                     </IconButton>
                 </StyledButtonContainer>
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>

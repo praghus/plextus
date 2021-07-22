@@ -5,9 +5,10 @@ import { debounce } from 'lodash'
 import { jsx, css } from '@emotion/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
+import { undo, redo } from '../store/history/actions'
+import { Rectangle } from '../store/editor/types'
 import { SCALE_BY, TOOLS, BG_IMAGE } from '../common/constants'
 import { centerStage } from '../common/utils/konva'
-
 import {
     selectCanvas,
     selectGrid,
@@ -17,26 +18,30 @@ import {
     selectWorkspace
 } from '../store/editor/selectors'
 import {
+    adjustWorkspaceSize,
     changeLayerData,
     changeLayerImage,
     changeLayerOffset,
     changePosition,
     changePrimaryColor,
     changeScale,
+    changeSelectedArea,
     changeSelectedTile,
     changeTileset,
-    changeTilesetImage
+    changeTilesetImage,
+    crop
 } from '../store/editor/actions'
+import CropTool from './CropTool'
 import GridLines from './GridLines'
 import TileLayer from './TileLayer'
 import StatusBar from './StatusBar'
-import KonvaTransformer from './KonvaTransformer'
 import Pointer from './Pointer'
 import ImageLayer from './ImageLayer'
+
 // import TilesIds from './TilesIds'
 
 const styles = ({ selected }) => css`
-    ${(selected.tool === TOOLS.DRAG &&
+    ${((selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP) &&
         `
     cursor: move;
     cursor: grab;
@@ -70,8 +75,14 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const [isMouseDown, setIsMouseDown] = useState(false)
     const [isMouseOver, setIsMouseOver] = useState(false)
     const [pointerPosition, setPointerPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
+    const [keyDown, setKeyDown] = useState<KeyboardEvent | null>(null)
 
     const dispatch = useDispatch()
+    const onUndo = () => dispatch(undo())
+    const onRedo = () => dispatch(redo())
+    const onCrop = () => dispatch(crop())
+    const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
+    const onChangeSelectedArea = (rect: Rectangle) => dispatch(changeSelectedArea(rect))
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
@@ -79,6 +90,8 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
+    const onKeyDown = (e: KeyboardEvent) => setKeyDown(e)
+    const onKeyUp = () => setKeyDown(null)
 
     const onChangePosition = useCallback(
         debounce((x, y) => dispatch(changePosition(x, y)), 300),
@@ -92,6 +105,30 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
 
     const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
     const stage = stageRef.current
+
+    useEffect(() => {
+        window.addEventListener('resize', onAdjustWorkspaceSize)
+        window.addEventListener('keydown', onKeyDown)
+        window.addEventListener('keyup', onKeyUp)
+        onAdjustWorkspaceSize()
+
+        return () => {
+            window.removeEventListener('resize', onAdjustWorkspaceSize)
+            window.removeEventListener('keydown', onKeyDown)
+            window.removeEventListener('keyup', onKeyUp)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (keyDown) {
+            if (keyDown.code === 'KeyZ' && (keyDown.ctrlKey || keyDown.metaKey)) {
+                keyDown.shiftKey ? onRedo() : onUndo()
+            }
+            if (keyDown.code === 'Enter' && selected.tool === TOOLS.CROP) {
+                onCrop()
+            }
+        }
+    }, [keyDown])
 
     // @todo refactor
     useEffect(() => {
@@ -177,7 +214,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                     ref={stageRef}
                     width={workspace.width}
                     height={workspace.height}
-                    draggable={selected.tool === TOOLS.DRAG}
+                    draggable={selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP}
                     onContextMenu={e => e.evt.preventDefault()}
                     onMouseDown={() => setIsMouseDown(true)}
                     onMouseUp={() => setIsMouseDown(false)}
@@ -207,6 +244,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                                             canvas,
                                             grid,
                                             isMouseDown,
+                                            keyDown,
                                             layer,
                                             onChangeLayerImage,
                                             onChangeLayerOffset,
@@ -225,6 +263,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                                             canvas,
                                             grid,
                                             isMouseDown,
+                                            keyDown,
                                             layer,
                                             onChangeLayerData,
                                             onChangeLayerOffset,
@@ -241,8 +280,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                                     />
                                 )
                             )}
-                        {selected.tool === TOOLS.CROP && <KonvaTransformer {...{ canvas, grid }} />}
-                        {/* <TilesIds width={canvas.width} height={canvas.height} {...{ grid, selectedLayer }} /> */}
+                        {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, grid, onChangeSelectedArea }} />}
                         <GridLines
                             x={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.x : 0}
                             y={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.y : 0}

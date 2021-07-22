@@ -36,3 +36,10 @@ export type DeflatedLayer = {
     image?: string
     data?: string
 }
+
+export type Rectangle = {
+    x: number
+    y: number
+    width: number
+    height: number
+}

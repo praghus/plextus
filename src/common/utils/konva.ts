@@ -1,7 +1,7 @@
 import Konva from 'konva'
-import { FONT_SPRITE, TOOLS } from '../../common/constants'
+import { TOOLS } from '../../common/constants'
 import { Canvas, Grid, Selected, Workspace } from '../../store/editor/types'
-import { getRgbaValue } from './colors'
+import { brightenDarken, getRgbaValue } from './colors'
 
 const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
 
@@ -41,8 +41,64 @@ export const centerStage = (
 export const pickColor = (ctx: CanvasRenderingContext2D, x: number, y: number) =>
     Object.values(ctx.getImageData(x, y, 1, 1).data)
 
+export const actionDraw = (
+    pos: Konva.Vector2d,
+    selected: Selected,
+    ctx: CanvasRenderingContext2D,
+    keyDown?: KeyboardEvent | null
+): void => {
+    const { tool, toolSize } = selected
+    switch (tool) {
+        case TOOLS.BRIGHTNESS:
+            const pick = ctx.getImageData(pos.x, pos.y, toolSize, toolSize)
+            const amount = keyDown && keyDown.code === 'AltLeft' ? -1 : 1
+            ctx.putImageData(brightenDarken(pick, amount), pos.x, pos.y)
+            break
+        default:
+            ctx.fillStyle = getRgbaValue(selected.color)
+            tool === TOOLS.ERASER
+                ? ctx.clearRect(pos.x, pos.y, toolSize, toolSize)
+                : ctx.fillRect(pos.x, pos.y, toolSize, toolSize)
+            break
+    }
+}
+
+export const actionLine = (
+    startPos: Konva.Vector2d,
+    endPos: Konva.Vector2d,
+    selected: Selected,
+    ctx: CanvasRenderingContext2D,
+    keyDown?: KeyboardEvent | null
+): void => {
+    const drawPixel = (x: number, y: number): void => actionDraw({ x, y }, selected, ctx, keyDown)
+    const ang = getAngle(endPos.x - startPos.x, endPos.y - startPos.y)
+    const tri =
+        Math.abs(startPos.x - endPos.x) > Math.abs(startPos.y - endPos.y)
+            ? {
+                  x: Math.sign(Math.cos(ang)),
+                  y: Math.tan(ang) * Math.sign(Math.cos(ang)),
+                  long: Math.abs(startPos.x - endPos.x)
+              }
+            : {
+                  x: Math.tan(Math.PI / 2 - ang) * Math.sign(Math.cos(Math.PI / 2 - ang)),
+                  y: Math.sign(Math.cos(Math.PI / 2 - ang)),
+                  long: Math.abs(startPos.y - endPos.y)
+              }
+
+    for (let i = 0; i < tri.long; i++) {
+        const thispoint = {
+            x: Math.round(startPos.x + tri.x * i),
+            y: Math.round(startPos.y + tri.y * i)
+        }
+        drawPixel(thispoint.x, thispoint.y)
+    }
+
+    drawPixel(Math.round(endPos.x), Math.round(endPos.y))
+}
+
 export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx): void {
-    const [r, g, b, a] = selectedColor
+    const [r, g, b] = selectedColor
+    const a = selectedColor.a || 255
     const pixelStack = [[pos.x, pos.y]]
     const colorLayer = ctx.getImageData(0, 0, bufferImage.width, bufferImage.height)
     const startPos = (pos.y * bufferImage.width + pos.x) * 4
@@ -126,70 +182,4 @@ export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx):
         colorLayer.data[pixelPos + 2] = b
         colorLayer.data[pixelPos + 3] = a
     }
-}
-
-export function actionDraw(pos: Konva.Vector2d, selected: Selected, ctx: CanvasRenderingContext2D) {
-    const { toolSize } = selected
-    const erase = selected.tool === TOOLS.ERASER
-    ctx.fillStyle = getRgbaValue(selected.color)
-    erase ? ctx.clearRect(pos.x, pos.y, toolSize, toolSize) : ctx.fillRect(pos.x, pos.y, toolSize, toolSize)
-}
-
-export function actionLine(
-    startPos: Konva.Vector2d,
-    endPos: Konva.Vector2d,
-    selected: Selected,
-    ctx: CanvasRenderingContext2D
-) {
-    const { toolSize } = selected
-    const tri = {} as { x: number; y: number; long: number }
-    const ang = getAngle(endPos.x - startPos.x, endPos.y - startPos.y)
-    const erase = selected.tool === TOOLS.ERASER
-
-    const drawPixel = (x: number, y: number, w: number, h: number): void =>
-        erase ? ctx.clearRect(x, y, w, h) : ctx.fillRect(x, y, w, h)
-
-    if (Math.abs(startPos.x - endPos.x) > Math.abs(startPos.y - endPos.y)) {
-        tri.x = Math.sign(Math.cos(ang))
-        tri.y = Math.tan(ang) * Math.sign(Math.cos(ang))
-        tri.long = Math.abs(startPos.x - endPos.x)
-    } else {
-        tri.x = Math.tan(Math.PI / 2 - ang) * Math.sign(Math.cos(Math.PI / 2 - ang))
-        tri.y = Math.sign(Math.cos(Math.PI / 2 - ang))
-        tri.long = Math.abs(startPos.y - endPos.y)
-    }
-
-    ctx.fillStyle = getRgbaValue(selected.color)
-
-    for (let i = 0; i < tri.long; i++) {
-        const thispoint = {
-            x: Math.round(startPos.x + tri.x * i),
-            y: Math.round(startPos.y + tri.y * i)
-        }
-        drawPixel(thispoint.x, thispoint.y, toolSize, toolSize)
-    }
-
-    drawPixel(Math.round(endPos.x), Math.round(endPos.y), toolSize, toolSize)
-}
-
-export const renderText = (text: string, x: number, y: number, ctx: CanvasRenderingContext2D): void => {
-    text.split('\n')
-        .reverse()
-        .forEach((output, index) => {
-            for (let i = 0; i < output.length; i += 1) {
-                const chr = output.charCodeAt(i)
-                const size = 5
-                ctx.drawImage(
-                    FONT_SPRITE,
-                    (chr % 16) * size,
-                    Math.ceil((chr + 1) / 16 - 1) * size,
-                    size,
-                    size,
-                    Math.floor(x + i * size),
-                    Math.floor(y - index * (size + 1)),
-                    size,
-                    size
-                )
-            }
-        })
 }

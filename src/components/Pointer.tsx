@@ -4,7 +4,7 @@ import useImage from 'use-image'
 import { Rect } from 'react-konva'
 import { TOOLS } from '../common/constants'
 import { getRgbaValue } from '../common/utils/colors'
-import { getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
+import { getPointerRelativePos } from '../common/utils/konva'
 import { getTilePos } from '../store/editor/utils'
 import { Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
@@ -74,14 +74,17 @@ const Pointer = ({
                     fill: 'rgba(255,128,128,0.3)'
                 })
             } else {
-                const toolSize = [TOOLS.LINE, TOOLS.PENCIL, TOOLS.ERASER].includes(selected.tool)
+                const toolSize = [TOOLS.BRIGHTNESS, TOOLS.LINE, TOOLS.PENCIL, TOOLS.ERASER].includes(selected.tool)
                     ? selected.toolSize
                     : 1
                 overlay.setAttrs({
                     width: toolSize,
                     height: toolSize,
                     stroke: 'rgba(255,255,255,0.8)',
-                    fill: selected.tool !== TOOLS.ERASER && getRgbaValue(selected.color)
+                    fill:
+                        selected.tool !== TOOLS.ERASER && selected.tool !== TOOLS.BRIGHTNESS
+                            ? getRgbaValue(selected.color)
+                            : undefined
                 })
             }
         }

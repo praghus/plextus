@@ -3,9 +3,18 @@ import { put, StrictEffect, select, takeLatest, call } from 'redux-saga/effects'
 import logger from '../../common/utils/logger'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
+import { TOOLS } from '../../common/constants'
 import { changeAppIsLoading } from '../app/actions'
-import { selectLayers, selectRawLayers } from './selectors'
-import { resetToDefaults, changeTilesetImageSuccess, changeLayersSuccess, removeTileSuccess } from './actions'
+import { selectCanvas, selectGrid, selectLayers, selectRawLayers, selectSelected } from './selectors'
+import {
+    resetToDefaults,
+    changeTilesetImageSuccess,
+    changeLayersSuccess,
+    removeTileSuccess,
+    changeSelectedArea,
+    cropSuccess,
+    changeTool
+} from './actions'
 import { APP_STORAGE_KEY } from '../app/constants'
 import {
     EDITOR_CHANGE_LAYERS,
@@ -16,12 +25,13 @@ import {
     EDITOR_CHANGE_LAYER_OPACITY,
     EDITOR_CHANGE_LAYER_VISIBLE,
     EDITOR_CLEAR_PROJECT,
+    EDITOR_CROP,
     EDITOR_REMOVE_LAYER,
     EDITOR_REMOVE_TILE,
     EDITOR_SAVE_CHANGES,
     EDITOR_SET_TILESET_IMAGE
 } from './constants'
-import { DeflatedLayer, Layer } from './types'
+import { DeflatedLayer, Grid, Layer, Canvas, Selected } from './types'
 import { getStateToSave } from './utils'
 
 export function* clearProject(): Generator<StrictEffect, void, any> {
@@ -84,6 +94,44 @@ export function* changeLayerOpacity(action: AnyAction): Generator {
 export function* changeLayerVisible(action: AnyAction): Generator {
     const { layerId, visible } = action.payload
     yield changeLayerProp(layerId, { visible })
+}
+
+export function* cropArea(): Generator<StrictEffect, void, any> {
+    try {
+        const grid: Grid = yield select(selectGrid)
+        const canvas: Canvas = yield select(selectCanvas)
+        const layers: Layer[] = yield select(selectLayers)
+        const { area }: Selected = yield select(selectSelected)
+
+        if (area && area.width > 0 && area.height > 0) {
+            const changedCanvas = {
+                ...canvas,
+                width: area.width * grid.width,
+                height: area.height * grid.height
+            }
+            const changedLayers = layers.map(layer => {
+                if (layer.data) {
+                    const changedData: (number | null)[] = new Array(area.width * area.height).fill(null)
+                    for (let y = 0; y < area.height; y += 1) {
+                        for (let x = 0; x < area.width; x += 1) {
+                            changedData[x + area.width * y] =
+                                x + area.x >= 0 && x + area.x < layer.width
+                                    ? layer.data[x + area.x + layer.width * (y + area.y)] || null
+                                    : null
+                        }
+                    }
+                    return { ...layer, width: area.width, data: compressLayerData(changedData) } as DeflatedLayer
+                } else {
+                    return layer as DeflatedLayer
+                }
+            })
+            yield put(cropSuccess(changedLayers, changedCanvas))
+        }
+        yield put(changeTool(TOOLS.DRAG))
+        yield put(changeSelectedArea(null))
+    } catch (err) {
+        logger.error(err)
+    }
 }
 
 export function* removeLayer(action: AnyAction): Generator<StrictEffect, void, any> {
@@ -149,6 +197,7 @@ export default function* editorSaga(): Generator {
         yield takeLatest(EDITOR_CHANGE_LAYER_OFFSET, changeLayerOffset),
         yield takeLatest(EDITOR_CHANGE_LAYER_OPACITY, changeLayerOpacity),
         yield takeLatest(EDITOR_CHANGE_LAYER_VISIBLE, changeLayerVisible),
+        yield takeLatest(EDITOR_CROP, cropArea),
         yield takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
         yield takeLatest(EDITOR_REMOVE_TILE, removeTile),
         yield takeLatest(EDITOR_SAVE_CHANGES, saveChanges),
