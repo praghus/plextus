@@ -236,7 +236,7 @@ const TileLayer = ({
                 case TOOLS.FILL:
                     if (e.evt.button === 2) {
                         onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
-                    } else if (gid && bufferCtx) {
+                    } else if (gid && bufferCtx && bufferImage) {
                         fillColor(getBufferPos(lastPos.current), selected.color, bufferImage, bufferCtx)
                         renderBufferToImage({ gid, x, y })
                     }

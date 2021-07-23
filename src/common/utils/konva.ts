@@ -96,9 +96,14 @@ export const actionLine = (
     drawPixel(Math.round(endPos.x), Math.round(endPos.y))
 }
 
-export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx): void {
+export function fillColor(
+    pos: Konva.Vector2d,
+    selectedColor: number[],
+    bufferImage: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+): void {
     const [r, g, b] = selectedColor
-    const a = selectedColor.a || 255
+    const a = !isNaN(selectedColor[3]) ? selectedColor[3] : 255
     const pixelStack = [[pos.x, pos.y]]
     const colorLayer = ctx.getImageData(0, 0, bufferImage.width, bufferImage.height)
     const startPos = (pos.y * bufferImage.width + pos.x) * 4
@@ -109,7 +114,6 @@ export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx):
 
     let x: number, y: number, pixelPos: number, reachLeft: boolean, reachRight: boolean
 
-    // exit if color is the same
     if (r === startR && g === startG && b === startB && a === startA) {
         return
     }
@@ -120,19 +124,18 @@ export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx):
         x = newPos[0]
         y = newPos[1]
 
-        //get current pixel position
         pixelPos = (y * bufferImage.width + x) * 4
-        // Go up as long as the color matches and are inside the canvas
+
         while (y >= 0 && matchStartColor(pixelPos)) {
             y--
             pixelPos -= bufferImage.width * 4
         }
-        //Don't overextend
+
         pixelPos += bufferImage.width * 4
         reachLeft = false
         reachRight = false
         y++
-        // Go down as long as the color matches and in inside the canvas
+
         while (y < bufferImage.height && matchStartColor(pixelPos)) {
             colorPixel(pixelPos)
 
@@ -168,7 +171,7 @@ export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx):
 
     ctx.putImageData(colorLayer, 0, 0)
 
-    function matchStartColor(pixelPos) {
+    function matchStartColor(pixelPos: number) {
         const r = colorLayer.data[pixelPos]
         const g = colorLayer.data[pixelPos + 1]
         const b = colorLayer.data[pixelPos + 2]
@@ -176,7 +179,7 @@ export function fillColor(pos: Konva.Vector2d, selectedColor, bufferImage, ctx):
         return r === startR && g === startG && b === startB && a === startA
     }
 
-    function colorPixel(pixelPos) {
+    function colorPixel(pixelPos: number) {
         colorLayer.data[pixelPos] = r
         colorLayer.data[pixelPos + 1] = g
         colorLayer.data[pixelPos + 2] = b
