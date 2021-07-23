@@ -18,7 +18,6 @@ import {
     selectWorkspace
 } from '../store/editor/selectors'
 import {
-    adjustWorkspaceSize,
     changeLayerData,
     changeLayerImage,
     changeLayerOffset,
@@ -81,7 +80,6 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onUndo = () => dispatch(undo())
     const onRedo = () => dispatch(redo())
     const onCrop = () => dispatch(crop())
-    const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
     const onChangeSelectedArea = (rect: Rectangle) => dispatch(changeSelectedArea(rect))
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
@@ -107,17 +105,31 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const stage = stageRef.current
 
     useEffect(() => {
-        window.addEventListener('resize', onAdjustWorkspaceSize)
         window.addEventListener('keydown', onKeyDown)
         window.addEventListener('keyup', onKeyUp)
-        onAdjustWorkspaceSize()
 
         return () => {
-            window.removeEventListener('resize', onAdjustWorkspaceSize)
             window.removeEventListener('keydown', onKeyDown)
             window.removeEventListener('keyup', onKeyUp)
         }
     }, [])
+
+    useEffect(() => {
+        const { scale, x, y } = workspace
+        const stage = stageRef.current
+        if (stage) {
+            if (x && y) {
+                stage.position({ x, y })
+                stage.scale({ x: scale, y: scale })
+                stage.batchDraw()
+            } else {
+                centerStage(stage, canvas, workspace, (x, y, scale) => {
+                    onChangePosition(x, y)
+                    onChangeScale(scale)
+                })
+            }
+        }
+    }, [canvas])
 
     useEffect(() => {
         if (keyDown) {
@@ -129,24 +141,6 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
             }
         }
     }, [keyDown])
-
-    // @todo refactor
-    useEffect(() => {
-        if (stageRef.current) {
-            const { scale, x, y } = workspace
-            const stage = stageRef.current
-            if (x && y) {
-                stage.position({ x, y })
-                stage.scale({ x: scale, y: scale })
-                stage.batchDraw()
-            } else {
-                centerStage(stageRef.current, canvas, workspace, (x, y, scale) => {
-                    onChangePosition(x, y)
-                    onChangeScale(scale)
-                })
-            }
-        }
-    }, [tileset.lastUpdateTime])
 
     useEffect(() => {
         if (stageRef.current && selected.tool == TOOLS.CROP) {

@@ -13,7 +13,8 @@ import {
     removeTileSuccess,
     changeSelectedArea,
     cropSuccess,
-    changeTool
+    changeTool,
+    changePosition
 } from './actions'
 import { APP_STORAGE_KEY } from '../app/constants'
 import {
@@ -128,6 +129,7 @@ export function* cropArea(): Generator<StrictEffect, void, any> {
             yield put(cropSuccess(changedLayers, changedCanvas))
         }
         yield put(changeTool(TOOLS.DRAG))
+        yield put(changePosition(0, 0))
         yield put(changeSelectedArea(null))
     } catch (err) {
         logger.error(err)

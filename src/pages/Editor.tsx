@@ -1,15 +1,15 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { Helmet } from 'react-helmet'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from '../common/constants'
 import { EDITOR_RESOURCE_NAME } from '../store/editor/constants'
 import { getTilesetDimensions } from '../store/editor/utils'
-import { selectIsLoaded, selectIsImportDialogOpen } from '../store/app/selectors'
+import { selectIsLoaded } from '../store/app/selectors'
 import { selectCanvas, selectTileset } from '../store/editor/selectors'
-
+import { adjustWorkspaceSize } from '../store/editor/actions'
 import reducer from '../store/editor/reducer'
 import saga from '../store/editor/saga'
 import logger from '../common/utils/logger'
@@ -61,19 +61,28 @@ const Editor = (): JSX.Element => {
     const { t } = useTranslation()
 
     const canvas = useSelector(selectCanvas)
-    const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
     const isLoaded = useSelector(selectIsLoaded)
     const tileset = useSelector(selectTileset)
 
     const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
 
-    // todo: refactor
+    const dispatch = useDispatch()
+    const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
+
+    useEffect(() => {
+        window.addEventListener('resize', onAdjustWorkspaceSize)
+        onAdjustWorkspaceSize()
+        return () => {
+            window.removeEventListener('resize', onAdjustWorkspaceSize)
+        }
+    }, [])
+
     useLayoutEffect(() => {
-        if (tileset.image && !isImportDialogOpen) {
-            const { w, h } = getTilesetDimensions(tileset)
+        if (tileset.image) {
             const img = new window.Image()
             const canvasElement: any = document.createElement('canvas')
             const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
+            const { w, h } = getTilesetDimensions(tileset)
 
             img.src = tileset.image
             img.onload = () => {
@@ -84,7 +93,7 @@ const Editor = (): JSX.Element => {
                 logger.info('New tileset', 'CANVAS')
             }
         }
-    }, [tileset, isImportDialogOpen])
+    }, [tileset])
 
     return (
         <>
