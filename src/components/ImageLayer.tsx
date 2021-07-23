@@ -2,16 +2,9 @@ import React, { useRef, useState, useEffect } from 'react'
 import Konva from 'konva'
 import { Image } from 'react-konva'
 import { TOOLS } from '../common/constants'
-// import { getTilePos } from '../store/editor/utils'
-import {
-    actionDraw,
-    actionLine,
-    // getCoordsFromPos,
-    getPointerRelativePos,
-    fillColor,
-    pickColor
-} from '../common/utils/konva'
+import { actionDraw, actionLine, getPointerRelativePos, fillColor, pickColor } from '../common/utils/konva'
 import { getRgbaValue } from '../common/utils/colors'
+import { createTileFromImageData, getTilePos } from '../store/editor/utils'
 import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
 type Props = {
@@ -23,6 +16,9 @@ type Props = {
     onChangeLayerImage: (layerId: string, blob: Blob) => void
     onChangeLayerOffset: (layerId: string, x: number, y: number) => void
     onChangePrimaryColor: (color: number[]) => void
+    onChangeSelectedTile: (tileId: number) => void
+    onChangeTileset: (tileset: any) => void
+    onSaveTilesetImage: (blob: Blob) => void
     selected: Selected
     stage: Konva.Stage
     tileset: Tileset
@@ -31,7 +27,6 @@ type Props = {
 }
 
 const ImageLayer = ({
-    // canvas,
     grid,
     isMouseDown,
     layer,
@@ -39,10 +34,13 @@ const ImageLayer = ({
     onChangeLayerImage,
     onChangeLayerOffset,
     onChangePrimaryColor,
+    onChangeSelectedTile,
+    onChangeTileset,
+    onSaveTilesetImage,
     selected,
     stage,
-    // tileset,
-    // tilesetCanvas,
+    tileset,
+    tilesetCanvas,
     workspace
 }: Props): JSX.Element => {
     const [bufferCtx, setBufferCtx] = useState<CanvasRenderingContext2D | undefined>()
@@ -59,6 +57,7 @@ const ImageLayer = ({
     const isSelected = selected.layerId === layer.id
 
     const { opacity, visible, width, height } = layer
+    const { tilewidth, tileheight } = tileset
 
     useEffect(() => {
         const canvasElement: any = document.createElement('canvas')
@@ -101,7 +100,7 @@ const ImageLayer = ({
     const clearBuffer = (): void => {
         if (bufferCtx && layerImage) {
             bufferCtx.clearRect(0, 0, width, height)
-            bufferCtx.drawImage(layerImage, 0, 0) //, 0, 0, tilewidth, tileheight
+            bufferCtx.drawImage(layerImage, 0, 0)
         }
     }
 
@@ -123,6 +122,44 @@ const ImageLayer = ({
         }
     }
 
+    const cloneTile = (pos: Konva.Vector2d) => {
+        if (ctx) {
+            const tile = ctx.getImageData(
+                Math.ceil(-1 + pos.x / grid.width) * grid.width,
+                Math.ceil(-1 + pos.y / grid.height) * grid.height,
+                tilewidth,
+                tileheight
+            )
+            createTileFromImageData(tileset, tilesetCanvas, tile, (blob: Blob, newTileId: number) => {
+                onChangeTileset({ ...tileset, tilecount: newTileId })
+                onChangeSelectedTile(newTileId)
+                onSaveTilesetImage(blob)
+            })
+        }
+    }
+
+    const drawTile = (pos: Konva.Vector2d): void => {
+        if (ctx && bufferCtx && bufferImage) {
+            if (selected.tileId) {
+                const { x, y } = getTilePos(selected.tileId, tileset)
+                bufferCtx.drawImage(
+                    tilesetCanvas,
+                    x,
+                    y,
+                    tilewidth,
+                    tileheight,
+                    Math.ceil(-1 + pos.x / grid.width) * grid.width,
+                    Math.ceil(-1 + pos.y / grid.height) * grid.height,
+                    tilewidth,
+                    tileheight
+                )
+                renderBufferToImage()
+                hasChanged.current = true
+                stage.batchDraw()
+            }
+        }
+    }
+
     const onMouseDown = async (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (ctx && visible && isSelected) {
             lastPos.current = getPos()
@@ -132,9 +169,8 @@ const ImageLayer = ({
             switch (selected.tool) {
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
-                    // e.evt.button === 2
-                    //     ? gid && onChangeSelectedTile(gid)
-                    //     : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
+                    e.evt.button === 2 ? cloneTile(lastPos.current) : drawTile(lastPos.current)
+
                     break
                 case TOOLS.BRIGHTNESS:
                 case TOOLS.PENCIL:
@@ -177,8 +213,9 @@ const ImageLayer = ({
             switch (selected.tool) {
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
-                    // const { x, y } = getCoordsFromPos(grid, currentPos)
-                    //updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
+                    if (currentPos.x !== prevPos.x || currentPos.y !== prevPos.y) {
+                        drawTile(currentPos)
+                    }
                     break
                 case TOOLS.BRIGHTNESS:
                 case TOOLS.ERASER:

@@ -34,6 +34,29 @@ export const createEmptyTile = (tileset: Tileset, tilesetCanvas: HTMLCanvasEleme
     }, 'image/png')
 }
 
+export const createTileFromImageData = (
+    tileset: Tileset,
+    tilesetCanvas: HTMLCanvasElement,
+    tile: ImageData,
+    onSave = noop
+): void => {
+    const { columns, tilecount, tilewidth, tileheight } = tileset
+    const newTileId = tilecount + 1
+    const pos = getTilePos(newTileId, tileset)
+    const canvasElement: any = document.createElement('canvas')
+    const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
+    const { x, y } = getTilePos(newTileId, tileset)
+
+    canvasElement.width = columns * tilewidth
+    canvasElement.height = pos.y + tileheight
+    canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height)
+    canvasContext.drawImage(tilesetCanvas, 0, 0)
+    canvasContext.putImageData(tile, x, y)
+    canvasElement.toBlob((blob: Blob) => {
+        blob && onSave(blob, newTileId)
+    }, 'image/png')
+}
+
 export const createEmptyLayer = (name: string, width: number, height: number): Layer => ({
     id: uuidv4(),
     data: new Array(width * height).fill(null),
