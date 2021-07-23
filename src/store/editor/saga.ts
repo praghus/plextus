@@ -121,7 +121,12 @@ export function* cropArea(): Generator<StrictEffect, void, any> {
                                     : null
                         }
                     }
-                    return { ...layer, width: area.width, data: compressLayerData(changedData) } as DeflatedLayer
+                    return {
+                        ...layer,
+                        width: area.width,
+                        height: area.height,
+                        data: compressLayerData(changedData)
+                    } as DeflatedLayer
                 } else {
                     return layer as DeflatedLayer
                 }
