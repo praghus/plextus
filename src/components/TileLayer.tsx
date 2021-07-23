@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import Konva from 'konva'
 import { Image } from 'react-konva'
 import { TOOLS } from '../common/constants'
-import { getTilePos } from '../store/editor/utils'
+import { createTileFromImageData, getTilePos } from '../store/editor/utils'
 import {
     actionDraw,
     actionLine,
@@ -46,7 +46,7 @@ const TileLayer = ({
     onChangeLayerOffset,
     onChangePrimaryColor,
     onChangeSelectedTile,
-    // onChangeTileset,
+    onChangeTileset,
     onSaveTilesetImage,
     selected,
     stage,
@@ -136,12 +136,10 @@ const TileLayer = ({
         const { x, y } = getCoordsFromPos(grid, pos2)
         const inBounds = x === selectedTile.x && y === selectedTile.y
         if (ctx && bufferCtx && bufferImage && inBounds) {
-            // renderBuffer(selectedTile.gid)
             actionLine(getBufferPos(pos1), getBufferPos(pos2), selected, bufferCtx, keyDown)
             ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
             ctx.drawImage(bufferImage, selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
             hasChanged.current = true
-            // update && renderBufferToImage(selectedTile)
             stage.batchDraw()
         }
     }
@@ -180,22 +178,16 @@ const TileLayer = ({
         }
     }
 
-    // const createNewEmptyTile = async (x: number, y: number): Promise<number> => {
-    //     const newLayerData = [...(layer.data || [])]
-    //     return new Promise(resolve => {
-    //         createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
-    //             if (layer.width) {
-    //                 newLayerData[x + ((layer.width * tilewidth) / grid.width) * y] = newTileId
-    //                 setData(newLayerData)
-    //             }
-    //             onChangeTileset({ ...tileset, tilecount: newTileId })
-    //             onChangeSelectedTile(newTileId)
-    //             onChangeLayerData(layer.id, newLayerData)
-    //             onSaveTilesetImage(blob)
-    //             resolve(newTileId)
-    //         })
-    //     })
-    // }
+    const cloneTile = (x: number, y: number) => {
+        if (ctx) {
+            const tile = ctx.getImageData(x * tilewidth, y * tileheight, tilewidth, tileheight)
+            createTileFromImageData(tileset, tilesetCanvas, tile, (blob: Blob, newTileId: number) => {
+                onChangeTileset({ ...tileset, tilecount: newTileId })
+                onChangeSelectedTile(newTileId)
+                onSaveTilesetImage(blob)
+            })
+        }
+    }
 
     const replaceTile = (gid: number) => {
         if (data && selected.tileId) {
@@ -211,10 +203,6 @@ const TileLayer = ({
             lastPos.current = getPos()
             const { x, y } = getCoordsFromPos(grid, lastPos.current)
             const gid = layer.data[x + ((layer.width * tilewidth) / grid.width) * y]
-            // const gid =
-            //     !tileId && [TOOLS.PENCIL, TOOLS.FILL, TOOLS.LINE].includes(selected.tool)
-            //         ? await createNewEmptyTile(x, y)
-            //         : tileId
 
             clearBuffer(gid)
 
@@ -224,9 +212,13 @@ const TileLayer = ({
                     break
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
-                    e.evt.button === 2
-                        ? gid && onChangeSelectedTile(gid)
-                        : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
+                    if (e.evt.button === 2 && gid) {
+                        onChangeSelectedTile(gid)
+                    } else {
+                        keyDown?.code === 'AltLeft'
+                            ? cloneTile(x, y)
+                            : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
+                    }
                     break
                 case TOOLS.BRIGHTNESS:
                 case TOOLS.PENCIL:

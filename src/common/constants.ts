@@ -45,7 +45,7 @@ export const TOOLS_DESC = {
     [TOOLS.PENCIL]: 'Pixel Tool',
     [TOOLS.PICKER]: 'Color Picker',
     [TOOLS.REPLACE]: 'Tile Replace Tool',
-    [TOOLS.STAMP]: 'Tile Stamp Tool'
+    [TOOLS.STAMP]: 'Tile Stamp Tool [Click], Tile Clone Tool [Alt+Click]'
 }
 
 export const DEFAULT_TILESET_IMAGE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAAAQCAYAAACRBXRYAAAABmJLR0QA/wD/

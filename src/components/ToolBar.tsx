@@ -50,7 +50,7 @@ export const useStyles = makeStyles(theme => ({
         filter: 'drop-shadow(1px 1px 1px rgba(0, 0, 0, .7))'
     },
     tooltip: {
-        maxWidth: 120
+        maxWidth: 130
     }
 }))
 

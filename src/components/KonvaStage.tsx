@@ -84,10 +84,10 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
     const onChangeSelectedArea = (rect: Rectangle) => dispatch(changeSelectedArea(rect))
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
+    const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
-    const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
     const onKeyDown = (e: KeyboardEvent) => setKeyDown(e)
@@ -107,17 +107,31 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const stage = stageRef.current
 
     useEffect(() => {
-        window.addEventListener('resize', onAdjustWorkspaceSize)
         window.addEventListener('keydown', onKeyDown)
         window.addEventListener('keyup', onKeyUp)
-        onAdjustWorkspaceSize()
-
         return () => {
-            window.removeEventListener('resize', onAdjustWorkspaceSize)
             window.removeEventListener('keydown', onKeyDown)
             window.removeEventListener('keyup', onKeyUp)
         }
     }, [])
+
+    useEffect(() => {
+        const { scale, x, y } = workspace
+        const stage = stageRef.current
+        if (stage) {
+            if (x && y) {
+                stage.position({ x, y })
+                stage.scale({ x: scale, y: scale })
+                stage.batchDraw()
+            } else {
+                centerStage(stage, canvas, workspace, (x, y, scale) => {
+                    onChangePosition(x, y)
+                    onChangeScale(scale)
+                })
+            }
+        }
+        onAdjustWorkspaceSize()
+    }, [canvas])
 
     useEffect(() => {
         if (keyDown) {
@@ -129,24 +143,6 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
             }
         }
     }, [keyDown])
-
-    // @todo refactor
-    useEffect(() => {
-        if (stageRef.current) {
-            const { scale, x, y } = workspace
-            const stage = stageRef.current
-            if (x && y) {
-                stage.position({ x, y })
-                stage.scale({ x: scale, y: scale })
-                stage.batchDraw()
-            } else {
-                centerStage(stageRef.current, canvas, workspace, (x, y, scale) => {
-                    onChangePosition(x, y)
-                    onChangeScale(scale)
-                })
-            }
-        }
-    }, [tileset.lastUpdateTime])
 
     useEffect(() => {
         if (stageRef.current && selected.tool == TOOLS.CROP) {
@@ -207,6 +203,22 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         }
     }
 
+    const layerProps = {
+        canvas,
+        grid,
+        isMouseDown,
+        keyDown,
+        selected,
+        tileset,
+        tilesetCanvas,
+        workspace,
+        onChangeLayerOffset,
+        onChangePrimaryColor,
+        onChangeSelectedTile,
+        onChangeTileset,
+        onSaveTilesetImage
+    }
+
     return (
         <div>
             <div css={styles({ selected })}>
@@ -220,15 +232,10 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                     onMouseUp={() => setIsMouseDown(false)}
                     onMouseOver={() => setIsMouseOver(true)}
                     onMouseOut={() => setIsMouseOver(false)}
-                    {...{
-                        onDragEnd,
-                        onMouseMove,
-                        onWheel
-                    }}
+                    {...{ onDragEnd, onMouseMove, onWheel }}
                 >
                     <Layer imageSmoothingEnabled={false}>
                         <Rect
-                            // shadowBlur={10}
                             width={canvas.width}
                             height={canvas.height}
                             fillPatternImage={BG_IMAGE}
@@ -240,43 +247,12 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                                 layer.image ? (
                                     <ImageLayer
                                         key={`layer-${layer.id}`}
-                                        {...{
-                                            canvas,
-                                            grid,
-                                            isMouseDown,
-                                            keyDown,
-                                            layer,
-                                            onChangeLayerImage,
-                                            onChangeLayerOffset,
-                                            onChangePrimaryColor,
-                                            selected,
-                                            stage,
-                                            tileset,
-                                            tilesetCanvas,
-                                            workspace
-                                        }}
+                                        {...{ ...layerProps, stage, layer, onChangeLayerImage }}
                                     />
                                 ) : (
                                     <TileLayer
                                         key={`layer-${layer.id}`}
-                                        {...{
-                                            canvas,
-                                            grid,
-                                            isMouseDown,
-                                            keyDown,
-                                            layer,
-                                            onChangeLayerData,
-                                            onChangeLayerOffset,
-                                            onChangePrimaryColor,
-                                            onChangeSelectedTile,
-                                            onChangeTileset,
-                                            onSaveTilesetImage,
-                                            selected,
-                                            stage,
-                                            tileset,
-                                            tilesetCanvas,
-                                            workspace
-                                        }}
+                                        {...{ ...layerProps, stage, layer, onChangeLayerData }}
                                     />
                                 )
                             )}
