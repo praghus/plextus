@@ -2,13 +2,14 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import Favicon from 'react-favicon'
 import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
+import { ThemeProvider } from '@material-ui/core/styles'
 import { Global, css } from '@emotion/react'
 import { store } from './store/store'
+import theme from './themes/theme-dark'
 import faviconUrl from './assets/favicon.ico'
-
 import App from './App'
 
+import './common/translations/i18n'
 import 'sanitize.css/sanitize.css'
 
 const styles = css`
@@ -43,11 +44,11 @@ const MOUNT_NODE = document.getElementById('root') as HTMLElement
 const render = () => {
     ReactDOM.render(
         <Provider {...{ store }}>
-            <BrowserRouter basename={'/plextus'}>
+            <ThemeProvider {...{ theme }}>
                 <Global {...{ styles }} />
                 <Favicon url={faviconUrl} />
                 <App />
-            </BrowserRouter>
+            </ThemeProvider>
         </Provider>,
         MOUNT_NODE
     )
