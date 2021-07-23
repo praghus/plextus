@@ -26,6 +26,7 @@ const App = () => (
             <Helmet titleTemplate="%s - Plextus" defaultTitle="Plextus">
                 <meta name="description" content="A minimal tiled map editor made with React, Redux and Konva" />
             </Helmet>
+            <Editor />
             <Switch>
                 <Route exact path="/" component={Editor} />
                 <Route path="" component={NotFound} />

@@ -2,11 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import Favicon from 'react-favicon'
 import { Provider } from 'react-redux'
-import { ConnectedRouter } from 'connected-react-router'
+import { BrowserRouter } from 'react-router-dom'
 import { Global, css } from '@emotion/react'
 import { store } from './store/store'
 import faviconUrl from './assets/favicon.ico'
-import history from './common/utils/history'
+
 import App from './App'
 
 import 'sanitize.css/sanitize.css'
@@ -43,11 +43,11 @@ const MOUNT_NODE = document.getElementById('root') as HTMLElement
 const render = () => {
     ReactDOM.render(
         <Provider {...{ store }}>
-            <ConnectedRouter {...{ history }}>
+            <BrowserRouter basename={'/plextus'}>
                 <Global {...{ styles }} />
                 <Favicon url={faviconUrl} />
                 <App />
-            </ConnectedRouter>
+            </BrowserRouter>
         </Provider>,
         MOUNT_NODE
     )
