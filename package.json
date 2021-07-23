@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/praghus/plextus/issues"
   },
-  "homepage": "https://github.com/praghus/plextus",
+  "homepage": "https://praghus.github.io/plextus",
   "scripts": {
     "build": "yarn run clean-dist && webpack --config=config/webpack/prod.js",
     "clean-dist": "rimraf dist/*",
@@ -108,11 +108,9 @@
     "@reduxjs/toolkit": "^1.5.1",
     "assert": "^2.0.0",
     "browserify-zlib": "^0.2.0",
-    "connected-react-router": "^6.9.1",
     "cross-env": "^7.0.3",
     "crypto-browserify": "^3.12.0",
     "file-saver": "^2.0.5",
-    "history": "5.0.0",
     "i18next": "^20.3.2",
     "i18next-browser-languagedetector": "^6.1.2",
     "import": "^0.0.6",
