@@ -1,4 +1,4 @@
-# Plextus [![Build Status](https://travis-ci.com/praghus/plextus.svg?branch=main)](https://travis-ci.org/github/praghus/plextus)
+# Plextus [![Build Status](https://travis-ci.com/praghus/plextus.svg?branch=main)](https://travis-ci.com/praghus/plextus)
 
 Plextus is a pixel art editor designed to make tiled maps and tilesets. In addition to the usual tile placement, it also allows you to draw directly on map and edit the contents of the tiles themselves.
 
