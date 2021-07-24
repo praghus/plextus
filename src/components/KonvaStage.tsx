@@ -9,6 +9,7 @@ import { undo, redo } from '../store/history/actions'
 import { Rectangle } from '../store/editor/types'
 import { SCALE_BY, TOOLS, BG_IMAGE } from '../common/constants'
 import { centerStage } from '../common/utils/konva'
+import { getRgbaValue } from '../common/utils/colors'
 import {
     selectCanvas,
     selectGrid,
@@ -101,8 +102,11 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         []
     )
 
+    const backgroundColor = canvas.background && getRgbaValue(canvas.background)
     const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
     const stage = stageRef.current
+
+    console.info(backgroundColor)
 
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)
@@ -240,6 +244,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                             fillPatternScaleX={1 / workspace.scale}
                             fillPatternScaleY={1 / workspace.scale}
                         />
+                        {backgroundColor && <Rect width={canvas.width} height={canvas.height} fill={backgroundColor} />}
                         {stage &&
                             layers.map(layer =>
                                 layer.image ? (

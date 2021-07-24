@@ -4,9 +4,13 @@ import { create } from 'xmlbuilder2'
 import { Buffer } from 'buffer'
 import { saveAs } from 'file-saver'
 import { Canvas, Layer, Tileset } from 'store/editor/types'
+import { componentToHex } from './colors'
 import logger from './logger'
 
 const zip = new JSZip()
+
+const formatColor = (c: number[]): string =>
+    `#${c[3] >= 0 ? componentToHex(c[3]) : ''}${componentToHex(c[0])}${componentToHex(c[1])}${componentToHex(c[2])}`
 
 const encodeLayer = async (data: Buffer) =>
     new Promise((resolve, reject) =>
@@ -16,6 +20,7 @@ const encodeLayer = async (data: Buffer) =>
 export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tileset) => {
     const { columns, tilewidth, tileheight, tilecount } = tileset
     const layerImages: any = []
+
     const mapLayers = await Promise.all(
         layers.map(async ({ data, image, name, visible, offset, opacity, width, height }, i) => {
             const offsetx = offset.x !== 0 ? { offsetx: offset.x } : {}
@@ -69,6 +74,7 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
             }
         })
     )
+    const backgroundColor = canvas.background ? { backgroundcolor: formatColor(canvas.background) } : {}
 
     const doc = create({
         map: {
@@ -83,7 +89,8 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
                 width: canvas.width / tileset.tileheight,
                 height: canvas.height / tileset.tileheight,
                 tileheight,
-                tilewidth
+                tilewidth,
+                ...backgroundColor
             },
             tileset: {
                 '@': {

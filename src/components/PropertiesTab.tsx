@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ColorPicker } from 'material-ui-color'
 import { makeStyles } from '@material-ui/core/styles'
 import { Card, CardContent, Grid, InputAdornment, Slider, TextField, Typography } from '@material-ui/core'
-import { selectGrid, selectSelected } from '../store/editor/selectors'
-import { changeGridColor, changeGridPitch, changeToolSize } from '../store/editor/actions'
+import { selectCanvas, selectGrid, selectSelected } from '../store/editor/selectors'
+import { changeCanvasBackground, changeGridColor, changeGridPitch, changeToolSize } from '../store/editor/actions'
 import { rgbaToHex } from '../common/utils/colors'
 import { Create as CreateIcon } from '@material-ui/icons'
 
@@ -33,16 +33,23 @@ const StyledPropContainer = styled.div`
 `
 
 const PropertiesTab = (): JSX.Element => {
+    const canvas = useSelector(selectCanvas)
     const grid = useSelector(selectGrid)
     const selected = useSelector(selectSelected)
     const classes = useStyles()
 
+    const [canvasBackground, setCanvasBackground] = useState<any>(rgbaToHex(canvas.background || [0, 0, 0, 0]))
     const [gridColor, setGridColor] = useState<any>(rgbaToHex(grid.color))
     const [toolSize, setToolSize] = useState<number>(selected.toolSize)
 
     const dispatch = useDispatch()
     const onChangeGridPitch = (pitch: number) => dispatch(changeGridPitch(pitch))
     const onChangeToolSize = (size: number) => dispatch(changeToolSize(size))
+
+    const onChangeCanvasBackground = useCallback(
+        debounce((color: number[] | null) => dispatch(changeCanvasBackground(color)), 500),
+        []
+    )
 
     const onChangeGridColor = useCallback(
         debounce((color: number[]) => dispatch(changeGridColor(color)), 500),
@@ -53,7 +60,6 @@ const PropertiesTab = (): JSX.Element => {
         <Card className={classes.card}>
             <CardContent>
                 <Typography variant="subtitle1">Pixel tool size</Typography>
-
                 <Grid container spacing={2} alignItems="center" className={classes.grid}>
                     <Grid item>
                         <CreateIcon />
@@ -74,10 +80,11 @@ const PropertiesTab = (): JSX.Element => {
                 </Grid>
 
                 <Grid container spacing={2}>
-                    <Grid item xs={6}>
+                    <Grid item xs={12}>
                         <Typography variant="subtitle1">Grid pitch every</Typography>
                         <StyledPropContainer>
                             <TextField
+                                fullWidth
                                 type="number"
                                 value={grid.pitch}
                                 onChange={event => {
@@ -92,16 +99,29 @@ const PropertiesTab = (): JSX.Element => {
                         </StyledPropContainer>
                     </Grid>
                     <Grid item xs={6}>
-                        <Typography variant="subtitle1">Grid color</Typography>
                         <StyledPropContainer>
                             <ColorPicker
-                                // hideTextfield
+                                hideTextfield
                                 value={gridColor}
                                 onChange={color => {
                                     setGridColor(color)
                                     color.rgb && onChangeGridColor(color.rgb)
                                 }}
                             />
+                            Grid color
+                        </StyledPropContainer>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <StyledPropContainer>
+                            <ColorPicker
+                                hideTextfield
+                                value={canvasBackground}
+                                onChange={color => {
+                                    setCanvasBackground(color)
+                                    color.rgb && onChangeCanvasBackground(color.alpha > 0 ? color.rgb : null)
+                                }}
+                            />
+                            Map background
                         </StyledPropContainer>
                     </Grid>
                 </Grid>
