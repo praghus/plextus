@@ -38,8 +38,6 @@ import StatusBar from './StatusBar'
 import Pointer from './Pointer'
 import ImageLayer from './ImageLayer'
 
-// import TilesIds from './TilesIds'
-
 const styles = ({ selected }) => css`
     ${((selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP) &&
         `

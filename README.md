@@ -60,7 +60,7 @@ Plextus is a pixel art editor designed to make tiled maps and tilesets. In addit
 -   [x] Replace tile
 -   [ ] Set and change map background color
 -   [ ] Support tile flips
--   [ ] Tile clone
+-   [x] Tile clone
 
 ## License
 

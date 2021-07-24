@@ -63,12 +63,12 @@ const KonvaTransformer = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.El
                 fill="rgba(0,128,255,0.3)"
                 onClick={() => setIsResizing(!isResizing)}
                 onTap={() => setIsResizing(!isResizing)}
-                onTransform={e => {
+                onTransform={(e: Konva.KonvaEventObject<Event>) => {
                     e.target.scaleX(Math.round((e.target.scaleX() / width) * width))
                     e.target.scaleY(Math.round((e.target.scaleY() / height) * height))
                     e.target.position(setPosition(e))
                 }}
-                onDragMove={e => {
+                onDragMove={(e: Konva.KonvaEventObject<Event>) => {
                     e.target.position(setPosition(e))
                 }}
                 onDragEnd={setArea}
@@ -79,7 +79,6 @@ const KonvaTransformer = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.El
                     ref={trRef}
                     rotateEnabled={false}
                     boundBoxFunc={(oldBox, newBox) => {
-                        // limit resize
                         if (newBox.width < width || newBox.height < height) {
                             return oldBox
                         }

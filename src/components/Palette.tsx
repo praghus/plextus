@@ -8,7 +8,6 @@ import { PALETTES } from '../common/constants'
 import { changePalette, changePrimaryColor } from '../store/editor/actions'
 import { selectPalette, selectSelected } from '../store/editor/selectors'
 import ColorBox from './ColorBox'
-// import { hexToRgba } from "../../common/utils/colors";
 
 const DEFAULT = 'DEFAULT'
 

@@ -19,7 +19,6 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }) 
                         const undoItem = selectUndoItem(state)
                         if (undoItem) {
                             acting = true
-                            // setViewState && dispatch(setViewState(undoItem.afterState))
                             dispatch(getUndoAction(undoItem))
                             setViewState && dispatch(setViewState(undoItem.before))
                             acting = false
