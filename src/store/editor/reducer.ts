@@ -1,8 +1,9 @@
 import { AnyAction } from 'redux'
-import { EditorState } from './types'
+import { Canvas, EditorState } from './types'
 import {
     INITIAL_STATE,
-    EDITOR_CHANGE_CANVAS_SIZE,
+    EDITOR_CHANGE_CANVAS,
+    EDITOR_CHANGE_CANVAS_BACKGROUND,
     EDITOR_CHANGE_GRID_COLOR,
     EDITOR_CHANGE_GRID_PITCH,
     EDITOR_CHANGE_GRID_SIZE,
@@ -28,13 +29,20 @@ import {
 
 function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
     switch (action.type) {
-        case EDITOR_CHANGE_CANVAS_SIZE:
+        case EDITOR_CHANGE_CANVAS:
             return {
                 ...state,
                 canvas: {
-                    ...state.canvas,
                     width: action.payload.width,
                     height: action.payload.height,
+                    background: action.payload.background
+                }
+            }
+        case EDITOR_CHANGE_CANVAS_BACKGROUND:
+            return {
+                ...state,
+                canvas: {
+                    ...(state.canvas as Canvas),
                     background: action.payload.background
                 }
             }

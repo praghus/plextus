@@ -1,8 +1,10 @@
 import { StringTMap } from 'common/types'
 import { AnyAction } from 'redux'
+import { Canvas, DeflatedLayer, Layer, Pallete, Rectangle, Tileset } from './types'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/constants'
 import {
-    EDITOR_CHANGE_CANVAS_SIZE,
+    EDITOR_CHANGE_CANVAS,
+    EDITOR_CHANGE_CANVAS_BACKGROUND,
     EDITOR_CHANGE_GRID_COLOR,
     EDITOR_CHANGE_GRID_PITCH,
     EDITOR_CHANGE_GRID_SIZE,
@@ -38,7 +40,6 @@ import {
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID
 } from './constants'
-import { Canvas, DeflatedLayer, Layer, Pallete, Rectangle, Tileset } from './types'
 
 export const adjustWorkspaceSize = (): AnyAction =>
     changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT - FOOTER_HEIGHT)
@@ -53,9 +54,15 @@ export const resetToDefaults = () =>
         type: EDITOR_RESET_TO_DEFAULTS
     } as const)
 
+export const changeCanvasBackground = (background: number[] | null) =>
+    ({
+        type: EDITOR_CHANGE_CANVAS_BACKGROUND,
+        payload: { background }
+    } as const)
+
 export const changeCanvasSize = (width: number | null, height: number | null) =>
     ({
-        type: EDITOR_CHANGE_CANVAS_SIZE,
+        type: EDITOR_CHANGE_CANVAS,
         payload: { width, height }
     } as const)
 
