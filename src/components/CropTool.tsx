@@ -55,12 +55,12 @@ const CropTool = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.Element =>
                 ref={shapeRef}
                 id="selectRect"
                 fill="rgba(0,128,255,0.3)"
-                onTransform={e => {
+                onTransform={(e: Konva.KonvaEventObject<Event>) => {
                     e.target.scaleX(Math.round((e.target.scaleX() / width) * width))
                     e.target.scaleY(Math.round((e.target.scaleY() / height) * height))
                     e.target.position(setPosition(e))
                 }}
-                onDragMove={e => {
+                onDragMove={(e: Konva.KonvaEventObject<Event>) => {
                     e.target.position(setPosition(e))
                 }}
                 onDragEnd={setArea}

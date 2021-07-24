@@ -100,7 +100,7 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
                             {...{ width, height }}
                             scale={scale.x}
                             grid={{
-                                color: [255, 255, 255, 128],
+                                color: [255, 255, 255],
                                 visible: true,
                                 width: gridSize.w,
                                 height: gridSize.h

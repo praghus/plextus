@@ -41,8 +41,7 @@ import {
 } from '../store/editor/actions'
 import { selectCanvas, selectSelected, selectLayers, selectTileset } from '../store/editor/selectors'
 import ConfirmationDialog from './ConfirmationDialog'
-
-type EditingLayer = { id: string; name: string }
+import LayerPropertiesDialog from './LayerPropertiesDialog'
 
 const useStyles = makeStyles(theme => ({
     layersList: {
@@ -85,6 +84,7 @@ const LayersList = (): JSX.Element => {
 
     const [opacity, setOpacity] = useState(currentLayer ? currentLayer.opacity : 255)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
+    const [propertiesDialogOpen, setPropertiesDialogOpen] = useState(false)
 
     const { t } = useTranslation()
 
@@ -94,13 +94,14 @@ const LayersList = (): JSX.Element => {
     const onChangeLayerVisible = (layerId: string, value: boolean) => dispatch(changeLayerVisible(layerId, value))
     const onChangeLayerOpacity = (layerId: string, value: number) => dispatch(changeLayerOpacity(layerId, value))
     const onChangeLayerName = (layerId: string, value: string) => dispatch(changeLayerName(layerId, value))
-    const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
-    const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
     const onOpacityChange = (event: any, value: any) => setOpacity(value)
     const onOpacityChangeCommitted = (event: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
+    const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
+    const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
 
-    const [editingLayer, setEditingLayer] = useState<EditingLayer | null>()
+    const [editingLayer, setEditingLayer] = useState<Layer | null>()
     const [anchorEl, setAnchorEl] = useState(null)
+    const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
 
     const handleClick = event => {
         setAnchorEl(event.currentTarget)
@@ -169,6 +170,15 @@ const LayersList = (): JSX.Element => {
         handleClose()
     }
 
+    const onUpdateLayer = (model: Layer | null) => {
+        if (model) {
+            const changedLayers = layers.map((layer: Layer) => (layer.id === model.id ? model : layer))
+            setOpacity(model.opacity)
+            onChangeLayers(changedLayers)
+        }
+        setPropertiesDialogOpen(false)
+    }
+
     return (
         <>
             <Typography gutterBottom>{t('layers')}</Typography>
@@ -179,28 +189,43 @@ const LayersList = (): JSX.Element => {
                 onConfirm={onConfirmRemoveLayer}
                 onClose={onCancelRemoveLayer}
             />
+
+            <LayerPropertiesDialog
+                layer={selectedLayer}
+                open={propertiesDialogOpen}
+                onSave={onUpdateLayer}
+                onClose={() => setPropertiesDialogOpen(false)}
+            />
+
             <List className={classes.layersList}>
-                {reversedList.map(({ id, image, name, visible }) => (
+                {reversedList.map((layer: Layer) => (
                     <ListItem
                         dense
                         button
-                        key={id}
-                        selected={id === selected.layerId}
+                        key={layer.id}
+                        selected={layer.id === selected.layerId}
                         onClick={() => {
-                            const layer = getLayerById(layers, id)
-                            if (layer) {
-                                setOpacity(layer.opacity)
-                                onChangeSelectedLayer(id)
+                            const l = getLayerById(layers, layer.id)
+                            if (l) {
+                                setOpacity(l.opacity)
+                                onChangeSelectedLayer(l.id)
                             }
                         }}
                         onDoubleClick={() => {
-                            setEditingLayer({ id, name })
+                            setEditingLayer(layer)
                         }}
                     >
                         <ListItemIcon>
-                            {image ? <ImageIcon fontSize="small" /> : <AppsIcon fontSize="small" />}
+                            <IconButton
+                                edge="start"
+                                onClick={() => {
+                                    setPropertiesDialogOpen(true)
+                                }}
+                            >
+                                {layer.image ? <ImageIcon fontSize="small" /> : <AppsIcon fontSize="small" />}
+                            </IconButton>
                         </ListItemIcon>
-                        {id === editingLayer?.id ? (
+                        {layer.id === editingLayer?.id ? (
                             <TextField
                                 autoFocus
                                 fullWidth
@@ -222,16 +247,20 @@ const LayersList = (): JSX.Element => {
                                 }}
                             />
                         ) : (
-                            <ListItemText id={`checkbox-list-label-${id}`} primary={name} />
+                            <ListItemText id={`checkbox-list-label-${layer.id}`} primary={layer.name} />
                         )}
                         <ListItemSecondaryAction>
                             <IconButton
                                 edge="end"
                                 onClick={() => {
-                                    onChangeLayerVisible(id, !visible)
+                                    onChangeLayerVisible(layer.id, !layer.visible)
                                 }}
                             >
-                                {visible ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
+                                {layer.visible ? (
+                                    <VisibilityIcon fontSize="small" />
+                                ) : (
+                                    <VisibilityOffIcon fontSize="small" />
+                                )}
                             </IconButton>
                         </ListItemSecondaryAction>
                     </ListItem>
