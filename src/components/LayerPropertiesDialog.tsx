@@ -145,5 +145,6 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
         </Dialog>
     )
 }
+LayerPropertiesDialog.displayName = 'LayerPropertiesDialog'
 
 export default LayerPropertiesDialog

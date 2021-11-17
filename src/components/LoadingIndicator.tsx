@@ -37,7 +37,7 @@ const LoadingIndicator = ({ color, loading, size }: Props): JSX.Element => {
         </Backdrop>
     )
 }
-
+LoadingIndicator.displayName = 'LoadingIndicator'
 LoadingIndicator.defaultProps = {
     size: 15,
     color: '#fff'

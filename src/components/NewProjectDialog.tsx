@@ -234,5 +234,6 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
         </Dialog>
     )
 }
+NewProjectDialog.displayName = 'NewProjectDialog'
 
 export default NewProjectDialog

@@ -18,5 +18,6 @@ const TileReplaceIcon = (props): JSX.Element => (
         />
     </SvgIcon>
 )
+TileReplaceIcon.displayName = 'TileReplaceIcon'
 
 export default TileReplaceIcon

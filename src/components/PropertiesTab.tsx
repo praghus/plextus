@@ -121,7 +121,7 @@ const PropertiesTab = (): JSX.Element => {
                                     color.rgb && onChangeCanvasBackground(color.alpha > 0 ? color.rgb : null)
                                 }}
                             />
-                            Map background
+                            Background color
                         </StyledPropContainer>
                     </Grid>
                 </Grid>
@@ -129,5 +129,6 @@ const PropertiesTab = (): JSX.Element => {
         </Card>
     )
 }
+PropertiesTab.displayName = 'PropertiesTab'
 
 export default PropertiesTab

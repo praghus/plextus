@@ -10,31 +10,16 @@ import { Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types
 
 type Props = {
     grid: Grid
-    isMouseDown: boolean
-    isMouseOver: boolean
     pointerPosition: Konva.Vector2d
-    scale: number
     selected: Selected
     selectedLayer: Layer | null
     tileset: Tileset
     workspace: Workspace
 }
 
-const Pointer = ({
-    grid,
-    isMouseDown,
-    isMouseOver,
-    pointerPosition,
-    scale,
-    selected,
-    selectedLayer,
-    tileset,
-    workspace
-}: Props): JSX.Element | null => {
-    if (isMouseDown || !isMouseOver || [TOOLS.DRAG, TOOLS.CROP, TOOLS.OFFSET].includes(selected.tool)) {
-        return null
-    }
+const Pointer = ({ grid, pointerPosition, selected, selectedLayer, tileset, workspace }: Props): JSX.Element | null => {
     const { tilewidth: width, tileheight: height } = tileset
+    const { scale } = workspace
 
     const pointerRef = useRef<Konva.Rect>(null)
     const pointerOverlayRef = useRef<Konva.Rect>(null)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import styled from '@emotion/styled'
 import { debounce } from 'lodash'
 import { useTranslation } from 'react-i18next'
@@ -254,5 +254,5 @@ const ToolBar = (): JSX.Element => {
         </>
     )
 }
-
+ToolBar.displayName = 'ToolBar'
 export default ToolBar
