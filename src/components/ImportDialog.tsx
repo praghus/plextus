@@ -438,5 +438,6 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
         </Dialog>
     )
 }
+ImportDialog.displayName = 'ImportDialog'
 
 export default ImportDialog

@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Konva from 'konva'
 import { debounce } from 'lodash'
 import { jsx, css } from '@emotion/react'
@@ -71,12 +71,22 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
 
-    const [isMouseDown, setIsMouseDown] = useState(false)
-    const [isMouseOver, setIsMouseOver] = useState(false)
+    const backgroundColor = canvas.background && getRgbaValue(canvas.background)
+    const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
+    const stage = stageRef.current
+
+    const [isMouseDown, setIsMouseDown] = useState<boolean>(false)
+    const [isMouseOver, setIsMouseOver] = useState<boolean>(false)
     const [pointerPosition, setPointerPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
     const [keyDown, setKeyDown] = useState<KeyboardEvent | null>(null)
 
+    const isPointerVisible = useMemo(
+        () => !isMouseDown && isMouseOver && ![TOOLS.DRAG, TOOLS.CROP, TOOLS.OFFSET].includes(selected.tool),
+        [isMouseDown, isMouseOver, selected.tool]
+    )
+
     const dispatch = useDispatch()
+
     const onUndo = () => dispatch(undo())
     const onRedo = () => dispatch(redo())
     const onCrop = () => dispatch(crop())
@@ -89,8 +99,6 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
-    const onKeyDown = (e: KeyboardEvent) => setKeyDown(e)
-    const onKeyUp = () => setKeyDown(null)
 
     const onChangePosition = useCallback(
         debounce((x, y) => dispatch(changePosition(x, y)), 300),
@@ -102,58 +110,11 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         []
     )
 
-    const backgroundColor = canvas.background && getRgbaValue(canvas.background)
-    const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
-    const stage = stageRef.current
+    const onKeyUp = () => setKeyDown(null)
+    const onKeyDown = (keyDown: KeyboardEvent) => setKeyDown(keyDown)
 
-    console.info(backgroundColor)
-
-    useEffect(() => {
-        window.addEventListener('keydown', onKeyDown)
-        window.addEventListener('keyup', onKeyUp)
-        return () => {
-            window.removeEventListener('keydown', onKeyDown)
-            window.removeEventListener('keyup', onKeyUp)
-        }
-    }, [])
-
-    useEffect(() => {
-        const { scale, x, y } = workspace
-        const stage = stageRef.current
-        if (stage) {
-            if (x && y) {
-                stage.position({ x, y })
-                stage.scale({ x: scale, y: scale })
-                stage.batchDraw()
-            } else {
-                centerStage(stage, canvas, workspace, (x, y, scale) => {
-                    onChangePosition(x, y)
-                    onChangeScale(scale)
-                })
-            }
-        }
-        onAdjustWorkspaceSize()
-    }, [canvas])
-
-    useEffect(() => {
-        if (keyDown) {
-            if (keyDown.code === 'KeyZ' && (keyDown.ctrlKey || keyDown.metaKey)) {
-                keyDown.shiftKey ? onRedo() : onUndo()
-            }
-            if (keyDown.code === 'Enter' && selected.tool === TOOLS.CROP) {
-                onCrop()
-            }
-        }
-    }, [keyDown])
-
-    useEffect(() => {
-        if (stageRef.current && selected.tool == TOOLS.CROP) {
-            centerStage(stageRef.current, canvas, workspace, (x, y, scale) => {
-                onChangePosition(x, y)
-                onChangeScale(scale)
-            })
-        }
-    }, [selected.tool])
+    const onDragEnd = () => stage && onChangePosition(stage.x(), stage.y())
+    const onMouseMove = () => stage && setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
 
     const onScale = (newScale: number) => {
         if (stage) {
@@ -193,17 +154,51 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         e.evt.preventDefault()
     }
 
-    const onDragEnd = () => {
-        if (stage) {
-            onChangePosition(stage.x(), stage.y())
+    useEffect(() => {
+        window.addEventListener('keydown', onKeyDown)
+        window.addEventListener('keyup', onKeyUp)
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+            window.removeEventListener('keyup', onKeyUp)
         }
-    }
+    }, [])
 
-    const onMouseMove = () => {
+    useEffect(() => {
+        const { scale, x, y } = workspace
         if (stage) {
-            setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
+            if (x && y) {
+                stage.position({ x, y })
+                stage.scale({ x: scale, y: scale })
+                stage.batchDraw()
+            } else {
+                centerStage(stage, canvas, workspace, (x, y, scale) => {
+                    onChangePosition(x, y)
+                    onChangeScale(scale)
+                })
+            }
         }
-    }
+        onAdjustWorkspaceSize()
+    }, [stage, canvas])
+
+    useEffect(() => {
+        if (stage && selected.tool == TOOLS.CROP) {
+            centerStage(stage, canvas, workspace, (x, y, scale) => {
+                onChangePosition(x, y)
+                onChangeScale(scale)
+            })
+        }
+    }, [selected.tool])
+
+    useEffect(() => {
+        if (keyDown) {
+            if (keyDown.code === 'KeyZ' && (keyDown.ctrlKey || keyDown.metaKey)) {
+                keyDown.shiftKey ? onRedo() : onUndo()
+            }
+            if (keyDown.code === 'Enter' && selected.tool === TOOLS.CROP) {
+                onCrop()
+            }
+        }
+    }, [keyDown])
 
     const layerProps = {
         canvas,
@@ -268,19 +263,18 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                             scale={workspace.scale}
                             {...{ grid }}
                         />
-                        <Pointer
-                            scale={workspace.scale}
-                            {...{
-                                grid,
-                                isMouseDown,
-                                isMouseOver,
-                                pointerPosition,
-                                selected,
-                                selectedLayer,
-                                tileset,
-                                workspace
-                            }}
-                        />
+                        {isPointerVisible && (
+                            <Pointer
+                                {...{
+                                    grid,
+                                    pointerPosition,
+                                    selected,
+                                    selectedLayer,
+                                    tileset,
+                                    workspace
+                                }}
+                            />
+                        )}
                     </Layer>
                 </Stage>
             </div>
@@ -288,5 +282,6 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         </div>
     )
 }
+KonvaStage.displayName = 'KonvaStage'
 
 export default KonvaStage

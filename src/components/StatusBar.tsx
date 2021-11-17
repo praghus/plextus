@@ -192,5 +192,6 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
         </StyledStatusBar>
     )
 }
+StatusBar.displayName = 'StatusBar'
 
 export default StatusBar

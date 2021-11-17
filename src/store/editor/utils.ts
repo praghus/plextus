@@ -86,7 +86,7 @@ export const getTilesetDimensions = (tileset: Tileset) => ({
 
 export const getStateToSave = async state => {
     const editorState = state[EDITOR_RESOURCE_NAME]
-    const stateToSave = {
+    return {
         [EDITOR_RESOURCE_NAME]: {
             ...editorState,
             layers: await Promise.all(
@@ -100,7 +100,6 @@ export const getStateToSave = async state => {
             }
         }
     }
-    return stateToSave
 }
 
 export const loadStateFromStore = async () => {

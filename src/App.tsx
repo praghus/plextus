@@ -117,7 +117,7 @@ const App = (): JSX.Element => {
         </StyledWrapper>
     )
 }
+App.displayName = 'Plextus'
 
 declare let module: Record<string, unknown>
-
 export default hot(module)(App)

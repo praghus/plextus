@@ -341,5 +341,6 @@ const LayersList = (): JSX.Element => {
         </>
     )
 }
+LayersList.displayName = 'LayersList'
 
 export default LayersList

@@ -17,6 +17,15 @@ export const createEmptyImage = (width: number, height: number): Promise<Blob> =
         imageElement.toBlob((blob: Blob) => resolve(blob), 'image/png')
     })
 
+export const downloadImage = (canvas: HTMLCanvasElement) => {
+    const downloadLink = document.createElement('a')
+    const dataURL = canvas.toDataURL('image/png')
+    const url = dataURL.replace(/^data:image\/png/, 'data:application/octet-stream')
+    downloadLink.setAttribute('download', 'tileset.png')
+    downloadLink.setAttribute('href', url)
+    downloadLink.click()
+}
+
 export const uploadImage = (file: Blob): Promise<{ blob: Blob; width: number; height: number }> =>
     new Promise((resolve, reject) => {
         const img = new window.Image()

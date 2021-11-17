@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,7 @@ import { getTilesetDimensions, createEmptyTile, getTilePos } from '../store/edit
 import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } from '../store/editor/actions'
 import { selectGrid, selectSelected, selectTileset } from '../store/editor/selectors'
 import { getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
+import { downloadImage } from '../common/utils/image'
 import { RIGHT_BAR_WIDTH, SCALE_STEP } from '../common/constants'
 import { Workspace, Tileset as TilesetType } from '../store/editor/types'
 import ConfirmationDialog from './ConfirmationDialog'
@@ -64,8 +65,6 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         height: 500
     })
 
-    const { columns, tilecount, tilewidth, tileheight } = tileset
-
     const dispatch = useDispatch()
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
@@ -74,9 +73,12 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
     const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
 
+    const stage = stageRef.current
+    const container = containerRef.current
+
     const onMouseDown = () => {
-        const stage = stageRef.current
         if (stage) {
+            const { columns, tilecount } = tileset
             const localPos = getPointerRelativePos(
                 {
                     x: stage.x(),
@@ -94,7 +96,6 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     }
 
     const repositionStage = (left: number, top: number): void => {
-        const stage = stageRef.current
         if (stage) {
             const boundsX = imageDimensions.w * scale.x - size.width
             const boundsY = imageDimensions.h * scale.y - size.height
@@ -108,15 +109,14 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         }
     }
 
-    const onResize = () => {
-        const container = containerRef.current
+    const onResize = useCallback(() => {
         if (container) {
             setSize({
                 width: container.offsetWidth,
                 height: container.offsetHeight
             })
         }
-    }
+    }, [container])
 
     const onScroll = (e: React.UIEvent<HTMLElement>): void => {
         const element = e.currentTarget as HTMLInputElement
@@ -126,8 +126,6 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     }
 
     const onScale = (newScale: any): void => {
-        const stage = stageRef.current
-        const container = containerRef.current
         if (stage && container) {
             stage.scale(scale)
             container.scrollTop = 0
@@ -145,19 +143,20 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         })
     }
 
-    const onDeleteTile = () => {
+    const onDeleteTile = (tileId: number) => {
         if (tilesetContext) {
+            const { columns, tilecount, tilewidth, tileheight } = tileset
             const newTileCount = tilecount > 1 ? tilecount - 1 : 1
             const newWidth = columns * tilewidth
             const newHeight = Math.ceil(newTileCount / columns) * tileheight
             if (tilecount > 1) {
-                for (let gid = selected.tileId; gid <= tilecount; gid += 1) {
+                for (let gid = tileId; gid <= tilecount; gid += 1) {
                     const { x, y } = getTilePos(gid, tileset)
                     const { x: newX, y: newY } = getTilePos(gid - 1, tileset)
                     const tile = tilesetContext.getImageData(x, y, tilewidth, tileheight)
 
                     tilesetContext.clearRect(x, y, tilewidth, tileheight)
-                    if (gid > selected.tileId) {
+                    if (gid > tileId) {
                         tilesetContext.putImageData(tile, newX, newY)
                     }
                 }
@@ -170,27 +169,18 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                 tilesetContext.clearRect(0, 0, tilewidth, tileheight)
             }
             tilesetCanvas.toBlob(blob => {
-                onRemoveTile(selected.tileId, {
+                onRemoveTile(tileId, {
                     ...tileset,
                     image: window.URL.createObjectURL(blob),
                     tilecount: newTileCount
                 })
-                if (selected.tileId > newTileCount) {
-                    onChangeSelectedTile(selected.tileId - 1)
+                if (tileId > newTileCount) {
+                    onChangeSelectedTile(tileId - 1)
                 }
             })
-            stageRef.current?.batchDraw()
+            stage?.batchDraw()
         }
         setConfirmationDialogOpen(false)
-    }
-
-    const onDownloadTilesetImage = () => {
-        const downloadLink = document.createElement('a')
-        const dataURL = tilesetCanvas.toDataURL('image/png')
-        const url = dataURL.replace(/^data:image\/png/, 'data:application/octet-stream')
-        downloadLink.setAttribute('download', 'tileset.png')
-        downloadLink.setAttribute('href', url)
-        downloadLink.click()
     }
 
     useEffect(() => {
@@ -199,13 +189,14 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         return () => {
             window.removeEventListener('resize', onResize)
         }
-    }, [tileset])
+    }, [onResize, tileset])
 
     useEffect(() => {
+        const { columns, tilewidth, tileheight } = tileset
         const x = ((selected.tileId - 1) % columns) * tilewidth
         const y = Math.ceil(selected.tileId / columns - 1) * tileheight
         setPosition({ x, y })
-    }, [selected.tileId])
+    }, [selected.tileId, tileset])
 
     return (
         <>
@@ -213,7 +204,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                 title={t('hold_on')}
                 message={t('delete_tile_confirmation')}
                 open={confirmationDialogOpen}
-                onConfirm={onDeleteTile}
+                onConfirm={() => onDeleteTile(selected.tileId)}
                 onClose={onCancelRemoveLayer}
             />
             <StyledTilesetImageContainer ref={containerRef} {...{ onScroll }}>
@@ -229,8 +220,8 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                             <Rect
                                 x={position.x}
                                 y={position.y}
-                                width={tilewidth}
-                                height={tileheight}
+                                width={tileset.tilewidth}
+                                height={tileset.tileheight}
                                 shadowBlur={5}
                                 strokeWidth={1 / scale.x}
                                 stroke="#96cdff"
@@ -263,7 +254,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Download tileset" placement="bottom-end">
-                        <IconButton size="small" onClick={onDownloadTilesetImage}>
+                        <IconButton size="small" onClick={() => downloadImage(tilesetCanvas)}>
                             <SaveAltIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
@@ -272,5 +263,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         </>
     )
 }
+
+Tileset.displayName = 'Tileset'
 
 export default Tileset

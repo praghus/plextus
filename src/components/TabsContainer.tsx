@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux'
 import { debounce } from 'lodash'
@@ -28,16 +28,18 @@ type Props = {
 }
 
 const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
+    const [tab, setTab] = useState(0)
     const classes = useStyles()
     const dispatch = useDispatch()
     const selected = useSelector(selectSelected)
+
     const [r, g, b, a] = selected.color
     const color = { r, g, b, a: (isNaN(a) && 255) || (a > 0 && a / 255) || 0 }
-    const onChangeColor = useCallback(
-        debounce(color => dispatch(changePrimaryColor([color.r, color.g, color.b, color.a * 255])), 300),
-        []
+    const onChangeColor = debounce(
+        color => dispatch(changePrimaryColor([color.r, color.g, color.b, color.a * 255])),
+        300
     )
-    const [tab, setTab] = useState(0)
+
     const onChange = (event: any, value: any) => setTab(value)
 
     return (
@@ -62,5 +64,5 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
         </>
     )
 }
-
+TabContainer.displayName = 'TabContainer'
 export default TabContainer

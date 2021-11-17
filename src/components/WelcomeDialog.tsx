@@ -51,4 +51,6 @@ const WelcomeDialog = (): JSX.Element => {
         </Dialog>
     )
 }
+WelcomeDialog.displayName = 'WelcomeDialog'
+
 export default WelcomeDialog

@@ -119,5 +119,6 @@ const ImportPreview = ({ gridSize, imageDimensions, offset, previewImage }: Prop
         </>
     )
 }
+ImportPreview.displayName = 'ImportPreview'
 
 export default ImportPreview

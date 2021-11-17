@@ -12,5 +12,6 @@ const StampIcon = (props): JSX.Element => (
         />
     </SvgIcon>
 )
+StampIcon.displayName = 'StampIcon'
 
 export default StampIcon

@@ -107,5 +107,6 @@ const Palette = (): JSX.Element => {
         </>
     )
 }
+Palette.displayName = 'Palette'
 
 export default Palette

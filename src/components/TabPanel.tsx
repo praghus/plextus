@@ -1,8 +1,13 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import Box from '@material-ui/core/Box'
 
-const TabPanel = ({ children, value, index, ...other }): JSX.Element => (
+type Props = {
+    children?: React.ReactNode
+    index: number
+    value: number
+}
+
+const TabPanel = ({ children, value, index, ...other }: Props): JSX.Element => (
     <div
         role="tabpanel"
         hidden={value !== index}
@@ -13,11 +18,6 @@ const TabPanel = ({ children, value, index, ...other }): JSX.Element => (
         {value === index && <Box>{children}</Box>}
     </div>
 )
-
-TabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.any.isRequired,
-    value: PropTypes.any.isRequired
-}
+TabPanel.displayName = 'TabPanel'
 
 export default TabPanel

@@ -11,5 +11,6 @@ const LineIcon = (props): JSX.Element => (
         />
     </SvgIcon>
 )
+LineIcon.displayName = 'LineIcon'
 
 export default LineIcon

@@ -9,6 +9,7 @@ module.exports = {
         'plugin:import/warnings',
         'plugin:jsdoc/recommended',
         'plugin:promise/recommended',
+        'plugin:react-hooks/recommended',
         'plugin:react-redux/recommended',
         'plugin:react/recommended',
         'plugin:redux-saga/recommended',
@@ -77,6 +78,7 @@ module.exports = {
         'prefer-rest-params': 0,
         radix: 0,
         quotes: [1, 'single'],
+        'react-hooks/exhaustive-deps': 0,
         'react-redux/prefer-separate-component-file': 0,
         'react/default-props-match-prop-types': 0,
         'react/jsx-filename-extension': [
@@ -93,6 +95,7 @@ module.exports = {
             }
         ],
         'react/destructuring-assignment': 0,
+        'react/display-name': [2, { ignoreTranspilerName: true }],
         'react/jsx-fragments': 0,
         'react/jsx-no-bind': 0,
         'react/jsx-props-no-spreading': 0,

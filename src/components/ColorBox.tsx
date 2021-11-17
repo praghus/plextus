@@ -35,5 +35,6 @@ const ColorBox = ({ onClick, selected, rgba }: Props): JSX.Element => (
         style={{ backgroundColor: getRgbaValue(rgba) }}
     />
 )
+ColorBox.displayName = 'ColorBox'
 
 export default ColorBox

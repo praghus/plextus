@@ -61,6 +61,7 @@ export const INITIAL_STATE = {
         area: null as Rectangle | null,
         color: DEFAULT_PALLETE[0],
         layerId,
+        stamp: [] as (number|null)[][],
         tileId: 1,
         tool: TOOLS.DRAG,
         toolSize: 1

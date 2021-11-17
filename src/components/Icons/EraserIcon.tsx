@@ -12,5 +12,6 @@ const EraserIcon = (props): JSX.Element => (
         />
     </SvgIcon>
 )
+EraserIcon.displayName = 'EraserIcon'
 
 export default EraserIcon

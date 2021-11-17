@@ -44,4 +44,6 @@ const Footer = (): JSX.Element => (
         .
     </StyledFooter>
 )
+Footer.displayName = 'Footer'
+
 export default Footer
