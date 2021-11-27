@@ -6,28 +6,11 @@ import { APP_RESOURCE_NAME, INITIAL_STATE } from './constants'
 type RootState = ReturnType<typeof store.getState>
 
 export const selectApp = (state: RootState): AppState => state[APP_RESOURCE_NAME] || INITIAL_STATE
-
-export const selectLastUpdateTime = createSelector<typeof selectApp, AppState, number>(
-    selectApp,
-    ({ lastUpdateTime }) => lastUpdateTime
-)
-
-export const selectIsLoading = createSelector<typeof selectApp, AppState, boolean>(
-    selectApp,
-    ({ isLoading }) => isLoading
-)
-
-export const selectIsImportDialogOpen = createSelector<typeof selectApp, AppState, boolean>(
-    selectApp,
-    ({ isImportDialogOpen }) => isImportDialogOpen
-)
-
-export const selectIsNewProjectDialogOpen = createSelector<typeof selectApp, AppState, boolean>(
+export const selectIsLoading = createSelector(selectApp, ({ isLoading }) => isLoading)
+export const selectIsLoaded = createSelector(selectApp, ({ isLoading, isLoaded }) => !isLoading && isLoaded)
+export const selectLastUpdateTime = createSelector(selectApp, ({ lastUpdateTime }) => lastUpdateTime)
+export const selectIsImportDialogOpen = createSelector(selectApp, ({ isImportDialogOpen }) => isImportDialogOpen)
+export const selectIsNewProjectDialogOpen = createSelector(
     selectApp,
     ({ isNewProjectDialogOpen }) => isNewProjectDialogOpen
-)
-
-export const selectIsLoaded = createSelector<typeof selectApp, AppState, boolean>(
-    selectApp,
-    ({ isLoading, isLoaded }) => !isLoading && isLoaded
 )

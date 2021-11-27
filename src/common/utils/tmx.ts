@@ -79,8 +79,8 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
     const doc = create({
         map: {
             '@': {
-                version: 1.7,
-                tiledversion: '1.7.1',
+                version: 1.7, // move to const
+                tiledversion: '1.7.1', // move to const
                 orientation: 'orthogonal',
                 renderorder: 'right-down',
                 type: 'map',

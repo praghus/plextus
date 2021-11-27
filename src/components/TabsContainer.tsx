@@ -28,19 +28,18 @@ type Props = {
 }
 
 const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
-    const [tab, setTab] = useState(0)
     const classes = useStyles()
     const dispatch = useDispatch()
     const selected = useSelector(selectSelected)
 
+    const [tab, setTab] = useState(0)
     const [r, g, b, a] = selected.color
     const color = { r, g, b, a: (isNaN(a) && 255) || (a > 0 && a / 255) || 0 }
+    const onChange = (e: any, value: any) => setTab(value)
     const onChangeColor = debounce(
         color => dispatch(changePrimaryColor([color.r, color.g, color.b, color.a * 255])),
         300
     )
-
-    const onChange = (event: any, value: any) => setTab(value)
 
     return (
         <>
@@ -65,4 +64,5 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
     )
 }
 TabContainer.displayName = 'TabContainer'
+
 export default TabContainer

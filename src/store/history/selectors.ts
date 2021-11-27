@@ -2,28 +2,17 @@ import { isEmpty } from 'lodash'
 import { createSelector } from 'reselect'
 import { store } from '../store'
 import { HISTORY_RESOURCE_NAME } from './constants'
-import { HistoryState } from './types'
-
-type RootState = ReturnType<typeof store.getState>
+import { HistoryState, UndoRedoAction } from './types'
 
 export const selectHistory = (state: ReturnType<typeof store.getState>): HistoryState => state[HISTORY_RESOURCE_NAME]
-
-export const selectUndoItem = createSelector<typeof selectHistory, HistoryState, any>(
+export const selectUndoItem = createSelector(selectHistory, ({ undo }): UndoRedoAction => undo[0])
+export const selectRedoItem = createSelector(selectHistory, ({ redo }): UndoRedoAction => redo[0])
+export const selectIsPristine = createSelector(
     selectHistory,
-    ({ undo }) => undo[0]
+    ({ undo, redo }): boolean => isEmpty(undo) && isEmpty(redo)
 )
 
-export const selectRedoItem = createSelector<typeof selectHistory, HistoryState, any>(
-    selectHistory,
-    ({ redo }) => redo[0]
-)
-
-export const selectIsPristine = createSelector<typeof selectHistory, RootState, boolean>(
-    selectHistory,
-    ({ undo, redo }) => isEmpty(undo) && isEmpty(redo)
-)
-
-// export const selectHistoryTilesets = createSelector<typeof selectHistory, RootState, string[]>(
+// export const selectHistoryTilesets = createSelector(
 //     selectHistory,
 //     ({ undo, redo }) => {
 //         const undoImages = undo.map(({ before }) => before.tileset && before.tileset.image)

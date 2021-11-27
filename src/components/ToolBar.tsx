@@ -98,7 +98,7 @@ const ToolBar = (): JSX.Element => {
 
     const dispatch = useDispatch()
     const handleClose = () => setAnchorEl(null)
-    const handleClick = (event: React.MouseEvent) => setAnchorEl(event.currentTarget as HTMLAnchorElement)
+    const handleClick = (e: React.MouseEvent) => setAnchorEl(e.currentTarget as HTMLAnchorElement)
     const onChangeTool = (tool: string) => tool && dispatch(changeTool(tool))
     const onSaveChanges = () => dispatch(saveChanges())
     const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
@@ -112,19 +112,22 @@ const ToolBar = (): JSX.Element => {
         []
     )
 
+    const renderToolButton = useCallback(
+        (value: string, Icon: any) => (
+            <ToggleButton {...{ value }}>
+                <Tooltip title={TOOLS_DESC[value]} placement="right" classes={{ tooltip: classes.tooltip }}>
+                    <div>
+                        <Icon fontSize="small" className={classes.icon} />
+                    </div>
+                </Tooltip>
+            </ToggleButton>
+        ),
+        [classes]
+    )
+
     useEffect(() => {
         setPrimaryColor(rgbaToHex(selected.color))
     }, [selected.color])
-
-    const renderToolButton = (value: string, Icon: any) => (
-        <ToggleButton {...{ value }}>
-            <Tooltip title={TOOLS_DESC[value]} placement="right" classes={{ tooltip: classes.tooltip }}>
-                <div>
-                    <Icon fontSize="small" className={classes.icon} />
-                </div>
-            </Tooltip>
-        </ToggleButton>
-    )
 
     return (
         <>
@@ -255,4 +258,5 @@ const ToolBar = (): JSX.Element => {
     )
 }
 ToolBar.displayName = 'ToolBar'
+
 export default ToolBar

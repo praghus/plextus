@@ -1,9 +1,7 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
-import { TOOLS } from '../common/constants'
-import { INITIAL_STATE } from '../store/editor/constants'
 import {
     Button,
     Dialog,
@@ -15,22 +13,9 @@ import {
     TextField,
     Typography
 } from '@material-ui/core'
-import {
-    changeCanvasSize,
-    changeGridSize,
-    changePosition,
-    changeLayers,
-    changeScale,
-    changeSelectedLayer,
-    changeSelectedTile,
-    changeTileset,
-    changeTool,
-    saveChanges
-} from '../store/editor/actions'
-import { clear } from '../store/history/actions'
-import { createEmptyLayer } from '../store/editor/utils'
-import { Layer, Tileset } from '../store/editor/types'
-import { selectTileset, selectWorkspace } from '../store/editor/selectors'
+import { selectTileset } from '../store/editor/selectors'
+import { createNewProject } from '../store/editor/actions'
+import { ProjectConfig } from '../store/editor/types'
 
 const ImageResolutionInfo = withStyles({ root: { color: '#222' } })(Typography)
 
@@ -57,25 +42,14 @@ type Props = {
 
 const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
     const tileset = useSelector(selectTileset)
-    const workspace = useSelector(selectWorkspace)
     const classes = useStyles()
-    const dispatch = useDispatch()
 
     const { t } = useTranslation()
 
-    const onChangePosition = (x: number, y: number) => dispatch(changePosition(x, y))
-    const onChangeCanvasSize = (width: number, height: number) => dispatch(changeCanvasSize(width, height))
-    const onChangeGridSize = (width: number, height: number) => dispatch(changeGridSize(width, height))
-    const onChangeScale = (scale: number) => dispatch(changeScale(scale))
-    const onChangeSelectedLayer = (value: string) => dispatch(changeSelectedLayer(value))
-    const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
-    const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
-    const onClearHistory = () => dispatch(clear())
-    const onSaveChanges = () => dispatch(saveChanges())
-    const onSaveLayers = (layers: Layer[]) => dispatch(changeLayers(layers))
-    const onChangeTool = tool => tool && dispatch(changeTool(tool))
+    const dispatch = useDispatch()
+    const onCreateNewProject = (config: ProjectConfig) => dispatch(createNewProject(config))
 
-    const [config, setConfig] = useState({
+    const [config, setConfig] = useState<ProjectConfig>({
         w: 160 / tileset.tilewidth,
         h: 160 / tileset.tileheight,
         columns: tileset.columns,
@@ -83,36 +57,19 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
         tileheight: tileset.tileheight
     })
 
-    const onSave = () => {
-        const { w, h, columns, tilewidth, tileheight } = config
-        const width = w * tilewidth
-        const height = h * tileheight
-        const newScale = height >= width ? workspace.height / height : workspace.width / width
-        const layer = createEmptyLayer('Layer 1', w, h)
-
-        onChangeScale(newScale)
-        onChangePosition((workspace.width - width * newScale) / 2, (workspace.height - height * newScale) / 2)
-        onChangeCanvasSize(width, height)
-        onChangeGridSize(tilewidth, tileheight)
-        onSaveLayers([layer])
-        onChangeSelectedLayer(layer.id)
-        onChangeTileset({
-            ...INITIAL_STATE.tileset,
-            columns,
-            tilewidth,
-            tileheight,
-            tilecount: 1,
-            lastUpdateTime: performance.now()
-        })
-        onChangeSelectedTile(1)
-        onChangeTool(TOOLS.DRAG)
-        onSaveChanges()
-        onClearHistory()
+    const onSave = useCallback(() => {
+        onCreateNewProject(config)
         onClose()
-    }
+    }, [])
+
+    const handleClose = useCallback((e: any, reason: string): void => {
+        if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
+            onClose()
+        }
+    }, [])
 
     return (
-        <Dialog open disableBackdropClick disableEscapeKeyDown onClose={onClose} aria-labelledby="form-dialog-title">
+        <Dialog open onClose={handleClose} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">{t('new_project')}</DialogTitle>
             <DialogContent>
                 <form className={classes.root} noValidate autoComplete="off">
@@ -222,7 +179,6 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                 <ImageResolutionInfo variant="caption" display="block">
                     {config.w * config.tilewidth} x {config.h * config.tileheight} pixels
                 </ImageResolutionInfo>
-
                 <div style={{ flex: '1 0 0' }} />
                 <Button onClick={onClose} color="primary">
                     Cancel

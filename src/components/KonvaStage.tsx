@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Konva from 'konva'
 import { debounce } from 'lodash'
 import { jsx, css } from '@emotion/react'
@@ -63,7 +63,6 @@ type Props = {
 }
 
 const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
-    const stageRef = useRef<Konva.Stage>(null)
     const selected = useSelector(selectSelected)
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
@@ -73,8 +72,8 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
 
     const backgroundColor = canvas.background && getRgbaValue(canvas.background)
     const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
-    const stage = stageRef.current
 
+    const [stage, setStage] = useState<Konva.Stage>()
     const [isMouseDown, setIsMouseDown] = useState<boolean>(false)
     const [isMouseOver, setIsMouseOver] = useState<boolean>(false)
     const [pointerPosition, setPointerPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
@@ -100,6 +99,11 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
 
+    const onKeyUp = () => setKeyDown(null)
+    const onKeyDown = (keyDown: KeyboardEvent) => setKeyDown(keyDown)
+    const onDragEnd = () => stage && onChangePosition(stage.x(), stage.y())
+    const onMouseMove = () => stage && setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
+
     const onChangePosition = useCallback(
         debounce((x, y) => dispatch(changePosition(x, y)), 300),
         []
@@ -110,49 +114,53 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         []
     )
 
-    const onKeyUp = () => setKeyDown(null)
-    const onKeyDown = (keyDown: KeyboardEvent) => setKeyDown(keyDown)
+    const handleStage = useCallback(node => {
+        setStage(node)
+    }, [])
 
-    const onDragEnd = () => stage && onChangePosition(stage.x(), stage.y())
-    const onMouseMove = () => stage && setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
-
-    const onScale = (newScale: number) => {
-        if (stage) {
-            const pointer = stage.getPointerPosition()
-            if (pointer) {
-                const { x, y } = pointer
-                const oldScale = stage.scaleX()
-                const newPos = {
-                    x: x - ((x - stage.x()) / oldScale) * newScale,
-                    y: y - ((y - stage.y()) / oldScale) * newScale
+    const onScale = useCallback(
+        (newScale: number) => {
+            if (stage) {
+                const pointer = stage.getPointerPosition()
+                if (pointer) {
+                    const { x, y } = pointer
+                    const oldScale = stage.scaleX()
+                    const newPos = {
+                        x: x - ((x - stage.x()) / oldScale) * newScale,
+                        y: y - ((y - stage.y()) / oldScale) * newScale
+                    }
+                    onChangeScale(newScale)
+                    onChangePosition(newPos.x, newPos.y)
+                    stage.scale({ x: newScale, y: newScale })
+                    stage.position(newPos)
+                    stage.batchDraw()
                 }
-                onChangeScale(newScale)
-                onChangePosition(newPos.x, newPos.y)
-                stage.scale({ x: newScale, y: newScale })
-                stage.position(newPos)
+            }
+        },
+        [stage]
+    )
+
+    const onWheel = useCallback(
+        (e: Konva.KonvaEventObject<WheelEvent>) => {
+            if (stage) {
+                const { altKey, deltaX, deltaY } = e.evt
+                if (altKey) {
+                    const newScale = deltaY > 0 ? stage.scaleX() / SCALE_BY : stage.scaleX() * SCALE_BY
+                    onScale(newScale)
+                } else {
+                    const newPos = {
+                        x: stage.x() - deltaX,
+                        y: stage.y() - deltaY
+                    }
+                    stage.position(newPos)
+                    onChangePosition(newPos.x, newPos.y)
+                }
                 stage.batchDraw()
             }
-        }
-    }
-
-    const onWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
-        const { altKey, deltaX, deltaY } = e.evt
-        if (stage) {
-            if (altKey) {
-                const newScale = deltaY > 0 ? stage.scaleX() / SCALE_BY : stage.scaleX() * SCALE_BY
-                onScale(newScale)
-            } else {
-                const newPos = {
-                    x: stage.x() - deltaX,
-                    y: stage.y() - deltaY
-                }
-                stage.position(newPos)
-                onChangePosition(newPos.x, newPos.y)
-            }
-            stage.batchDraw()
-        }
-        e.evt.preventDefault()
-    }
+            e.evt.preventDefault()
+        },
+        [stage]
+    )
 
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)
@@ -187,7 +195,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                 onChangeScale(scale)
             })
         }
-    }, [selected.tool])
+    }, [stage, selected.tool])
 
     useEffect(() => {
         if (keyDown) {
@@ -220,7 +228,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         <div>
             <div css={styles({ selected })}>
                 <Stage
-                    ref={stageRef}
+                    ref={handleStage}
                     width={workspace.width}
                     height={workspace.height}
                     draggable={selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP}

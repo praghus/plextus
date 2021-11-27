@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux'
@@ -104,26 +104,29 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
     const onChangeScale = (scale: number) => dispatch(changeScale(scale))
     const onToggleShowGrid = (showGrid: boolean) => dispatch(toggleShowGrid(showGrid))
 
-    const onCenter = () => {
+    const onCenter = useCallback(() => {
         canvas &&
             centerStage(stage, canvas, workspace, (x, y, scale) => {
                 onChangePosition(x, y)
                 onChangeScale(scale)
             })
-    }
+    }, [stage, canvas, workspace])
 
-    const onZoom = (event: any, value: any) => {
-        const sx = workspace.width / 2
-        const sy = workspace.height / 2
-        const oldScale = stage.scaleX()
-        const newPos = {
-            x: sx - ((sx - stage.x()) / oldScale) * value,
-            y: sy - ((sy - stage.y()) / oldScale) * value
-        }
-        stage.scale({ x: value, y: value })
-        stage.position(newPos)
-        setValue(value)
-    }
+    const onZoom = useCallback(
+        (value: any) => {
+            const sx = workspace.width / 2
+            const sy = workspace.height / 2
+            const oldScale = stage.scaleX()
+            const newPos = {
+                x: sx - ((sx - stage.x()) / oldScale) * value,
+                y: sy - ((sy - stage.y()) / oldScale) * value
+            }
+            stage.scale({ x: value, y: value })
+            stage.position(newPos)
+            setValue(value)
+        },
+        [stage, workspace]
+    )
 
     const onZoomCommitted = () => {
         onChangeScale(stage.scaleX())
@@ -132,14 +135,14 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
 
     const onZoomIn = () => {
         if (scale < SCALE_MAX) {
-            onZoom(null, stage.scaleX() * SCALE_BY)
+            onZoom(stage.scaleX() * SCALE_BY)
             onZoomCommitted()
         }
     }
 
     const onZoomOut = () => {
         if (scale > SCALE_MIN) {
-            onZoom(null, stage.scaleX() / SCALE_BY)
+            onZoom(stage.scaleX() / SCALE_BY)
             onZoomCommitted()
         }
     }
@@ -183,7 +186,7 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
                     step={SCALE_STEP}
                     min={SCALE_MIN}
                     max={SCALE_MAX}
-                    onChange={onZoom}
+                    onChange={(e, value) => onZoom(value)}
                     onChangeCommitted={onZoomCommitted}
                 />
                 <StyledScaleContainer>{Math.round(100 * scale)}%</StyledScaleContainer>

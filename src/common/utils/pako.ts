@@ -1,13 +1,13 @@
 import pako from 'pako'
 
-export function arrayBufferToBase64(buffer) {
+export function arrayBufferToBase64(buffer: number) {
     let binary = ''
     const bytes = [].slice.call(new Uint8Array(buffer))
     bytes.forEach(b => (binary += String.fromCharCode(b)))
     return window.btoa(binary)
 }
 
-export function urlBase64ToUint8Array(base64String) {
+export function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
     const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/')
     const rawData = window.atob(base64)
