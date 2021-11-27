@@ -13,14 +13,16 @@ import './common/translations/i18n'
 import 'sanitize.css/sanitize.css'
 
 const styles = css`
-    html,
+    html {
+        scroll-behavior: smooth;
+    }
     body {
+        margin: 0;
+        padding: 0;
         height: 100%;
         width: 100%;
         overflow: hidden;
         background-color: #252525;
-    }
-    body {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
     &::-webkit-scrollbar {

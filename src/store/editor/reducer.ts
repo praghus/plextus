@@ -98,7 +98,11 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 workspace: { ...state.workspace, scale: action.payload.scale }
             }
         case EDITOR_CHANGE_TILESET:
-            return { ...state, tileset: action.payload.tileset }
+            return { ...state, tileset: {
+                ...state.tileset,
+                ...action.payload.tileset,
+                lastUpdateTime: performance.now()
+            }}            
         case EDITOR_CHANGE_TOOL:
             return {
                 ...state,

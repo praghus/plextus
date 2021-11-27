@@ -94,22 +94,17 @@ const LayersList = (): JSX.Element => {
     const onChangeLayerVisible = (layerId: string, value: boolean) => dispatch(changeLayerVisible(layerId, value))
     const onChangeLayerOpacity = (layerId: string, value: number) => dispatch(changeLayerOpacity(layerId, value))
     const onChangeLayerName = (layerId: string, value: string) => dispatch(changeLayerName(layerId, value))
-    const onOpacityChange = (event: any, value: any) => setOpacity(value)
-    const onOpacityChangeCommitted = (event: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
+    const onOpacityChange = (e: any, value: any) => setOpacity(value)
+    const onOpacityChangeCommitted = (e: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
     const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
     const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
 
     const [editingLayer, setEditingLayer] = useState<Layer | null>()
-    const [anchorEl, setAnchorEl] = useState(null)
+    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
     const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
 
-    const handleClick = event => {
-        setAnchorEl(event.currentTarget)
-    }
-
-    const handleClose = () => {
-        setAnchorEl(null)
-    }
+    const handleClick = (e: React.MouseEvent) => setAnchorEl(e.currentTarget as HTMLAnchorElement)
+    const handleClose = () => setAnchorEl(null)
 
     const onConfirmRemoveLayer = () => {
         const index = layers.indexOf(currentLayer)

@@ -15,6 +15,11 @@ import { isValidArray } from '../common/utils/array'
 import { getRgbaValue } from '../common/utils/colors'
 import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
+const canvasElement: any = document.createElement('canvas')
+const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
+const canvasBufferElement: any = document.createElement('canvas')
+const canvasBufferContext: CanvasRenderingContext2D = canvasBufferElement.getContext('2d')
+
 type Props = {
     canvas: Canvas
     grid: Grid
@@ -73,11 +78,6 @@ const TileLayer = ({
     const { tilewidth, tileheight } = tileset
 
     useEffect(() => {
-        const canvasElement: any = document.createElement('canvas')
-        const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
-        const canvasBufferElement: any = document.createElement('canvas')
-        const canvasBufferContext: CanvasRenderingContext2D = canvasBufferElement.getContext('2d')
-
         canvasElement.width = width
         canvasElement.height = height
         canvasBufferElement.width = tilewidth
@@ -198,7 +198,7 @@ const TileLayer = ({
         }
     }
 
-    const onMouseDown = async (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const onMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (ctx && visible && isSelected && layer.data && layer.width) {
             lastPos.current = getPos()
             const { x, y } = getCoordsFromPos(grid, lastPos.current)
@@ -252,6 +252,7 @@ const TileLayer = ({
             }
             setSelectedTile({ gid, x, y })
         }
+        e.evt.preventDefault()
     }
 
     const onMouseMove = () => {

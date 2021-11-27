@@ -1,3 +1,4 @@
+import { IMPORT_MODES } from '../../common/constants'
 import { INITIAL_STATE } from './constants'
 
 export type EditorState = typeof INITIAL_STATE
@@ -20,7 +21,7 @@ export type Layer = {
     height: number
     visible: boolean
     opacity: number
-    offset: { x: number; y: number }
+    offset: Vec2
     image?: string
     data?: number[]
 }
@@ -32,7 +33,7 @@ export type DeflatedLayer = {
     height: number
     visible: boolean
     opacity: number
-    offset: { x: number; y: number }
+    offset: Vec2
     image?: string
     data?: string
 }
@@ -42,4 +43,22 @@ export type Rectangle = {
     y: number
     width: number
     height: number
+}
+
+export type ProjectConfig = {
+    w: number
+    h: number
+    columns: number
+    tilewidth: number
+    tileheight: number
+}
+
+export type LayerImportConfig = {
+    mode: IMPORT_MODES
+    name: string
+    offset: Vec2
+    tileSize: Dim
+    columns: number
+    resolution: Dim
+    image?: CanvasImageSource
 }

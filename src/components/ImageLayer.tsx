@@ -7,6 +7,11 @@ import { getRgbaValue } from '../common/utils/colors'
 import { createTileFromImageData, getTilePos } from '../store/editor/utils'
 import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
+const canvasElement: any = document.createElement('canvas')
+const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
+const canvasBufferElement: any = document.createElement('canvas')
+const canvasBufferContext: CanvasRenderingContext2D = canvasBufferElement.getContext('2d')
+
 type Props = {
     canvas: Canvas
     grid: Grid
@@ -53,18 +58,12 @@ const ImageLayer = ({
     const lastPos = useRef<Konva.Vector2d | null>()
     const lastLinePos = useRef<Konva.Vector2d | null>()
     const hasChanged = useRef<boolean>(false)
-    // const tilesetContext = tilesetCanvas.getContext('2d')
     const isSelected = selected.layerId === layer.id
 
     const { opacity, visible, width, height } = layer
     const { tilewidth, tileheight } = tileset
 
     useEffect(() => {
-        const canvasElement: any = document.createElement('canvas')
-        const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
-        const canvasBufferElement: any = document.createElement('canvas')
-        const canvasBufferContext: CanvasRenderingContext2D = canvasBufferElement.getContext('2d')
-
         canvasElement.width = width
         canvasElement.height = height
         canvasBufferElement.width = width
@@ -160,7 +159,7 @@ const ImageLayer = ({
         }
     }
 
-    const onMouseDown = async (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const onMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (ctx && visible && isSelected) {
             lastPos.current = getPos()
 
@@ -170,7 +169,6 @@ const ImageLayer = ({
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
                     e.evt.button === 2 ? cloneTile(lastPos.current) : drawTile(lastPos.current)
-
                     break
                 case TOOLS.BRIGHTNESS:
                 case TOOLS.PENCIL:
@@ -188,7 +186,7 @@ const ImageLayer = ({
                 case TOOLS.FILL:
                     if (e.evt.button === 2) {
                         onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
-                    } else {
+                    } else if (bufferImage && bufferCtx) {
                         fillColor(lastPos.current, selected.color, bufferImage, bufferCtx)
                         renderBufferToImage()
                     }
@@ -203,6 +201,7 @@ const ImageLayer = ({
                     break
             }
         }
+        e.evt.preventDefault()
     }
 
     const onMouseMove = () => {
@@ -280,7 +279,6 @@ const ImageLayer = ({
         />
     )
 }
-
 ImageLayer.displayName = 'ImageLayer'
 
 export default ImageLayer

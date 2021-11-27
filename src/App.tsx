@@ -3,9 +3,9 @@ import styled from '@emotion/styled'
 import { hot } from 'react-hot-loader'
 import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
+import { getImage } from './common/utils/image'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from './common/constants'
 import { EDITOR_RESOURCE_NAME } from './store/editor/constants'
-import { getTilesetDimensions } from './store/editor/utils'
 import { selectIsLoaded } from './store/app/selectors'
 import { selectCanvas, selectTileset } from './store/editor/selectors'
 import { adjustWorkspaceSize } from './store/editor/actions'
@@ -84,20 +84,18 @@ const App = (): JSX.Element => {
     }, [])
 
     useLayoutEffect(() => {
-        if (tileset.image) {
-            const img = new window.Image()
+        async function getTilesetImage(src: string) {
+            const image = await getImage(src)
             const canvasElement: any = document.createElement('canvas')
             const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
-            const { w, h } = getTilesetDimensions(tileset)
-
-            img.src = tileset.image
-            img.onload = () => {
-                canvasElement.width = w
-                canvasElement.height = h
-                ctx.drawImage(img, 0, 0)
-                setTilesetCanvas(canvasElement)
-                logger.info('New tileset', 'CANVAS')
-            }
+            canvasElement.width = image.width
+            canvasElement.height = image.height
+            ctx.drawImage(image, 0, 0)
+            setTilesetCanvas(canvasElement)
+            logger.info('New tileset', 'CANVAS')
+        }
+        if (tileset.image) {
+            getTilesetImage(tileset.image)
         }
     }, [tileset])
 

@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 
 type Props = {
     message: string
-    onConfirm: (event: React.MouseEvent<HTMLElement>) => void
-    onClose: (event: React.MouseEvent<HTMLElement>) => void
+    onConfirm: (e: React.MouseEvent<HTMLElement>) => void
+    onClose: (e: React.MouseEvent<HTMLElement>) => void
     open: boolean
     title: string
 }

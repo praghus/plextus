@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
@@ -11,7 +11,7 @@ import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } fro
 import { selectGrid, selectSelected, selectTileset } from '../store/editor/selectors'
 import { getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
 import { downloadImage } from '../common/utils/image'
-import { RIGHT_BAR_WIDTH, SCALE_STEP } from '../common/constants'
+import { SCALE_STEP } from '../common/constants'
 import { Workspace, Tileset as TilesetType } from '../store/editor/types'
 import ConfirmationDialog from './ConfirmationDialog'
 
@@ -46,24 +46,22 @@ type Props = {
 }
 
 const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
-    const containerRef = useRef<HTMLDivElement>(null)
-    const stageRef = useRef<Konva.Stage>(null)
-
-    const { t } = useTranslation()
-
     const grid = useSelector(selectGrid)
     const tileset = useSelector(selectTileset)
     const selected = useSelector(selectSelected)
-    const imageDimensions = getTilesetDimensions(tileset)
+    const imageDimensions = useMemo<Dim>(() => getTilesetDimensions(tileset), [tileset])
     const tilesetContext = tilesetCanvas.getContext('2d')
 
+    const { t } = useTranslation()
+
+    const { columns, tilecount, tilewidth, tileheight } = tileset
+
+    const [container, setContainer] = useState<HTMLDivElement>()
+    const [stage, setStage] = useState<Konva.Stage>()
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-    const [scale, setScale] = useState({ x: 2, y: 2 })
-    const [position, setPosition] = useState({ x: 0, y: 0 })
-    const [size, setSize] = useState({
-        width: RIGHT_BAR_WIDTH - 20,
-        height: 500
-    })
+    const [scale, setScale] = useState<Vec2>({ x: 1, y: 1 })
+    const [position, setPosition] = useState<Vec2>({ x: 0, y: 0 })
+    const [size, setSize] = useState<Dim>({ w: 330, h: 500 })
 
     const dispatch = useDispatch()
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
@@ -73,12 +71,16 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
     const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
 
-    const stage = stageRef.current
-    const container = containerRef.current
+    const handleContainer = useCallback(node => {
+        setContainer(node)
+    }, [])
 
-    const onMouseDown = () => {
-        if (stage) {
-            const { columns, tilecount } = tileset
+    const handleStage = useCallback(node => {
+        setStage(node)
+    }, [])
+
+    const onMouseDown = useCallback(() => {
+        if (stage && scale) {
             const localPos = getPointerRelativePos(
                 {
                     x: stage.x(),
@@ -93,59 +95,75 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                 onChangeSelectedTile(tileId)
             }
         }
-    }
+    }, [grid, stage, scale, columns, tilecount])
 
-    const repositionStage = (left: number, top: number): void => {
-        if (stage) {
-            const boundsX = imageDimensions.w * scale.x - size.width
-            const boundsY = imageDimensions.h * scale.y - size.height
-            const dx = left < boundsX ? left : boundsX
-            const dy = top < boundsY ? top : boundsY
+    const repositionStage = useCallback(
+        (left: number, top: number): void => {
+            if (stage && scale && container) {
+                const boundsX = imageDimensions.w * scale.x - size.w
+                const boundsY = imageDimensions.h * scale.y - size.h
+                const dx = left <= boundsX ? left : boundsX
+                const dy = top <= boundsY ? top : boundsY
 
-            stage.container().style.transform = `translate(${dx}px, ${dy}px)`
-            stage.x(-dx)
-            stage.y(-dy)
-            stage.batchDraw()
-        }
-    }
+                stage.container().style.transform = `translate(${dx}px, ${dy}px)`
+                stage.x(-dx)
+                stage.y(-dy)
+                stage.batchDraw()
+
+                container.scrollLeft = left
+                container.scrollTop = top
+                console.info(container.offsetWidth)
+            }
+        },
+        [imageDimensions, container, scale, size, stage]
+    )
 
     const onResize = useCallback(() => {
         if (container) {
             setSize({
-                width: container.offsetWidth,
-                height: container.offsetHeight
+                w: container.offsetWidth,
+                h: container.offsetHeight
             })
         }
     }, [container])
 
-    const onScroll = (e: React.UIEvent<HTMLElement>): void => {
-        const element = e.currentTarget as HTMLInputElement
-        if (element) {
-            repositionStage(element.scrollLeft, element.scrollTop)
-        }
-    }
+    const onScroll = useCallback(
+        (e: React.UIEvent<HTMLElement>): void => {
+            const element = e.currentTarget as HTMLInputElement
+            element && repositionStage(element.scrollLeft, element.scrollTop)
+            e.preventDefault()
+        },
+        [repositionStage]
+    )
 
-    const onScale = (newScale: any): void => {
-        if (stage && container) {
-            stage.scale(scale)
-            container.scrollTop = 0
-            container.scrollLeft = 0
-            repositionStage(0, 0)
-            setScale({ x: newScale, y: newScale })
-        }
-    }
+    const onScale = useCallback(
+        (newScale: any): void => {
+            if (container && stage) {
+                container.scrollTop = 0
+                container.scrollLeft = 0
+                repositionStage(0, 0)
+                setScale({ x: newScale, y: newScale })
+            }
+        },
+        [container, scale, stage]
+    )
 
     const onAddTile = () => {
         createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
             onSaveTilesetImage(blob)
             onChangeTileset({ ...tileset, tilecount: newTileId })
             onChangeSelectedTile(newTileId)
+            if (stage) {
+                repositionStage(
+                    ((newTileId - 1) % columns) * tilewidth * scale.x,
+                    Math.ceil(newTileId / columns - 1) * tileheight * scale.y
+                )
+            }
         })
     }
 
     const onDeleteTile = (tileId: number) => {
         if (tilesetContext) {
-            const { columns, tilecount, tilewidth, tileheight } = tileset
             const newTileCount = tilecount > 1 ? tilecount - 1 : 1
             const newWidth = columns * tilewidth
             const newHeight = Math.ceil(newTileCount / columns) * tileheight
@@ -189,14 +207,18 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         return () => {
             window.removeEventListener('resize', onResize)
         }
-    }, [onResize, tileset])
+    }, [onResize])
 
     useEffect(() => {
-        const { columns, tilewidth, tileheight } = tileset
         const x = ((selected.tileId - 1) % columns) * tilewidth
         const y = Math.ceil(selected.tileId / columns - 1) * tileheight
         setPosition({ x, y })
-    }, [selected.tileId, tileset])
+    }, [selected.tileId, columns, tilewidth, tileheight])
+
+    useEffect(() => {
+        const newScale = (size.w - 10) / imageDimensions.w
+        setScale({ x: newScale, y: newScale })
+    }, [imageDimensions.w])
 
     return (
         <>
@@ -207,14 +229,14 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                 onConfirm={() => onDeleteTile(selected.tileId)}
                 onClose={onCancelRemoveLayer}
             />
-            <StyledTilesetImageContainer ref={containerRef} {...{ onScroll }}>
+            <StyledTilesetImageContainer ref={handleContainer} {...{ onScroll }}>
                 <div
                     style={{
                         width: imageDimensions.w * scale.x,
                         height: imageDimensions.h * scale.y
                     }}
                 >
-                    <Stage ref={stageRef} width={size.width} height={size.height} {...{ scale }}>
+                    <Stage ref={handleStage} width={size.w} height={size.h} {...{ scale }}>
                         <Layer imageSmoothingEnabled={false}>
                             {tilesetCanvas && <Image image={tilesetCanvas} {...{ onMouseDown }} />}
                             <Rect
@@ -234,13 +256,15 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
 
             <StyledBottomContainer>
                 <StyledSliderContainer>
-                    <Slider
-                        step={SCALE_STEP}
-                        min={0.5}
-                        max={10}
-                        value={scale.x}
-                        onChange={(event, value) => onScale(value)}
-                    />
+                    {scale && (
+                        <Slider
+                            step={SCALE_STEP}
+                            min={0.5}
+                            max={10}
+                            value={scale.x}
+                            onChange={(event, value) => onScale(value)}
+                        />
+                    )}
                 </StyledSliderContainer>
                 <StyledButtonContainer>
                     <Tooltip title="Add new tile" placement="bottom-end">

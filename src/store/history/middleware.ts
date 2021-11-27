@@ -1,15 +1,16 @@
+import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import { get, includes } from 'lodash'
 import { add } from './actions'
 import { HISTORY_REDO, HISTORY_UNDO } from './constants'
 import { selectUndoItem, selectRedoItem } from './selectors'
 
-function createUndoMiddleware({ getViewState, setViewState, revertingActions }) {
+function createUndoMiddleware({ getViewState, setViewState, revertingActions }): Middleware {
     const SUPPORTED_ACTIONS = Object.keys(revertingActions)
     let acting = false
 
-    return ({ dispatch, getState }) =>
-        next =>
-        action => {
+    return ({ dispatch, getState }: MiddlewareAPI) =>
+        (next: Dispatch) =>
+        (action: AnyAction) => {
             const state = getState()
             const ret = next(action)
 
@@ -56,7 +57,7 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }) 
         return actionCreator(action, before)
     }
 
-    function getBefore(state, action) {
+    function getBefore(state: any, action: AnyAction) {
         const beforeFactory = get(revertingActions[action.type], 'getBefore')
         return beforeFactory && beforeFactory(state, action)
     }

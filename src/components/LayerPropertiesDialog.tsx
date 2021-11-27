@@ -39,7 +39,7 @@ type Props = {
     layer: Layer | null
     open: boolean
     onSave: (model: Layer | null) => void
-    onClose: (event: React.MouseEvent<HTMLElement>) => void
+    onClose: (e: React.MouseEvent<HTMLElement>) => void
 }
 
 const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Element => {

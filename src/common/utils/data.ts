@@ -24,3 +24,10 @@ export const getDataFromObjectURL = async (objectUrl: string) => {
     const dataUrl = await blobToDataURL(imageBlob as Blob)
     return dataUrl
 }
+
+export const canvasToBlob = (canvas: HTMLCanvasElement, type = 'image/png'): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+        canvas.toBlob((blob: Blob | null) => {
+            blob ? resolve(blob) : reject()
+        }, type)
+    })

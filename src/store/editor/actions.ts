@@ -1,6 +1,6 @@
 import { StringTMap } from 'common/types'
 import { AnyAction } from 'redux'
-import { Canvas, DeflatedLayer, Layer, Pallete, Rectangle, Tileset } from './types'
+import { Canvas, DeflatedLayer, Layer, Pallete, Rectangle, Tileset, ProjectConfig, LayerImportConfig } from './types'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/constants'
 import {
     EDITOR_CHANGE_CANVAS,
@@ -38,7 +38,9 @@ import {
     EDITOR_SAVE_CHANGES,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_SET_TILESET_IMAGE,
-    EDITOR_TOGGLE_SHOW_GRID
+    EDITOR_TOGGLE_SHOW_GRID,
+    EDITOR_CREATE_NEW_PROJECT,
+    EDITOR_CREATE_LAYER_FROM_FILE
 } from './constants'
 
 export const adjustWorkspaceSize = (): AnyAction =>
@@ -162,7 +164,7 @@ export const changeTilesetImageSuccess = (image: ImageData) =>
         payload: { image }
     } as const)
 
-export const changeLayers = (layers: Layer[] | null[]) =>
+export const changeLayers = (layers: (Layer | null)[]) =>
     ({
         type: EDITOR_CHANGE_LAYERS,
         payload: { layers }
@@ -254,4 +256,16 @@ export const toggleShowGrid = (visible: boolean) =>
     ({
         type: EDITOR_TOGGLE_SHOW_GRID,
         payload: { visible }
+    } as const)
+
+export const createNewProject = (config: ProjectConfig) =>
+    ({
+        type: EDITOR_CREATE_NEW_PROJECT,
+        payload: { config }
+    } as const)
+
+export const createNewLayerFromFile = (config: LayerImportConfig) =>
+    ({
+        type: EDITOR_CREATE_LAYER_FROM_FILE,
+        payload: { config }
     } as const)

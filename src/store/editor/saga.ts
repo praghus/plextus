@@ -1,11 +1,21 @@
 import { AnyAction } from 'redux'
 import { put, StrictEffect, select, takeLatest, call } from 'redux-saga/effects'
 import logger from '../../common/utils/logger'
+import { importLayer } from '../../common/utils/image'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
-import { TOOLS } from '../../common/constants'
+import { canvasToBlob } from '../../common/utils/data'
+import { IMPORT_MODES, TOOLS } from '../../common/constants'
 import { changeAppIsLoading } from '../app/actions'
-import { selectCanvas, selectGrid, selectLayers, selectRawLayers, selectSelected } from './selectors'
+import {
+    selectCanvas,
+    selectGrid,
+    selectLayers,
+    selectRawLayers,
+    selectSelected,
+    selectTileset,
+    selectWorkspace
+} from './selectors'
 import {
     resetToDefaults,
     changeTilesetImageSuccess,
@@ -13,9 +23,19 @@ import {
     removeTileSuccess,
     changeSelectedArea,
     cropSuccess,
+    changeLayers,
     changeTool,
-    changePosition
+    changePosition,
+    changeCanvasSize,
+    changeGridSize,
+    changeScale,
+    changeSelectedLayer,
+    changeSelectedTile,
+    changeTileset,
+    saveChanges,
+    changeTilesetImage
 } from './actions'
+import { clear } from '../history/actions'
 import { APP_STORAGE_KEY } from '../app/constants'
 import {
     EDITOR_CHANGE_LAYERS,
@@ -26,14 +46,17 @@ import {
     EDITOR_CHANGE_LAYER_OPACITY,
     EDITOR_CHANGE_LAYER_VISIBLE,
     EDITOR_CLEAR_PROJECT,
+    EDITOR_CREATE_NEW_PROJECT,
     EDITOR_CROP,
     EDITOR_REMOVE_LAYER,
     EDITOR_REMOVE_TILE,
     EDITOR_SAVE_CHANGES,
-    EDITOR_SET_TILESET_IMAGE
+    EDITOR_SET_TILESET_IMAGE,
+    EDITOR_CREATE_LAYER_FROM_FILE,
+    INITIAL_STATE
 } from './constants'
-import { DeflatedLayer, Grid, Layer, Canvas, Selected } from './types'
-import { getStateToSave } from './utils'
+import { DeflatedLayer, Grid, Layer, Canvas, Selected, Tileset } from './types'
+import { createEmptyLayer, getStateToSave } from './utils'
 
 export function* clearProject(): Generator<StrictEffect, void, any> {
     try {
@@ -45,7 +68,7 @@ export function* clearProject(): Generator<StrictEffect, void, any> {
     }
 }
 
-export function* changeLayers(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* changeLayersSaga(action: AnyAction): Generator<StrictEffect, void, any> {
     const { layers } = action.payload
     try {
         const changedLayers = layers.map((layer: Layer) =>
@@ -174,7 +197,7 @@ export function* removeTile(action: AnyAction): Generator<StrictEffect, void, an
     }
 }
 
-export function* saveChanges(): Generator<StrictEffect, void, any> {
+export function* saveChangesSaga(): Generator<StrictEffect, void, any> {
     try {
         const state = yield select(state => state)
         const toSave = yield call(() => getStateToSave(state))
@@ -195,9 +218,93 @@ export function* setTilesetImage(action: AnyAction): Generator<StrictEffect, voi
     }
 }
 
+export function* createNewProject(action: AnyAction): Generator<StrictEffect, void, any> {
+    const { config } = action.payload
+    try {
+        const workspace = yield select(selectWorkspace)
+        const { w, h, columns, tilewidth, tileheight } = config
+        const width = w * tilewidth
+        const height = h * tileheight
+        const newScale = height >= width ? workspace.height / height : workspace.width / width
+        const layer = createEmptyLayer('Layer 1', w, h)
+
+        yield put(changeScale(newScale))
+        yield put(changePosition((workspace.width - width * newScale) / 2, (workspace.height - height * newScale) / 2))
+        yield put(changeCanvasSize(width, height))
+        yield put(changeGridSize(tilewidth, tileheight))
+        yield put(changeLayers([layer]))
+        yield put(changeSelectedLayer(layer.id))
+        yield put(changeSelectedTile(1))
+        yield put(changeTool(TOOLS.DRAG))
+        yield put(
+            changeTileset({
+                ...INITIAL_STATE.tileset,
+                columns,
+                tilewidth,
+                tileheight,
+                tilecount: 1
+            })
+        )
+        yield put(clear())
+        yield put(saveChanges())
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* createLayerFromFile(action: AnyAction): Generator<StrictEffect, void, any> {
+    const { config } = action.payload
+    try {
+        const tileset: Tileset = yield select(selectTileset)
+        const layers: DeflatedLayer[] = yield select(selectRawLayers)
+
+        const { layer, tilesetCanvas, tilecount } = yield call(importLayer, config, tileset)
+
+        const { columns, mode, name, tileSize } = config
+        const { w: tilewidth, h: tileheight } = tileSize
+
+        const w = layer.width * tilewidth
+        const h = layer.height * tileheight
+
+        if (mode === IMPORT_MODES.NEW_PROJECT) {
+            yield put(changePosition(0, 0))
+            yield put(changeCanvasSize(w, h))
+            yield put(changeGridSize(tilewidth, tileheight))
+            yield put(changeLayers([{ ...layer, name }]))
+            yield put(
+                changeTileset({
+                    ...INITIAL_STATE.tileset,
+                    columns,
+                    tilewidth,
+                    tileheight,
+                    tilecount
+                })
+            )
+        } else {
+            yield put(changeLayers([...layers, { ...layer, name }]))
+            yield put(
+                changeTileset({
+                    ...tileset,
+                    tilecount
+                })
+            )
+        }
+
+        const blob = yield call(canvasToBlob, tilesetCanvas)
+
+        yield put(changeTilesetImage(blob))
+        yield put(changeSelectedLayer(layer.id))
+        yield put(saveChanges())
+        yield put(clear())
+        yield put(changeAppIsLoading(false))
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
 export default function* editorSaga(): Generator {
     yield takeLatest(EDITOR_CLEAR_PROJECT, clearProject),
-        yield takeLatest(EDITOR_CHANGE_LAYERS, changeLayers),
+        yield takeLatest(EDITOR_CHANGE_LAYERS, changeLayersSaga),
         yield takeLatest(EDITOR_CHANGE_LAYER_DATA, changeLayerData),
         yield takeLatest(EDITOR_CHANGE_LAYER_IMAGE, changeLayerImage),
         yield takeLatest(EDITOR_CHANGE_LAYER_NAME, changeLayerName),
@@ -207,6 +314,8 @@ export default function* editorSaga(): Generator {
         yield takeLatest(EDITOR_CROP, cropArea),
         yield takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
         yield takeLatest(EDITOR_REMOVE_TILE, removeTile),
-        yield takeLatest(EDITOR_SAVE_CHANGES, saveChanges),
-        yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage)
+        yield takeLatest(EDITOR_SAVE_CHANGES, saveChangesSaga),
+        yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage),
+        yield takeLatest(EDITOR_CREATE_NEW_PROJECT, createNewProject),
+        yield takeLatest(EDITOR_CREATE_LAYER_FROM_FILE, createLayerFromFile)
 }
