@@ -1,12 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Favicon from 'react-favicon'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from '@material-ui/core/styles'
 import { Global, css } from '@emotion/react'
 import { store } from './store/store'
 import theme from './themes/theme-dark'
-import faviconUrl from './assets/favicon.ico'
 import App from './App'
 
 import './common/translations/i18n'
@@ -48,7 +46,6 @@ const render = () => {
         <Provider {...{ store }}>
             <ThemeProvider {...{ theme }}>
                 <Global {...{ styles }} />
-                <Favicon url={faviconUrl} />
                 <App />
             </ThemeProvider>
         </Provider>,
