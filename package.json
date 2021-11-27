@@ -122,7 +122,6 @@
     "react": "^17.0.2",
     "react-colorful": "^5.2.0",
     "react-dom": "^17.0.2",
-    "react-favicon": "^0.0.25",
     "react-hot-loader": "^4.13.0",
     "react-i18next": "^11.11.0",
     "react-konva": "17.0.2-5",
