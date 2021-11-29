@@ -45,12 +45,12 @@ import LayerPropertiesDialog from './LayerPropertiesDialog'
 
 const useStyles = makeStyles(theme => ({
     layersList: {
-        width: '100%',
-        position: 'relative',
-        overflow: 'auto',
-        maxWidth: 360,
+        backgroundColor: theme.palette.background.paper,
         height: '100%',
-        backgroundColor: theme.palette.background.paper
+        maxWidth: 360,
+        overflow: 'auto',
+        position: 'relative',
+        width: '100%'
     }
 }))
 
@@ -134,7 +134,7 @@ const LayersList = (): JSX.Element => {
 
     const onCreateTileLayer = () => {
         const newLayer = createEmptyLayer(
-            'New tile Layer',
+            t('new_tile_layer'),
             Math.round(canvas.width / tileset.tilewidth),
             Math.round(canvas.height / tileset.tileheight)
         )
@@ -146,7 +146,7 @@ const LayersList = (): JSX.Element => {
     const onCreateImageLayer = async () => {
         const imageBlob = await createEmptyImage(canvas.width, canvas.height)
         if (imageBlob) {
-            const newLayer = createImageLayer('New image Layer', imageBlob, canvas.width, canvas.height)
+            const newLayer = createImageLayer(t('new_image_layer'), imageBlob, canvas.width, canvas.height)
             onChangeLayers([...layers, newLayer])
             onChangeSelectedLayer(newLayer.id)
         }
@@ -273,7 +273,7 @@ const LayersList = (): JSX.Element => {
                 </StyledSliderContainer>
                 <StyledButtonContainer>
                     <IconButton size="small" onClick={handleClick}>
-                        <Tooltip title="New Layer" placement="top">
+                        <Tooltip title={t('new_layer') as string} placement="top">
                             <AddIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
@@ -283,7 +283,7 @@ const LayersList = (): JSX.Element => {
                         disabled={layers.indexOf(currentLayer) === 0}
                         onClick={() => onChangeLayerOrder(1)}
                     >
-                        <Tooltip title="Layer Order Down" placement="top">
+                        <Tooltip title={t('layer_order_down') as string} placement="top">
                             <ArrowDownwardIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
@@ -293,25 +293,25 @@ const LayersList = (): JSX.Element => {
                         disabled={layers.indexOf(currentLayer) === layers.length - 1}
                         onClick={() => onChangeLayerOrder(-1)}
                     >
-                        <Tooltip title="Layer Order Up" placement="top">
+                        <Tooltip title={t('layer_order_up') as string} placement="top">
                             <ArrowUpwardIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
                     <IconButton size="small" onClick={onOpenConfirmationDialog}>
-                        <Tooltip title="Delete Layer" placement="top">
+                        <Tooltip title={t('delete_layer') as string} placement="top">
                             <DeleteForeverIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
                 </StyledButtonContainer>
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
                     <MenuItem onClick={onCreateTileLayer}>
-                        Tile layer
+                        {t('tile_layer')}
                         <ListItemSecondaryAction>
                             <AppsIcon fontSize="small" />
                         </ListItemSecondaryAction>
                     </MenuItem>
                     <MenuItem onClick={onCreateImageLayer}>
-                        Image layer (empty)
+                        {t('image_layer_empty')}
                         <ListItemSecondaryAction>
                             <ImageIcon fontSize="small" />
                         </ListItemSecondaryAction>
@@ -325,7 +325,7 @@ const LayersList = (): JSX.Element => {
                     />
                     <label htmlFor="upload-input">
                         <MenuItem>
-                            Image layer (import)
+                            {t('image_layer_import')}
                             <ListItemSecondaryAction>
                                 <ImageSearchIcon fontSize="small" />
                             </ListItemSecondaryAction>

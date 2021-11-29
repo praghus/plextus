@@ -7,6 +7,6 @@ export const HISTORY_REDO = `${HISTORY_RESOURCE_NAME}/REDO`
 export const HISTORY_LIMIT = 100
 
 export const INITIAL_STATE = {
-    undo: [],
-    redo: []
+    redo: [],
+    undo: []
 }

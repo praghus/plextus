@@ -1,15 +1,14 @@
 import createSagaMiddleware from 'redux-saga'
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import { createInjectorsEnhancer } from 'redux-injectors'
-import createReducer from './reducers'
 import { IS_PRODUCTION } from '../common/constants'
 import { cacheMiddleware, undoMiddleware } from './middlewares'
+import createReducer from './reducers'
 
 const sagaMiddleware = createSagaMiddleware()
+const middlewares = [sagaMiddleware, cacheMiddleware, undoMiddleware]
 
 const { run: runSaga } = sagaMiddleware
-
-const middlewares = [sagaMiddleware, cacheMiddleware, undoMiddleware]
 
 const enhancers = [
     createInjectorsEnhancer({
@@ -20,13 +19,13 @@ const enhancers = [
 
 /* istanbul ignore next */
 export const store = configureStore({
-    reducer: createReducer(),
-    middleware: [
+    devTools: !IS_PRODUCTION,
+    enhancers,
+    middleware: getDefaultMiddleware => [
         ...getDefaultMiddleware({
             serializableCheck: false
         }),
         ...middlewares
     ],
-    devTools: !IS_PRODUCTION,
-    enhancers
+    reducer: createReducer()
 })

@@ -11,11 +11,6 @@ import { rgbaToHex } from '../common/utils/colors'
 import { Create as CreateIcon } from '@material-ui/icons'
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        '& > *': {
-            padding: theme.spacing(1)
-        }
-    },
     card: {
         marginBottom: theme.spacing(2)
     },
@@ -24,6 +19,11 @@ const useStyles = makeStyles(theme => ({
     },
     input: {
         width: 42
+    },
+    root: {
+        '& > *': {
+            padding: theme.spacing(1)
+        }
     }
 }))
 
@@ -92,8 +92,8 @@ const PropertiesTab = (): JSX.Element => {
                                     Number.isInteger(pitch) && pitch >= 0 && onChangeGridPitch(pitch)
                                 }}
                                 InputProps={{
-                                    inputProps: { min: 0 },
-                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>
+                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>,
+                                    inputProps: { min: 0 }
                                 }}
                             />
                         </StyledPropContainer>

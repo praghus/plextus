@@ -1,5 +1,4 @@
 export default {
-    name: 'Dawnbringer 32',
     colors: [
         [0, 0, 0],
         [34, 32, 52],
@@ -33,5 +32,6 @@ export default {
         [215, 123, 186],
         [143, 151, 74],
         [138, 111, 48]
-    ]
+    ],
+    name: 'Dawnbringer 32'
 }

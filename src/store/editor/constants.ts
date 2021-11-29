@@ -51,11 +51,11 @@ const layerId = uuidv4()
 export const INITIAL_STATE = {
     canvas: null as Canvas | null,
     grid: {
-        width: 16,
+        color: [0, 0, 0, 255],
         height: 16,
-        visible: true,
         pitch: 10,
-        color: [0, 0, 0, 255]
+        visible: true,
+        width: 16
     },
     layers: [] as DeflatedLayer[] | [],
     palette: DEFAULT_PALLETE,
@@ -71,17 +71,17 @@ export const INITIAL_STATE = {
     tileset: {
         columns: 10,
         firstgid: 1,
+        image: DEFAULT_TILESET_IMAGE,
+        lastUpdateTime: performance.now(),
         tilecount: 1,
         tileheight: 16,
-        tilewidth: 16,
-        image: DEFAULT_TILESET_IMAGE,
-        lastUpdateTime: performance.now()
+        tilewidth: 16
     },
     workspace: {
-        x: 0,
-        y: 0,
-        width: 0,
         height: 0,
-        scale: 2
+        scale: 2,
+        width: 0,
+        x: 0,
+        y: 0
     }
 }

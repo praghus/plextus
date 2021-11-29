@@ -13,7 +13,7 @@ type Props = {
 const TilesIds = forwardRef<Konva.Group | null, Props>(
     ({ grid, width, height, selectedLayer }: Props, ref) =>
         grid.visible && (
-            <Group {...{ ref, width, height }} listening={false}>
+            <Group {...{ height, ref, width }} listening={false}>
                 {selectedLayer &&
                     selectedLayer.data &&
                     selectedLayer.data.map((gid, i) => {

@@ -16,23 +16,23 @@ function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
         case APP_REHYDRATE_STORE_START:
             return {
                 ...state,
-                isLoaded: false,
                 error: null,
+                isLoaded: false,
                 isLoading: true
             }
         case APP_REHYDRATE_STORE_SUCCESS:
             return {
                 ...state,
-                isLoaded: true,
                 error: null,
+                isLoaded: true,
                 isLoading: false,
                 lastUpdateTime: performance.now()
             }
         case APP_REHYDRATE_STORE_ERROR:
             return {
                 ...state,
-                isLoaded: false,
                 error: action.payload?.error.message,
+                isLoaded: false,
                 isLoading: false
             }
         case APP_CHANGE_IS_IMPORT_DIALOG_OPEN:

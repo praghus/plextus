@@ -3,16 +3,16 @@ const webpack = require('webpack')
 const commonConfig = require('./common')
 
 module.exports = merge(commonConfig, {
-    mode: 'development',
+    devServer: {
+        hot: true
+    },
+    devtool: 'cheap-module-source-map',
     entry: [
         'react-hot-loader/patch',
         'webpack-dev-server/client?http://localhost:8080',
         'webpack/hot/only-dev-server',
         './index.tsx'
     ],
-    devServer: {
-        hot: true
-    },
-    devtool: 'cheap-module-source-map',
+    mode: 'development',
     plugins: [new webpack.HotModuleReplacementPlugin()]
 })

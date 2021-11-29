@@ -34,7 +34,7 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
 
     const [tab, setTab] = useState(0)
     const [r, g, b, a] = selected.color
-    const color = { r, g, b, a: (isNaN(a) && 255) || (a > 0 && a / 255) || 0 }
+    const color = { a: (isNaN(a) && 255) || (a > 0 && a / 255) || 0, b, g, r }
     const onChange = (e: any, value: any) => setTab(value)
     const onChangeColor = debounce(
         color => dispatch(changePrimaryColor([color.r, color.g, color.b, color.a * 255])),

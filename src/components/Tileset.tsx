@@ -61,7 +61,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
     const [scale, setScale] = useState<Vec2>({ x: 1, y: 1 })
     const [position, setPosition] = useState<Vec2>({ x: 0, y: 0 })
-    const [size, setSize] = useState<Dim>({ w: 330, h: 500 })
+    const [size, setSize] = useState<Dim>({ h: 500, w: 330 })
 
     const dispatch = useDispatch()
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
@@ -83,9 +83,9 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         if (stage && scale) {
             const localPos = getPointerRelativePos(
                 {
+                    scale: scale.x,
                     x: stage.x(),
-                    y: stage.y(),
-                    scale: scale.x
+                    y: stage.y()
                 } as Workspace,
                 stage.getPointerPosition() as Konva.Vector2d
             )
@@ -112,7 +112,6 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
 
                 container.scrollLeft = left
                 container.scrollTop = top
-                console.info(container.offsetWidth)
             }
         },
         [imageDimensions, container, scale, size, stage]
@@ -121,8 +120,8 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     const onResize = useCallback(() => {
         if (container) {
             setSize({
-                w: container.offsetWidth,
-                h: container.offsetHeight
+                h: container.offsetHeight,
+                w: container.offsetWidth
             })
         }
     }, [container])
@@ -232,8 +231,8 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
             <StyledTilesetImageContainer ref={handleContainer} {...{ onScroll }}>
                 <div
                     style={{
-                        width: imageDimensions.w * scale.x,
-                        height: imageDimensions.h * scale.y
+                        height: imageDimensions.h * scale.y,
+                        width: imageDimensions.w * scale.x
                     }}
                 >
                     <Stage ref={handleStage} width={size.w} height={size.h} {...{ scale }}>

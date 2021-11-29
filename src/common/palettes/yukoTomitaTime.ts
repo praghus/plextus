@@ -1,5 +1,4 @@
 export default {
-    name: 'Yuko Tomita Time',
     colors: [
         [39, 10, 19],
         [120, 32, 0],
@@ -26,5 +25,6 @@ export default {
         [120, 84, 32],
         [176, 116, 56],
         [185, 166, 87]
-    ]
+    ],
+    name: 'Yuko Tomita Time'
 }

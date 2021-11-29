@@ -27,14 +27,14 @@ const handleLoad = async (api: MiddlewareAPI) => {
         const loaded = await loadStateFromStore()
         const state = { ...api.getState(), ...loaded }
         dispatch({
-            type: APP_REHYDRATE_STORE_SUCCESS,
-            payload: { state }
+            payload: { state },
+            type: APP_REHYDRATE_STORE_SUCCESS
         })
         logger.info('Loading store')
     } catch (error) {
         dispatch({
-            type: APP_REHYDRATE_STORE_ERROR,
-            payload: { error }
+            payload: { error },
+            type: APP_REHYDRATE_STORE_ERROR
         })
     }
 }
@@ -49,7 +49,6 @@ const cacheMiddleware: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => 
 
 const undoMiddleware = createUndoMiddleware({
     getViewState: selectUndoable,
-    setViewState: historyAction,
     revertingActions: {
         [EDITOR_CHANGE_LAYERS_SUCCESS]: {
             action: (action: AnyAction, { layers }: any) => changeLayersSuccess(layers),
@@ -57,17 +56,18 @@ const undoMiddleware = createUndoMiddleware({
         },
         [EDITOR_CROP_SUCCESS]: {
             action: (action: AnyAction, { layers, canvas }: any) => cropSuccess(layers, canvas),
-            getBefore: (state: any) => ({ layers: selectRawLayers(state), canvas: selectCanvas(state) })
-        },
-        [EDITOR_SET_TILESET_IMAGE]: {
-            action: (action: AnyAction, { image }: any) => changeTilesetImageSuccess(image),
-            getBefore: (state: any) => ({ tileset: selectTileset(state) })
+            getBefore: (state: any) => ({ canvas: selectCanvas(state), layers: selectRawLayers(state) })
         },
         [EDITOR_REMOVE_TILE_SUCCESS]: {
             action: (action: AnyAction, { layers, tileset }: any) => removeTileSuccess(layers, tileset),
             getBefore: (state: any) => ({ layers: selectRawLayers(state), tileset: selectTileset(state) })
+        },
+        [EDITOR_SET_TILESET_IMAGE]: {
+            action: (action: AnyAction, { image }: any) => changeTilesetImageSuccess(image),
+            getBefore: (state: any) => ({ tileset: selectTileset(state) })
         }
-    }
+    },
+    setViewState: historyAction
 })
 
 export { cacheMiddleware, undoMiddleware }

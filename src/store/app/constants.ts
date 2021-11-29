@@ -10,9 +10,9 @@ export const APP_REHYDRATE_STORE_ERROR = `${APP_RESOURCE_NAME}/APP_REHYDRATE_STO
 
 export const INITIAL_STATE = {
     error: null,
-    isLoading: false,
-    isLoaded: true,
     isImportDialogOpen: false,
+    isLoaded: true,
+    isLoading: false,
     isNewProjectDialogOpen: false,
     lastUpdateTime: performance.now()
 }

@@ -1,12 +1,14 @@
 import { AnyAction } from 'redux'
 import { put, StrictEffect, select, takeLatest, call } from 'redux-saga/effects'
+import { toast } from 'react-toastify'
+import i18n from '../../common/translations/i18n'
 import logger from '../../common/utils/logger'
 import { importLayer } from '../../common/utils/image'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
 import { canvasToBlob } from '../../common/utils/data'
 import { IMPORT_MODES, TOOLS } from '../../common/constants'
-import { changeAppIsLoading } from '../app/actions'
+import { changeAppIsImportDialogOpen, changeAppIsLoading } from '../app/actions'
 import {
     selectCanvas,
     selectGrid,
@@ -130,8 +132,8 @@ export function* cropArea(): Generator<StrictEffect, void, any> {
         if (area && area.width > 0 && area.height > 0) {
             const changedCanvas = {
                 ...canvas,
-                width: area.width * grid.width,
-                height: area.height * grid.height
+                height: area.height * grid.height,
+                width: area.width * grid.width
             }
             const changedLayers = layers.map(layer => {
                 if (layer.data) {
@@ -146,9 +148,9 @@ export function* cropArea(): Generator<StrictEffect, void, any> {
                     }
                     return {
                         ...layer,
-                        width: area.width,
+                        data: compressLayerData(changedData),
                         height: area.height,
-                        data: compressLayerData(changedData)
+                        width: area.width
                     } as DeflatedLayer
                 } else {
                     return layer as DeflatedLayer
@@ -202,6 +204,7 @@ export function* saveChangesSaga(): Generator<StrictEffect, void, any> {
         const state = yield select(state => state)
         const toSave = yield call(() => getStateToSave(state))
         yield call(() => setCacheBlob(APP_STORAGE_KEY, JSON.stringify(toSave), 'application/json'))
+        toast.success(i18n.t('map_saved'))
         logger.info('Saving to store')
     } catch (err) {
         logger.error(err)
@@ -240,9 +243,9 @@ export function* createNewProject(action: AnyAction): Generator<StrictEffect, vo
             changeTileset({
                 ...INITIAL_STATE.tileset,
                 columns,
-                tilewidth,
+                tilecount: 1,
                 tileheight,
-                tilecount: 1
+                tilewidth
             })
         )
         yield put(clear())
@@ -255,11 +258,10 @@ export function* createNewProject(action: AnyAction): Generator<StrictEffect, vo
 export function* createLayerFromFile(action: AnyAction): Generator<StrictEffect, void, any> {
     const { config } = action.payload
     try {
+        const layers: Layer[] = yield select(selectLayers)
         const tileset: Tileset = yield select(selectTileset)
-        const layers: DeflatedLayer[] = yield select(selectRawLayers)
 
         const { layer, tilesetCanvas, tilecount } = yield call(importLayer, config, tileset)
-
         const { columns, mode, name, tileSize } = config
         const { w: tilewidth, h: tileheight } = tileSize
 
@@ -275,9 +277,9 @@ export function* createLayerFromFile(action: AnyAction): Generator<StrictEffect,
                 changeTileset({
                     ...INITIAL_STATE.tileset,
                     columns,
-                    tilewidth,
+                    tilecount,
                     tileheight,
-                    tilecount
+                    tilewidth
                 })
             )
         } else {
@@ -294,9 +296,10 @@ export function* createLayerFromFile(action: AnyAction): Generator<StrictEffect,
 
         yield put(changeTilesetImage(blob))
         yield put(changeSelectedLayer(layer.id))
+        yield put(changeAppIsImportDialogOpen(false))
+        yield put(changeAppIsLoading(false))
         yield put(saveChanges())
         yield put(clear())
-        yield put(changeAppIsLoading(false))
     } catch (err) {
         logger.error(err)
     }

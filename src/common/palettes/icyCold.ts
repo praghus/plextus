@@ -1,5 +1,4 @@
 export default {
-    name: 'Icy cold',
     colors: [
         [29, 29, 30],
         [60, 68, 91],
@@ -24,5 +23,6 @@ export default {
         [96, 113, 129],
         [78, 86, 95],
         [56, 59, 64]
-    ]
+    ],
+    name: 'Icy cold'
 }

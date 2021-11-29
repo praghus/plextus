@@ -27,7 +27,7 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
             const offsety = offset.y !== 0 ? { offsety: offset.y } : {}
             if (image) {
                 const filename = `layer-${i + 1}.png`
-                layerImages.push({ filename, data: await fetch(image).then(r => r.blob()) })
+                layerImages.push({ data: await fetch(image).then(r => r.blob()), filename })
                 return {
                     imagelayer: {
                         '@': {
@@ -40,9 +40,9 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
                         },
                         image: {
                             '@': {
+                                height,
                                 source: `./images/${filename}`,
-                                width,
-                                height
+                                width
                             }
                         }
                     }
@@ -53,21 +53,21 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
                 return {
                     layer: {
                         '@': {
+                            height,
                             id: i + 1,
                             name,
                             opacity,
-                            width,
-                            height,
                             visible: visible ? 1 : 0,
+                            width,
                             ...offsetx,
                             ...offsety
                         },
                         data: {
+                            '#': await encodeLayer(buffer),
                             '@': {
-                                encoding: 'base64',
-                                compression: 'zlib'
-                            },
-                            '#': await encodeLayer(buffer)
+                                compression: 'zlib',
+                                encoding: 'base64'
+                            }
                         }
                     }
                 }
@@ -79,33 +79,44 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
     const doc = create({
         map: {
             '@': {
-                version: 1.7, // move to const
-                tiledversion: '1.7.1', // move to const
-                orientation: 'orthogonal',
-                renderorder: 'right-down',
-                type: 'map',
-                infinite: false,
-                nextlayerid: layers.length,
-                width: canvas.width / tileset.tileheight,
-                height: canvas.height / tileset.tileheight,
+                
+
+height: canvas.height / tileset.tileheight, 
+                
+
+
+infinite: false, 
+                
+
+nextlayerid: layers.length,
+                
+// move to const
+orientation: 'orthogonal',
+                
+renderorder: 'right-down',
+                // move to const
+tiledversion: '1.7.1',
                 tileheight,
                 tilewidth,
+                type: 'map',
+                version: 1.7,
+                width: canvas.width / tileset.tileheight,
                 ...backgroundColor
             },
             tileset: {
                 '@': {
+                    columns,
                     firstgid: 1,
                     name: 'Tileset',
-                    tilewidth,
-                    tileheight,
                     tilecount,
-                    columns
+                    tileheight,
+                    tilewidth
                 },
                 image: {
                     '@': {
+                        height: (1 + Math.round(tilecount / columns)) * tileheight,
                         source: './images/tileset.png',
-                        width: columns * tilewidth,
-                        height: (1 + Math.round(tilecount / columns)) * tileheight
+                        width: columns * tilewidth
                     }
                 }
             }

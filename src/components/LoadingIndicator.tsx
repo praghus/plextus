@@ -6,8 +6,8 @@ import { css } from '@emotion/react'
 
 const useStyles = makeStyles(theme => ({
     backdrop: {
-        zIndex: theme.zIndex.drawer + 1,
-        color: '#fff'
+        color: '#fff',
+        zIndex: theme.zIndex.drawer + 1
     }
 }))
 
@@ -33,14 +33,14 @@ const LoadingIndicator = ({ color, loading, size }: Props): JSX.Element => {
     const classes = useStyles()
     return (
         <Backdrop className={classes.backdrop} open={loading}>
-            <GridLoader css={override} {...{ loading, size, color }} />
+            <GridLoader css={override} {...{ color, loading, size }} />
         </Backdrop>
     )
 }
 LoadingIndicator.displayName = 'LoadingIndicator'
 LoadingIndicator.defaultProps = {
-    size: 15,
-    color: '#fff'
+    color: '#fff',
+    size: 15
 }
 
 export default LoadingIndicator

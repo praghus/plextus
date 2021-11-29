@@ -34,10 +34,10 @@ const CropTool = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.Element =>
         () =>
             shape &&
             onChangeSelectedArea({
-                x: shape.x() / width,
-                y: shape.y() / height,
+                height: shape.scaleY(),
                 width: shape.scaleX(),
-                height: shape.scaleY()
+                x: shape.x() / width,
+                y: shape.y() / height
             }),
         [shape]
     )
@@ -53,17 +53,17 @@ const CropTool = ({ canvas, grid, onChangeSelectedArea }: Props): JSX.Element =>
             }
         }
         onChangeSelectedArea({
-            x: 0,
-            y: 0,
+            height: canvas.height / height,
             width: canvas.width / width,
-            height: canvas.height / height
+            x: 0,
+            y: 0
         })
     }, [shape, transformer])
 
     return (
         <>
             <Rect
-                {...{ width, height }}
+                {...{ height, width }}
                 draggable
                 ref={handleShape}
                 id="selectRect"

@@ -213,15 +213,15 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         grid,
         isMouseDown,
         keyDown,
-        selected,
-        tileset,
-        tilesetCanvas,
-        workspace,
         onChangeLayerOffset,
         onChangePrimaryColor,
         onChangeSelectedTile,
         onChangeTileset,
-        onSaveTilesetImage
+        onSaveTilesetImage,
+        selected,
+        tileset,
+        tilesetCanvas,
+        workspace
     }
 
     return (
@@ -253,12 +253,12 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                                 layer.image ? (
                                     <ImageLayer
                                         key={`layer-${layer.id}`}
-                                        {...{ ...layerProps, stage, layer, onChangeLayerImage }}
+                                        {...{ ...layerProps, layer, onChangeLayerImage, stage }}
                                     />
                                 ) : (
                                     <TileLayer
                                         key={`layer-${layer.id}`}
-                                        {...{ ...layerProps, stage, layer, onChangeLayerData }}
+                                        {...{ ...layerProps, layer, onChangeLayerData, stage }}
                                     />
                                 )
                             )}

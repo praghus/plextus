@@ -33,9 +33,9 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
             return {
                 ...state,
                 canvas: {
-                    width: action.payload.width,
+                    background: action.payload.background,
                     height: action.payload.height,
-                    background: action.payload.background
+                    width: action.payload.width
                 }
             }
         case EDITOR_CHANGE_CANVAS_BACKGROUND:
@@ -55,8 +55,8 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 ...state,
                 grid: {
                     ...state.grid,
-                    width: action.payload.width,
-                    height: action.payload.height
+                    height: action.payload.height,
+                    width: action.payload.width
                 }
             }
         case EDITOR_CHANGE_LAYERS_SUCCESS:
@@ -118,8 +118,8 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 ...state,
                 workspace: {
                     ...state.workspace,
-                    width: action.payload.width,
-                    height: action.payload.height
+                    height: action.payload.height,
+                    width: action.payload.width
                 }
             }
         case EDITOR_CROP_SUCCESS:

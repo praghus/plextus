@@ -5,9 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
-import { Divider, IconButton, Menu, MenuItem, Paper, Snackbar, Tooltip } from '@material-ui/core'
+import { Divider, IconButton, Menu, MenuItem, Paper, Tooltip } from '@material-ui/core'
 import { ColorPicker } from 'material-ui-color'
-import MuiAlert from '@material-ui/lab/Alert'
 import {
     BrightnessMedium as BrightnessMediumIcon,
     Colorize as ColorizeIcon,
@@ -33,21 +32,21 @@ import NewProjectDialog from './NewProjectDialog'
 import ConfirmationDialog from './ConfirmationDialog'
 
 export const useStyles = makeStyles(theme => ({
-    iconButton: {
-        width: 40,
-        height: 40,
-        padding: 0
-    },
-    paper: {
-        width: 48,
-        marginBottom: 10
-    },
     divider: {
-        width: '40px',
-        margin: theme.spacing(1, 0.5)
+        margin: theme.spacing(1, 0.5),
+        width: '40px'
     },
     icon: {
         filter: 'drop-shadow(1px 1px 1px rgba(0, 0, 0, .7))'
+    },
+    iconButton: {
+        height: 40,
+        padding: 0,
+        width: 40
+    },
+    paper: {
+        marginBottom: 10,
+        width: 48
     },
     tooltip: {
         maxWidth: 130
@@ -69,14 +68,14 @@ const StyledColorPicker = styled.div`
 
 const StyledToggleButtonGroup = withStyles(theme => ({
     grouped: {
-        margin: theme.spacing(0.5),
-        border: 'none',
+        '&:first-child': {
+            borderRadius: theme.shape.borderRadius
+        },
         '&:not(:first-child)': {
             borderRadius: theme.shape.borderRadius
         },
-        '&:first-child': {
-            borderRadius: theme.shape.borderRadius
-        }
+        border: 'none',
+        margin: theme.spacing(0.5)
     }
 }))(ToggleButtonGroup)
 
@@ -91,7 +90,6 @@ const ToolBar = (): JSX.Element => {
 
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-    const [isSaved, setIsSaved] = useState(false)
     const [primaryColor, setPrimaryColor] = useState<any>(rgbaToHex(selected.color))
 
     const { t } = useTranslation()
@@ -131,9 +129,9 @@ const ToolBar = (): JSX.Element => {
 
     return (
         <>
+            {isNewProjectDialogOpen && <NewProjectDialog onClose={() => onToggleNewProjectDialog(false)} />}
+            {isImportDialogOpen && <ImportDialog onClose={() => onToggleImportDialog(false)} />}
             <StyledMenuContainer>
-                {isNewProjectDialogOpen && <NewProjectDialog onClose={() => onToggleNewProjectDialog(false)} />}
-                {isImportDialogOpen && <ImportDialog onClose={() => onToggleImportDialog(false)} />}
                 <ConfirmationDialog
                     title={t('hold_on')}
                     message={t('close_project_message')}
@@ -197,7 +195,6 @@ const ToolBar = (): JSX.Element => {
                                 onClick={() => {
                                     handleClose()
                                     onSaveChanges()
-                                    setIsSaved(true)
                                 }}
                             >
                                 {t('save')}
@@ -240,20 +237,6 @@ const ToolBar = (): JSX.Element => {
                     </StyledColorPicker>
                 </Paper>
             </StyledMenuContainer>
-
-            <Snackbar
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                }}
-                open={isSaved}
-                autoHideDuration={6000}
-                onClose={() => setIsSaved(false)}
-            >
-                <MuiAlert elevation={6} variant="filled" severity="success">
-                    Map saved!
-                </MuiAlert>
-            </Snackbar>
         </>
     )
 }

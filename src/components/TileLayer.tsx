@@ -15,11 +15,6 @@ import { isValidArray } from '../common/utils/array'
 import { getRgbaValue } from '../common/utils/colors'
 import { Canvas, Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
-const canvasElement: any = document.createElement('canvas')
-const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
-const canvasBufferElement: any = document.createElement('canvas')
-const canvasBufferContext: CanvasRenderingContext2D = canvasBufferElement.getContext('2d')
-
 type Props = {
     canvas: Canvas
     grid: Grid
@@ -77,6 +72,11 @@ const TileLayer = ({
     const { opacity, visible } = layer
     const { tilewidth, tileheight } = tileset
 
+    const canvasElement: any = document.createElement('canvas')
+    const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
+    const canvasBufferElement: any = document.createElement('canvas')
+    const canvasBufferContext: CanvasRenderingContext2D = canvasBufferElement.getContext('2d')
+
     useEffect(() => {
         canvasElement.width = width
         canvasElement.height = height
@@ -87,6 +87,7 @@ const TileLayer = ({
         setCtx(canvasContext)
         setBufferImage(canvasBufferElement)
         setBufferCtx(canvasBufferContext)
+        console.info('set canvas', layer.name)
     }, [width, height, tilewidth, tileheight])
 
     useEffect(() => {
@@ -337,19 +338,18 @@ const TileLayer = ({
             x={layer.offset.x || 0}
             y={layer.offset.y || 0}
             {...{
+                height,
                 image,
                 onDragEnd,
                 onMouseDown,
                 onMouseMove,
                 onMouseUp,
                 visible,
-                width,
-                height
+                width
             }}
         />
     )
 }
-
 TileLayer.displayName = 'TileLayer'
 
 export default TileLayer
