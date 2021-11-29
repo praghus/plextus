@@ -13,7 +13,7 @@ type Props = {
 const ConfirmationDialog = ({ message, onConfirm, onClose, open, title }: Props): JSX.Element => {
     const { t } = useTranslation()
     return (
-        <Dialog {...{ open, onClose }}>
+        <Dialog {...{ onClose, open }}>
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <DialogContentText>{message}</DialogContentText>

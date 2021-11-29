@@ -58,158 +58,158 @@ export const resetToDefaults = () =>
 
 export const changeCanvasBackground = (background: number[] | null) =>
     ({
-        type: EDITOR_CHANGE_CANVAS_BACKGROUND,
-        payload: { background }
+        payload: { background },
+        type: EDITOR_CHANGE_CANVAS_BACKGROUND
     } as const)
 
 export const changeCanvasSize = (width: number | null, height: number | null) =>
     ({
-        type: EDITOR_CHANGE_CANVAS,
-        payload: { width, height }
+        payload: { height, width },
+        type: EDITOR_CHANGE_CANVAS
     } as const)
 
 export const changeGridColor = (color: number[]) =>
     ({
-        type: EDITOR_CHANGE_GRID_COLOR,
-        payload: { color }
+        payload: { color },
+        type: EDITOR_CHANGE_GRID_COLOR
     } as const)
 
 export const changeGridPitch = pitch =>
     ({
-        type: EDITOR_CHANGE_GRID_PITCH,
-        payload: { pitch }
+        payload: { pitch },
+        type: EDITOR_CHANGE_GRID_PITCH
     } as const)
 
 export const changeGridSize = (width: number, height: number) =>
     ({
-        type: EDITOR_CHANGE_GRID_SIZE,
-        payload: { width, height }
+        payload: { height, width },
+        type: EDITOR_CHANGE_GRID_SIZE
     } as const)
 
 export const changeSelectedLayer = (layerId: string) =>
     ({
-        type: EDITOR_CHANGE_SELECTED_LAYER,
-        payload: { layerId }
+        payload: { layerId },
+        type: EDITOR_CHANGE_SELECTED_LAYER
     } as const)
 
 export const changePalette = (palette: Pallete) =>
     ({
-        type: EDITOR_CHANGE_PALETTE,
-        payload: { palette }
+        payload: { palette },
+        type: EDITOR_CHANGE_PALETTE
     } as const)
 
 export const changePosition = (x: number, y: number) =>
     ({
-        type: EDITOR_CHANGE_POSITION,
-        payload: { x, y }
+        payload: { x, y },
+        type: EDITOR_CHANGE_POSITION
     } as const)
 
 export const changePrimaryColor = (color: number[]) =>
     ({
-        type: EDITOR_CHANGE_PRIMARY_COLOR,
-        payload: { color }
+        payload: { color },
+        type: EDITOR_CHANGE_PRIMARY_COLOR
     } as const)
 
 export const changeScale = (scale: number) =>
     ({
-        type: EDITOR_CHANGE_SCALE,
-        payload: { scale }
+        payload: { scale },
+        type: EDITOR_CHANGE_SCALE
     } as const)
 
 export const changeTool = (tool: string) =>
     ({
-        type: EDITOR_CHANGE_TOOL,
-        payload: { tool }
+        payload: { tool },
+        type: EDITOR_CHANGE_TOOL
     } as const)
 
 export const changeToolSize = (toolSize: number) =>
     ({
-        type: EDITOR_CHANGE_TOOL_SIZE,
-        payload: { toolSize }
+        payload: { toolSize },
+        type: EDITOR_CHANGE_TOOL_SIZE
     } as const)
 
 export const changeSelectedArea = (area: Rectangle | null) =>
     ({
-        type: EDITOR_CHANGE_SELECTED_AREA,
-        payload: { area }
+        payload: { area },
+        type: EDITOR_CHANGE_SELECTED_AREA
     } as const)
 
 export const changeSelectedTile = (tileId: number) =>
     ({
-        type: EDITOR_CHANGE_SELECTED_TILE,
-        payload: { tileId }
+        payload: { tileId },
+        type: EDITOR_CHANGE_SELECTED_TILE
     } as const)
 
 export const changeWorkspaceSize = (width: number, height: number) =>
     ({
-        type: EDITOR_CHANGE_WORKSPACE_SIZE,
-        payload: { width, height }
+        payload: { height, width },
+        type: EDITOR_CHANGE_WORKSPACE_SIZE
     } as const)
 
 export const changeTileset = (tileset: Tileset) =>
     ({
-        type: EDITOR_CHANGE_TILESET,
-        payload: { tileset }
+        payload: { tileset },
+        type: EDITOR_CHANGE_TILESET
     } as const)
 
 export const changeTilesetImage = (blob: Blob) =>
     ({
-        type: EDITOR_SET_TILESET_IMAGE,
-        payload: { blob }
+        payload: { blob },
+        type: EDITOR_SET_TILESET_IMAGE
     } as const)
 
 export const changeTilesetImageSuccess = (image: ImageData) =>
     ({
-        type: EDITOR_SET_TILESET_IMAGE_SUCCESS,
-        payload: { image }
+        payload: { image },
+        type: EDITOR_SET_TILESET_IMAGE_SUCCESS
     } as const)
 
 export const changeLayers = (layers: (Layer | null)[]) =>
     ({
-        type: EDITOR_CHANGE_LAYERS,
-        payload: { layers }
+        payload: { layers },
+        type: EDITOR_CHANGE_LAYERS
     } as const)
 
 export const changeLayerData = (layerId: string, data: (number | null)[]) =>
     ({
-        type: EDITOR_CHANGE_LAYER_DATA,
-        payload: { layerId, data }
+        payload: { data, layerId },
+        type: EDITOR_CHANGE_LAYER_DATA
     } as const)
 
 export const changeLayerImage = (layerId: string, blob: Blob) =>
     ({
-        type: EDITOR_CHANGE_LAYER_IMAGE,
-        payload: { layerId, blob }
+        payload: { blob, layerId },
+        type: EDITOR_CHANGE_LAYER_IMAGE
     } as const)
 
 export const changeLayerOffset = (layerId: string, x: number, y: number) =>
     ({
-        type: EDITOR_CHANGE_LAYER_OFFSET,
-        payload: { layerId, offset: { x, y } }
+        payload: { layerId, offset: { x, y } },
+        type: EDITOR_CHANGE_LAYER_OFFSET
     } as const)
 
 export const changeLayersSuccess = (layers: DeflatedLayer[] | null[]) =>
     ({
-        type: EDITOR_CHANGE_LAYERS_SUCCESS,
-        payload: { layers }
+        payload: { layers },
+        type: EDITOR_CHANGE_LAYERS_SUCCESS
     } as const)
 
 export const changeLayerName = (layerId: string, name: string) =>
     ({
-        type: EDITOR_CHANGE_LAYER_NAME,
-        payload: { layerId, name }
+        payload: { layerId, name },
+        type: EDITOR_CHANGE_LAYER_NAME
     } as const)
 
 export const changeLayerOpacity = (layerId: string, opacity: number) =>
     ({
-        type: EDITOR_CHANGE_LAYER_OPACITY,
-        payload: { layerId, opacity }
+        payload: { layerId, opacity },
+        type: EDITOR_CHANGE_LAYER_OPACITY
     } as const)
 
 export const changeLayerVisible = (layerId: string, visible: boolean) =>
     ({
-        type: EDITOR_CHANGE_LAYER_VISIBLE,
-        payload: { layerId, visible }
+        payload: { layerId, visible },
+        type: EDITOR_CHANGE_LAYER_VISIBLE
     } as const)
 
 export const crop = () =>
@@ -219,32 +219,32 @@ export const crop = () =>
 
 export const cropSuccess = (layers: DeflatedLayer[], canvas: Canvas) =>
     ({
-        type: EDITOR_CROP_SUCCESS,
-        payload: { layers, canvas }
+        payload: { canvas, layers },
+        type: EDITOR_CROP_SUCCESS
     } as const)
 
 export const historyAction = <T>(payload: StringTMap<T>) =>
     ({
-        type: EDITOR_HISTORY_ACTION,
-        payload
+        payload,
+        type: EDITOR_HISTORY_ACTION
     } as const)
 
 export const removeLayer = (layerId: string) =>
     ({
-        type: EDITOR_REMOVE_LAYER,
-        payload: { layerId }
+        payload: { layerId },
+        type: EDITOR_REMOVE_LAYER
     } as const)
 
 export const removeTile = (tileId: number, tileset: Tileset) =>
     ({
-        type: EDITOR_REMOVE_TILE,
-        payload: { tileId, tileset }
+        payload: { tileId, tileset },
+        type: EDITOR_REMOVE_TILE
     } as const)
 
 export const removeTileSuccess = (layers: DeflatedLayer[], tileset: Tileset) =>
     ({
-        type: EDITOR_REMOVE_TILE_SUCCESS,
-        payload: { layers, tileset }
+        payload: { layers, tileset },
+        type: EDITOR_REMOVE_TILE_SUCCESS
     } as const)
 
 export const saveChanges = () =>
@@ -254,18 +254,18 @@ export const saveChanges = () =>
 
 export const toggleShowGrid = (visible: boolean) =>
     ({
-        type: EDITOR_TOGGLE_SHOW_GRID,
-        payload: { visible }
+        payload: { visible },
+        type: EDITOR_TOGGLE_SHOW_GRID
     } as const)
 
 export const createNewProject = (config: ProjectConfig) =>
     ({
-        type: EDITOR_CREATE_NEW_PROJECT,
-        payload: { config }
+        payload: { config },
+        type: EDITOR_CREATE_NEW_PROJECT
     } as const)
 
 export const createNewLayerFromFile = (config: LayerImportConfig) =>
     ({
-        type: EDITOR_CREATE_LAYER_FROM_FILE,
-        payload: { config }
+        payload: { config },
+        type: EDITOR_CREATE_LAYER_FROM_FILE
     } as const)

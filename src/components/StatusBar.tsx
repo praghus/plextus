@@ -19,11 +19,11 @@ import { Layer } from '../store/editor/types'
 
 export const useStyles = makeStyles(() => ({
     button: {
-        padding: '0 5px',
-        fontSize: 12,
-        color: '#666',
-        textTransform: 'lowercase',
         backgroundColor: 'transparent',
+        color: '#666',
+        fontSize: 12,
+        padding: '0 5px',
+        textTransform: 'lowercase',
         whiteSpace: 'nowrap'
     },
     zoomButton: {

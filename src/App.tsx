@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import { hot } from 'react-hot-loader'
+import { ToastContainer } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { getImage } from './common/utils/image'
@@ -101,6 +102,7 @@ const App = (): JSX.Element => {
 
     return (
         <StyledWrapper>
+            <ToastContainer theme="dark" autoClose={3000} />
             <StyledContainer>
                 <LoadingIndicator loading={!isLoaded} />
                 <ToolBar />

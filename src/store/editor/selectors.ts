@@ -18,6 +18,6 @@ export const selectTilesetImage = createSelector(selectEditor, ({ tileset }) => 
 export const selectWorkspace = createSelector(selectEditor, ({ workspace }) => workspace)
 export const selectUndoable = createSelector(selectEditor, ({ canvas, tileset, layers }) => ({
     canvas,
-    tileset,
-    layers
+    layers,
+    tileset
 }))

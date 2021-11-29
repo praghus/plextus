@@ -39,37 +39,37 @@ const Pointer = ({ grid, pointerPosition, selected, selectedLayer, tileset, work
             const overlay = pointerOverlayRef.current
             if ([TOOLS.STAMP, TOOLS.REPLACE].includes(selected.tool)) {
                 overlay.setAttrs({
-                    width,
+                    fill: 'rgba(150,200,255,0.3)',
                     height,
                     stroke: '#96cdff',
-                    fill: 'rgba(150,200,255,0.3)'
+                    width
                 })
                 pointer.setAttrs({
-                    width,
-                    height,
                     fillPatternImage,
-                    stroke: '#96cdff'
+                    height,
+                    stroke: '#96cdff',
+                    width
                 })
                 pointer.fillPatternOffset(getTilePos(selected.tileId, tileset))
             } else if (selected.tool === TOOLS.DELETE) {
                 overlay.setAttrs({
-                    width,
+                    fill: 'rgba(255,128,128,0.3)',
                     height,
                     stroke: '#ff8080',
-                    fill: 'rgba(255,128,128,0.3)'
+                    width
                 })
             } else {
                 const toolSize = [TOOLS.BRIGHTNESS, TOOLS.LINE, TOOLS.PENCIL, TOOLS.ERASER].includes(selected.tool)
                     ? selected.toolSize
                     : 1
                 overlay.setAttrs({
-                    width: toolSize,
-                    height: toolSize,
-                    stroke: 'rgba(255,255,255,0.8)',
                     fill:
                         selected.tool !== TOOLS.ERASER && selected.tool !== TOOLS.BRIGHTNESS
                             ? getRgbaValue(selected.color)
-                            : undefined
+                            : undefined,
+                    height: toolSize,
+                    stroke: 'rgba(255,255,255,0.8)',
+                    width: toolSize
                 })
             }
         }

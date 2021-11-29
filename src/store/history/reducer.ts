@@ -11,16 +11,16 @@ function historyReducer(state = INITIAL_STATE, action: AnyAction) {
             return undo.length === 0
                 ? state
                 : {
-                      undo: undo.slice(1),
-                      redo: [undo[0], ...redo]
+                      redo: [undo[0], ...redo],
+                      undo: undo.slice(1)
                   }
         }
         case HISTORY_REDO: {
             return redo.length === 0
                 ? state
                 : {
-                      undo: [redo[0], ...undo],
-                      redo: redo.slice(1)
+                      redo: redo.slice(1),
+                      undo: [redo[0], ...undo]
                   }
         }
         case HISTORY_ADD: {
@@ -28,8 +28,8 @@ function historyReducer(state = INITIAL_STATE, action: AnyAction) {
             HISTORY_LIMIT ? newUndo.push(...undo.slice(0, HISTORY_LIMIT - 1)) : newUndo.push(...undo)
 
             return {
-                undo: newUndo,
-                redo: []
+                redo: [],
+                undo: newUndo
             }
         }
         case HISTORY_CLEAR:

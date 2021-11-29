@@ -8,6 +8,7 @@ import theme from './themes/theme-dark'
 import App from './App'
 
 import './common/translations/i18n'
+import 'react-toastify/dist/ReactToastify.min.css'
 import 'sanitize.css/sanitize.css'
 
 const styles = css`

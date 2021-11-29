@@ -1,5 +1,4 @@
 export default {
-    name: 'Colodore',
     colors: [
         [0, 0, 0],
         [74, 74, 74],
@@ -17,5 +16,6 @@ export default {
         [112, 109, 235],
         [46, 44, 155],
         [142, 60, 151]
-    ]
+    ],
+    name: 'Colodore'
 }

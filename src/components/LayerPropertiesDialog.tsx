@@ -15,23 +15,23 @@ import { useTranslation } from 'react-i18next'
 import { Layer } from '../store/editor/types'
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        '& > *': {
-            padding: theme.spacing(1)
-        }
-    },
     input: {
-        marginTop: theme.spacing(2),
-        marginRight: theme.spacing(1)
+        marginRight: theme.spacing(1),
+        marginTop: theme.spacing(2)
     },
     inputNarrow: {
-        marginTop: theme.spacing(2),
         marginRight: theme.spacing(1),
+        marginTop: theme.spacing(2),
         width: '126px'
     },
     label: {
         paddingLeft: theme.spacing(1),
         paddingTop: theme.spacing(2)
+    },
+    root: {
+        '& > *': {
+            padding: theme.spacing(1)
+        }
     }
 }))
 
@@ -52,8 +52,8 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
     }, [layer])
 
     return (
-        <Dialog {...{ open, onClose }}>
-            <DialogTitle>Layer properties</DialogTitle>
+        <Dialog {...{ onClose, open }}>
+            <DialogTitle>{t('layer_properties')}</DialogTitle>
             <DialogContent>
                 {model && (
                     <form className={classes.root} noValidate autoComplete="off">
@@ -64,7 +64,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     fullWidth
                                     value={model.name}
                                     id="name"
-                                    label="Name"
+                                    label={t('name')}
                                     size="small"
                                     variant="outlined"
                                     onChange={event => {
@@ -77,7 +77,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     type="number"
                                     value={model.offset.x}
                                     id="offsetX"
-                                    label="Offset X"
+                                    label={t('offset_x')}
                                     size="small"
                                     variant="outlined"
                                     onChange={event => {
@@ -90,7 +90,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     type="number"
                                     value={model.offset.y}
                                     id="offsetY"
-                                    label="Offset Y"
+                                    label={t('offset_y')}
                                     size="small"
                                     variant="outlined"
                                     onChange={event => {
@@ -103,10 +103,10 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     type="number"
                                     value={model.opacity}
                                     id="alpha"
-                                    label="Alpha"
+                                    label={t('alpha')}
                                     size="small"
                                     variant="outlined"
-                                    InputProps={{ inputProps: { min: 0, max: 255 } }}
+                                    InputProps={{ inputProps: { max: 255, min: 0 } }}
                                     onChange={event => {
                                         const opacity = parseInt(event.target.value)
                                         Number.isInteger(opacity) &&
@@ -117,6 +117,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                 />
                                 <FormControlLabel
                                     className={classes.label}
+                                    label={t('visible')}
                                     control={
                                         <Switch
                                             checked={model.visible}
@@ -127,7 +128,6 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                             }}
                                         />
                                     }
-                                    label="Visible"
                                 />
                             </Grid>
                         </Grid>

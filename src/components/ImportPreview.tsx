@@ -69,8 +69,8 @@ const ImportPreview = ({ config }: Props): JSX.Element => {
         if (image) {
             image.setAttrs({
                 fillPatternImage: config.image,
-                width,
-                height
+                height,
+                width
             })
             image.fillPatternOffset({ x: -offset.x, y: -offset.y })
         }
@@ -95,16 +95,16 @@ const ImportPreview = ({ config }: Props): JSX.Element => {
                     draggable
                 >
                     <Layer imageSmoothingEnabled={false}>
-                        <Rect fillPatternImage={BG_IMAGE} {...{ width, height }} />
+                        <Rect fillPatternImage={BG_IMAGE} {...{ height, width }} />
                         <Rect fillPatternRepeat="no-repeat" ref={handleImage} />
                         <GridLines
-                            {...{ width, height }}
+                            {...{ height, width }}
                             scale={scale.x}
                             grid={{
                                 color: [255, 255, 255],
+                                height: tileSize.h,
                                 visible: true,
-                                width: tileSize.w,
-                                height: tileSize.h
+                                width: tileSize.w
                             }}
                         />
                     </Layer>

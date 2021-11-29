@@ -1,5 +1,4 @@
 export default {
-    name: 'Pico 8',
     colors: [
         [0, 0, 0],
         [29, 43, 83],
@@ -17,5 +16,6 @@ export default {
         [131, 118, 156],
         [255, 119, 168],
         [255, 204, 170]
-    ]
+    ],
+    name: 'Pico 8'
 }

@@ -39,13 +39,13 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
             )
         }
         return lines
-    }, [grid.pitch, grid.width, grid.color, grid.height, scale, dash, width, height])
+    }, [grid, scale, dash, width, height])
 
     return (
         grid.visible && (
-            <Group {...{ ref, width, height }} listening={false} {...{ x, y }}>
+            <Group {...{ height, ref, width }} listening={false} {...{ x, y }}>
                 {mesh}
-                <Rect stroke={getRgbaValue(grid.color)} strokeWidth={0.5 / scale} {...{ width, height }} />
+                <Rect stroke={getRgbaValue(grid.color)} strokeWidth={0.5 / scale} {...{ height, width }} />
             </Group>
         )
     )

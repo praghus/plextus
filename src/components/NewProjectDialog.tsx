@@ -20,19 +20,19 @@ import { ProjectConfig } from '../store/editor/types'
 const ImageResolutionInfo = withStyles({ root: { color: '#222' } })(Typography)
 
 const useStyles = makeStyles(theme => ({
+    input: {
+        marginRight: theme.spacing(1),
+        marginTop: theme.spacing(2)
+    },
+    inputNarrow: {
+        marginRight: theme.spacing(1),
+        marginTop: theme.spacing(2),
+        width: '126px'
+    },
     root: {
         '& > *': {
             padding: theme.spacing(1)
         }
-    },
-    input: {
-        marginTop: theme.spacing(2),
-        marginRight: theme.spacing(1)
-    },
-    inputNarrow: {
-        marginTop: theme.spacing(2),
-        marginRight: theme.spacing(1),
-        width: '126px'
     }
 }))
 
@@ -50,11 +50,11 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
     const onCreateNewProject = (config: ProjectConfig) => dispatch(createNewProject(config))
 
     const [config, setConfig] = useState<ProjectConfig>({
-        w: 160 / tileset.tilewidth,
-        h: 160 / tileset.tileheight,
         columns: tileset.columns,
+        h: 160 / tileset.tileheight,
+        tileheight: tileset.tileheight,
         tilewidth: tileset.tilewidth,
-        tileheight: tileset.tileheight
+        w: 160 / tileset.tilewidth
     })
 
     const onSave = useCallback(() => {
@@ -122,8 +122,8 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                                         Number.isInteger(columns) && columns > 0 && setConfig({ ...config, columns })
                                     }}
                                     InputProps={{
-                                        inputProps: { min: 1 },
-                                        endAdornment: <InputAdornment position="end">columns</InputAdornment>
+                                        endAdornment: <InputAdornment position="end">columns</InputAdornment>,
+                                        inputProps: { min: 1 }
                                     }}
                                     id="cols"
                                     label="Tileset maximum width"
@@ -145,8 +145,8 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                                     Number.isInteger(w) && w > 0 && setConfig({ ...config, w })
                                 }}
                                 InputProps={{
-                                    inputProps: { min: 1 },
-                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>
+                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>,
+                                    inputProps: { min: 1 }
                                 }}
                                 id="width"
                                 label="Map width"
@@ -162,8 +162,8 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                                     Number.isInteger(h) && h > 0 && setConfig({ ...config, h })
                                 }}
                                 InputProps={{
-                                    inputProps: { min: 1 },
-                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>
+                                    endAdornment: <InputAdornment position="end">tiles</InputAdornment>,
+                                    inputProps: { min: 1 }
                                 }}
                                 id="height"
                                 label="Map height"

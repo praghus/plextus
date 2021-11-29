@@ -60,7 +60,7 @@ export const uploadImage = (
                     ctx.drawImage(image, 0, 0)
 
                     const blob = await canvasToBlob(canvasElement)
-                    resolve({ image, blob, width: image.width, height: image.height })
+                    resolve({ blob, height: image.height, image, width: image.width })
                 }
             } else reject()
         }
@@ -114,13 +114,13 @@ export const importLayer = async (config: LayerImportConfig, tileset: Tileset) =
             mode === IMPORT_MODES.NEW_LAYER ? await getTilesetHashData(tileset) : { tempTiles: [], tempTilesHash: [] }
 
         const layer = {
+            data: [] as number[],
+            height: (Math.ceil(layerheight / tileheight) * tileheight) / tileheight,
             id: uuidv4(),
+            offset: { x: 0, y: 0 },
             opacity: 255,
             visible: true,
-            offset: { x: 0, y: 0 },
-            width: (Math.ceil(layerwidth / tilewidth) * tilewidth) / tilewidth,
-            height: (Math.ceil(layerheight / tileheight) * tileheight) / tileheight,
-            data: [] as number[]
+            width: (Math.ceil(layerwidth / tilewidth) * tilewidth) / tilewidth
         }
         const w = layer.width * tilewidth
         const h = layer.height * tileheight
@@ -161,8 +161,8 @@ export const importLayer = async (config: LayerImportConfig, tileset: Tileset) =
 
         return {
             layer: { ...layer, name },
-            tilesetCanvas,
-            tilecount: tempTiles.length
+            tilecount: tempTiles.length,
+            tilesetCanvas
         }
     } else throw new Error('No image data for processing!')
 }

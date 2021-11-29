@@ -4,13 +4,13 @@ const { resolve } = require('path')
 const commonConfig = require('./common')
 
 module.exports = merge(commonConfig, {
-    mode: 'production',
+    devtool: 'source-map',
     entry: './index.tsx',
+    mode: 'production',
     output: {
         filename: 'js/bundle.[contenthash].min.js',
         path: resolve(__dirname, '../../dist'),
         publicPath: '/plextus/'
     },
-    devtool: 'source-map',
     plugins: []
 })

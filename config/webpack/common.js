@@ -3,31 +3,17 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-    resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        fallback: {
-            crypto: require.resolve('crypto-browserify'),
-            stream: require.resolve('stream-browserify')
-        },
-        alias: {
-            'react-dom': '@hot-loader/react-dom',
-            zlib: require.resolve('browserify-zlib'),
-            buffer: require.resolve('buffer/'),
-            events: require.resolve('events/'),
-            process: 'process/browser',
-            stream: require.resolve('stream-browserify'),
-            assert: require.resolve('assert/'),
-            timers: require.resolve('timers-browserify'),
-            util: require.resolve('util/')
-        }
-    },
     context: resolve(__dirname, '../../src'),
+    externals: {
+        react: 'React',
+        'react-dom': 'ReactDOM'
+    },
     module: {
         rules: [
             {
+                exclude: /node_modules/,
                 test: [/\.jsx?$/, /\.tsx?$/],
-                use: ['babel-loader'],
-                exclude: /node_modules/
+                use: ['babel-loader']
             },
             {
                 test: /\.css$/,
@@ -42,17 +28,31 @@ module.exports = {
             }
         ]
     },
+    performance: {
+        hints: false
+    },
     plugins: [
         new HtmlWebpackPlugin({ template: 'index.html.ejs' }),
         new webpack.ProvidePlugin({
             process: 'process/browser'
         })
     ],
-    externals: {
-        react: 'React',
-        'react-dom': 'ReactDOM'
-    },
-    performance: {
-        hints: false
+    resolve: {
+        alias: {
+            assert: require.resolve('assert/'),
+            buffer: require.resolve('buffer/'),
+            events: require.resolve('events/'),
+            process: 'process/browser',
+            'react-dom': '@hot-loader/react-dom',
+            stream: require.resolve('stream-browserify'),
+            timers: require.resolve('timers-browserify'),
+            util: require.resolve('util/'),
+            zlib: require.resolve('browserify-zlib')
+        },
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        fallback: {
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify')
+        }
     }
 }

@@ -7,24 +7,24 @@ import {
 
 export const changeAppIsLoading = (isLoading: boolean) =>
     ({
-        type: APP_CHANGE_IS_LOADING,
-        payload: { isLoading }
+        payload: { isLoading },
+        type: APP_CHANGE_IS_LOADING
     } as const)
 
 export const changeLastUpdateTime = (lastUpdateTime: number) =>
     ({
-        type: APP_CHANGE_LAST_UPDATE_TIME,
-        payload: { lastUpdateTime }
+        payload: { lastUpdateTime },
+        type: APP_CHANGE_LAST_UPDATE_TIME
     } as const)
 
 export const changeAppIsImportDialogOpen = (isImportDialogOpen: boolean) =>
     ({
-        type: APP_CHANGE_IS_IMPORT_DIALOG_OPEN,
-        payload: { isImportDialogOpen }
+        payload: { isImportDialogOpen },
+        type: APP_CHANGE_IS_IMPORT_DIALOG_OPEN
     } as const)
 
 export const changeAppIsNewProjectDialogOpen = (isNewProjectDialogOpen: boolean) =>
     ({
-        type: APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN,
-        payload: { isNewProjectDialogOpen }
+        payload: { isNewProjectDialogOpen },
+        type: APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN
     } as const)

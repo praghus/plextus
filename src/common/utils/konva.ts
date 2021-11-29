@@ -75,14 +75,14 @@ export const actionLine = (
     const tri =
         Math.abs(startPos.x - endPos.x) > Math.abs(startPos.y - endPos.y)
             ? {
+                  long: Math.abs(startPos.x - endPos.x),
                   x: Math.sign(Math.cos(ang)),
-                  y: Math.tan(ang) * Math.sign(Math.cos(ang)),
-                  long: Math.abs(startPos.x - endPos.x)
+                  y: Math.tan(ang) * Math.sign(Math.cos(ang))
               }
             : {
+                  long: Math.abs(startPos.y - endPos.y),
                   x: Math.tan(Math.PI / 2 - ang) * Math.sign(Math.cos(Math.PI / 2 - ang)),
-                  y: Math.sign(Math.cos(Math.PI / 2 - ang)),
-                  long: Math.abs(startPos.y - endPos.y)
+                  y: Math.sign(Math.cos(Math.PI / 2 - ang))
               }
 
     for (let i = 0; i < tri.long; i++) {

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import {
     Button,
@@ -29,8 +30,8 @@ const ImageResolutionInfo = withStyles({ root: { color: '#222' } })(Typography)
 
 const useStyles = makeStyles(theme => ({
     input: {
-        marginTop: theme.spacing(1),
         marginRight: theme.spacing(1),
+        marginTop: theme.spacing(1),
         minWidth: '80px'
     }
 }))
@@ -44,6 +45,8 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
 
+    const { t } = useTranslation()
+
     const dispatch = useDispatch()
     const onChangeAppIsLoading = (value: boolean) => dispatch(changeAppIsLoading(value))
     const onCreateNewLayerFromFile = (config: LayerImportConfig) => dispatch(createNewLayerFromFile(config))
@@ -51,12 +54,12 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
     const [isProcessing, setIsProcessing] = useState(false)
     const [isLoaded, setIsLoaded] = useState(false)
     const [config, setConfig] = useState<LayerImportConfig>({
+        columns: tileset.columns,
         mode: IMPORT_MODES.NEW_PROJECT,
         name: '',
         offset: { x: 0, y: 0 },
-        columns: tileset.columns,
-        resolution: { w: canvas?.width ?? 0, h: canvas?.height ?? 0 },
-        tileSize: { w: tileset.tilewidth, h: tileset.tileheight }
+        resolution: { h: canvas?.height ?? 0, w: canvas?.width ?? 0 },
+        tileSize: { h: tileset.tileheight, w: tileset.tilewidth }
     })
 
     const { columns, mode, name, offset, resolution, tileSize } = config
@@ -66,7 +69,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
             setConfig({
                 ...config,
                 columns: tileset.columns,
-                tileSize: { w: tileset.tilewidth, h: tileset.tileheight }
+                tileSize: { h: tileset.tileheight, w: tileset.tilewidth }
             })
         }
     }, [mode])
@@ -84,7 +87,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
             const { image, width, height } = await uploadImage(file)
             const name = file.name.split('.').slice(0, -1).join('.')
 
-            setConfig({ ...config, name, image, resolution: { w: width, h: height } })
+            setConfig({ ...config, image, name, resolution: { h: height, w: width } })
             setIsProcessing(false)
             setIsLoaded(true)
         }
@@ -127,12 +130,12 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                     <FormControlLabel
                                         value={IMPORT_MODES.NEW_PROJECT}
                                         control={<Radio color="primary" />}
-                                        label="As a new project"
+                                        label={t('as_a_new_project')}
                                     />
                                     <FormControlLabel
                                         value={IMPORT_MODES.NEW_LAYER}
                                         control={<Radio color="primary" />}
-                                        label="As a new layer"
+                                        label={t('as_a_new_layer')}
                                     />
                                 </RadioGroup>
                             </FormControl>
@@ -144,7 +147,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                 value={name}
                                 onChange={e => setConfigProp('name', e.target.value)}
                                 id="name"
-                                label="Layer name"
+                                label={t('layer_name')}
                                 size="small"
                                 variant="outlined"
                             />
@@ -168,7 +171,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                                 inputProps: { min: 1 }
                                             }}
                                             id="width"
-                                            label="Tile width"
+                                            label={t('tile_width')}
                                             size="small"
                                             variant="outlined"
                                         />
@@ -188,7 +191,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                                 inputProps: { min: 1 }
                                             }}
                                             id="height"
-                                            label="Tile height"
+                                            label={t('tile_height')}
                                             size="small"
                                             variant="outlined"
                                         />
@@ -203,11 +206,11 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                                 Number.isInteger(c) && c > 0 && setConfigProp('columns', c)
                                             }}
                                             InputProps={{
-                                                inputProps: { min: 1 },
-                                                endAdornment: <InputAdornment position="end">columns</InputAdornment>
+                                                endAdornment: <InputAdornment position="end">columns</InputAdornment>,
+                                                inputProps: { min: 1 }
                                             }}
                                             id="cols"
-                                            label="Tileset maximum width"
+                                            label={t('tileset_maximum_width')}
                                             size="small"
                                             variant="outlined"
                                         />
@@ -223,7 +226,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                         setConfigProp('offset', { ...offset, x: parseInt(event.target.value) })
                                     }
                                     id="offsetX"
-                                    label="Offset X"
+                                    label={t('offset_x')}
                                     size="small"
                                     variant="outlined"
                                 />
@@ -237,7 +240,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                         setConfigProp('offset', { ...offset, y: parseInt(event.target.value) })
                                     }
                                     id="offsetY"
-                                    label="Offset Y"
+                                    label={t('offset_y')}
                                     size="small"
                                     variant="outlined"
                                 />
@@ -245,7 +248,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                         </Grid>
                     </>
                 ) : (
-                    <DialogContentText>Choose a graphic file containing a tiled map.</DialogContentText>
+                    <DialogContentText>{t('choose_map_image')}</DialogContentText>
                 )}
             </DialogContent>
 
@@ -253,12 +256,12 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                 {isLoaded && (
                     <ImageResolutionInfo variant="caption" display="block">
                         {Math.ceil(resolution.w / tileSize.w) * tileSize.w} x{' '}
-                        {Math.ceil(resolution.h / tileSize.h) * tileSize.h} pixels
+                        {Math.ceil(resolution.h / tileSize.h) * tileSize.h} {t('pixels')}
                     </ImageResolutionInfo>
                 )}
                 <div style={{ flex: '1 0 0' }} />
                 <Button onClick={onCancel} color="primary">
-                    Cancel
+                    {t('cancel')}
                 </Button>
                 {isLoaded ? (
                     <Button
@@ -269,11 +272,11 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                         }}
                         variant="contained"
                     >
-                        Save
+                        {t('save')}
                     </Button>
                 ) : (
                     <Button variant="contained" component="label">
-                        Upload File
+                        {t('upload_file')}
                         <input type="file" hidden accept="image/png, image/gif, image/jpeg" {...{ onChange }} />
                     </Button>
                 )}

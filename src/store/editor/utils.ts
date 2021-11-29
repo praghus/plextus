@@ -58,30 +58,30 @@ export const createTileFromImageData = (
 }
 
 export const createEmptyLayer = (name: string, width: number, height: number): Layer => ({
-    id: uuidv4(),
     data: new Array(width * height).fill(null),
-    offset: { x: 0, y: 0 },
-    visible: true,
-    opacity: 255,
-    name,
     height,
+    id: uuidv4(),
+    name,
+    offset: { x: 0, y: 0 },
+    opacity: 255,
+    visible: true,
     width
 })
 
 export const createImageLayer = (name: string, blob: Blob, width: number, height: number): Layer => ({
+    height,
     id: uuidv4(),
     image: window.URL.createObjectURL(blob),
-    offset: { x: 0, y: 0 },
-    visible: true,
-    opacity: 255,
     name,
-    width,
-    height
+    offset: { x: 0, y: 0 },
+    opacity: 255,
+    visible: true,
+    width
 })
 
 export const getTilesetDimensions = (tileset: Tileset) => ({
-    w: tileset.columns * tileset.tilewidth,
-    h: Math.ceil(tileset.tilecount / tileset.columns) * tileset.tileheight
+    h: Math.ceil(tileset.tilecount / tileset.columns) * tileset.tileheight,
+    w: tileset.columns * tileset.tilewidth
 })
 
 export const getStateToSave = async state => {
