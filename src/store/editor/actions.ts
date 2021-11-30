@@ -40,7 +40,8 @@ import {
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID,
     EDITOR_CREATE_NEW_PROJECT,
-    EDITOR_CREATE_LAYER_FROM_FILE
+    EDITOR_CREATE_LAYER_FROM_FILE,
+    EDITOR_LOAD_STATE_FROM_FILE
 } from './constants'
 
 export const adjustWorkspaceSize = (): AnyAction =>
@@ -268,4 +269,10 @@ export const createNewLayerFromFile = (config: LayerImportConfig) =>
     ({
         payload: { config },
         type: EDITOR_CREATE_LAYER_FROM_FILE
+    } as const)
+
+export const loadStateFromFile = (data: any) =>
+    ({
+        payload: { data },
+        type: EDITOR_LOAD_STATE_FROM_FILE
     } as const)

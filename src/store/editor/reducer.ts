@@ -7,6 +7,7 @@ import {
     EDITOR_CHANGE_GRID_COLOR,
     EDITOR_CHANGE_GRID_PITCH,
     EDITOR_CHANGE_GRID_SIZE,
+    EDITOR_CHANGE_LAYERS_SUCCESS,
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
@@ -19,16 +20,20 @@ import {
     EDITOR_CHANGE_TOOL_SIZE,
     EDITOR_CHANGE_WORKSPACE_SIZE,
     EDITOR_CROP_SUCCESS,
+    EDITOR_HISTORY_ACTION,
+    EDITOR_LOAD_STATE_FROM_FILE,
     EDITOR_REMOVE_TILE_SUCCESS,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
-    EDITOR_TOGGLE_SHOW_GRID,
-    EDITOR_HISTORY_ACTION,
-    EDITOR_CHANGE_LAYERS_SUCCESS
+    EDITOR_TOGGLE_SHOW_GRID
 } from './constants'
 
 function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
     switch (action.type) {
+        case EDITOR_LOAD_STATE_FROM_FILE:
+            return {
+                ...action.payload.data
+            }
         case EDITOR_CHANGE_CANVAS:
             return {
                 ...state,
@@ -98,11 +103,14 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 workspace: { ...state.workspace, scale: action.payload.scale }
             }
         case EDITOR_CHANGE_TILESET:
-            return { ...state, tileset: {
-                ...state.tileset,
-                ...action.payload.tileset,
-                lastUpdateTime: performance.now()
-            }}            
+            return {
+                ...state,
+                tileset: {
+                    ...state.tileset,
+                    ...action.payload.tileset,
+                    lastUpdateTime: performance.now()
+                }
+            }
         case EDITOR_CHANGE_TOOL:
             return {
                 ...state,
