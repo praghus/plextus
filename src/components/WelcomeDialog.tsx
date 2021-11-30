@@ -4,6 +4,8 @@ import { withStyles } from '@material-ui/core/styles'
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@material-ui/core'
 import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
 import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
+import { loadStateFromFile } from '../store/editor/actions'
+import demoProject from '../demo/demo-project.json'
 
 const StyledDialogContent = withStyles(theme => ({
     root: {
@@ -23,6 +25,7 @@ const WelcomeDialog = (): JSX.Element => {
     const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
 
     const dispatch = useDispatch()
+    const onLoadDemoProject = () => dispatch(loadStateFromFile(demoProject))
     const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
     const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
 
@@ -45,8 +48,9 @@ const WelcomeDialog = (): JSX.Element => {
                 </Typography>
             </StyledDialogContent>
             <StyledDialogActions>
+                <Button onClick={() => onLoadDemoProject()}>See demo project</Button>
                 <Button onClick={() => onToggleImportDialog(true)}>Import image</Button>
-                <Button onClick={() => onToggleNewProjectDialog(true)}>Create an empty project</Button>
+                <Button onClick={() => onToggleNewProjectDialog(true)}>Create new project</Button>
             </StyledDialogActions>
         </Dialog>
     )
