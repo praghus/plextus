@@ -1,21 +1,11 @@
 import React, { useState } from 'react'
-import styled from '@emotion/styled'
-import { useDispatch, useSelector } from 'react-redux'
-import { debounce } from 'lodash'
-import { RgbaColorPicker } from 'react-colorful'
+
 import { makeStyles } from '@material-ui/core/styles'
 import { AppBar, Tab, Tabs } from '@material-ui/core'
-import { selectSelected } from '../store/editor/selectors'
-import { changePrimaryColor } from '../store/editor/actions'
 import Palette from './Palette'
 import PropertiesTab from './PropertiesTab'
 import TabPanel from './TabPanel'
 import Tileset from './Tileset'
-
-const StyledColorPicker = styled(RgbaColorPicker)`
-    width: auto !important;
-    margin: 15px 10px;
-`
 
 const useStyles = makeStyles(() => ({
     tab: {
@@ -29,17 +19,9 @@ type Props = {
 
 const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
     const classes = useStyles()
-    const dispatch = useDispatch()
-    const selected = useSelector(selectSelected)
-
     const [tab, setTab] = useState(0)
-    const [r, g, b, a] = selected.color
-    const color = { a: (isNaN(a) && 255) || (a > 0 && a / 255) || 0, b, g, r }
+
     const onChange = (e: any, value: any) => setTab(value)
-    const onChangeColor = debounce(
-        color => dispatch(changePrimaryColor([color.r, color.g, color.b, color.a * 255])),
-        300
-    )
 
     return (
         <>
@@ -54,7 +36,6 @@ const TabContainer = ({ tilesetCanvas }: Props): JSX.Element => {
                 <Tileset {...{ tilesetCanvas }} />
             </TabPanel>
             <TabPanel value={tab} index={1}>
-                <StyledColorPicker color={color} onChange={onChangeColor} />
                 <Palette />
             </TabPanel>
             <TabPanel value={tab} index={2}>

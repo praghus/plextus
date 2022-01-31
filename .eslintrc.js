@@ -121,22 +121,12 @@ module.exports = {
         'react/default-props-match-prop-types': 0,
         'react/destructuring-assignment': 0,
         'react/display-name': [2, { ignoreTranspilerName: true }],
-        'react/jsx-filename-extension': [
-            1,
-            {
-                extensions: ['.js', '.jsx', '.ts', '.tsx']
-            }
-        ],
+        'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
         'react/jsx-fragments': 0,
         'react/jsx-no-bind': 0,
         'react/jsx-props-no-spreading': 0,
         'react/no-array-index-key': 0,
-        'react/prop-types': [
-            1,
-            {
-                ignore: ['children', 'className']
-            }
-        ],
+        'react/prop-types': [1, { ignore: ['children', 'className'] }],
         'react/require-default-props': 0,
         'react/sort-comp': 0,
         'react/state-in-constructor': 0,

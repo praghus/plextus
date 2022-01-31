@@ -7,9 +7,9 @@ type RootState = ReturnType<typeof store.getState>
 
 export const selectApp = (state: RootState): AppState => state[APP_RESOURCE_NAME] || INITIAL_STATE
 export const selectIsLoading = createSelector(selectApp, ({ isLoading }) => isLoading)
-export const selectIsLoaded = createSelector(selectApp, ({ isLoading, isLoaded }) => !isLoading && isLoaded)
 export const selectLastUpdateTime = createSelector(selectApp, ({ lastUpdateTime }) => lastUpdateTime)
-export const selectIsImportDialogOpen = createSelector(selectApp, ({ isImportDialogOpen }) => isImportDialogOpen)
+export const selectImportedImage = createSelector(selectApp, ({ importedImage }) => importedImage)
+export const selectIsImportDialogOpen = createSelector(selectApp, ({ importedImage }) => !!importedImage)
 export const selectIsNewProjectDialogOpen = createSelector(
     selectApp,
     ({ isNewProjectDialogOpen }) => isNewProjectDialogOpen

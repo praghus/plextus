@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { put, StrictEffect, select, takeLatest, call } from 'redux-saga/effects'
+import { call, put, StrictEffect, select, takeLatest } from 'redux-saga/effects'
 import { toast } from 'react-toastify'
 import i18n from '../../common/translations/i18n'
 import logger from '../../common/utils/logger'
@@ -8,7 +8,8 @@ import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
 import { canvasToBlob } from '../../common/utils/data'
 import { IMPORT_MODES, TOOLS } from '../../common/constants'
-import { changeAppIsImportDialogOpen, changeAppIsLoading } from '../app/actions'
+import { selectImportedImage } from '../app/selectors'
+import { changeAppImportedImage, changeAppIsLoading } from '../app/actions'
 import {
     selectCanvas,
     selectGrid,
@@ -54,11 +55,12 @@ import {
     EDITOR_REMOVE_TILE,
     EDITOR_SAVE_CHANGES,
     EDITOR_SET_TILESET_IMAGE,
-    EDITOR_CREATE_LAYER_FROM_FILE,
-    INITIAL_STATE
+    EDITOR_CREATE_TILE_LAYER_FROM_FILE,
+    INITIAL_STATE,
+    EDITOR_CREATE_IMAGE_LAYER_FROM_FILE
 } from './constants'
 import { DeflatedLayer, Grid, Layer, Canvas, Selected, Tileset } from './types'
-import { createEmptyLayer, getStateToSave } from './utils'
+import { createEmptyLayer, createImageLayer, getStateToSave } from './utils'
 
 export function* clearProject(): Generator<StrictEffect, void, any> {
     try {
@@ -204,7 +206,7 @@ export function* saveChangesSaga(): Generator<StrictEffect, void, any> {
         const state = yield select(state => state)
         const toSave = yield call(() => getStateToSave(state))
         yield call(() => setCacheBlob(APP_STORAGE_KEY, JSON.stringify(toSave), 'application/json'))
-        toast.success(i18n.t('map_saved'))
+        toast.success(i18n.t('i18_map_saved'))
         logger.info('Saving to store')
     } catch (err) {
         logger.error(err)
@@ -255,15 +257,36 @@ export function* createNewProject(action: AnyAction): Generator<StrictEffect, vo
     }
 }
 
-export function* createLayerFromFile(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* createImageLayerFromFile(action: AnyAction): Generator<StrictEffect, void, any> {
     const { config } = action.payload
     try {
+        yield put(changeAppIsLoading(true))
+        const importedImage: string = yield select(selectImportedImage)
+        const layers: Layer[] = yield select(selectLayers)
+        const layer = createImageLayer(config.name, importedImage, config.resolution.w, config.resolution.h)
+        yield put(changeLayers([...layers, { ...layer }]))
+        yield put(changeSelectedLayer(layer.id))
+        yield put(changeAppImportedImage())
+        yield put(changeAppIsLoading(false))
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* createTileLayerFromFile(action: AnyAction): Generator<StrictEffect, void, any> {
+    const { image, config } = action.payload
+    try {
+        yield put(changeAppIsLoading(true))
+        yield put(changeAppImportedImage())
+
         const layers: Layer[] = yield select(selectLayers)
         const tileset: Tileset = yield select(selectTileset)
 
-        const { layer, tilesetCanvas, tilecount } = yield call(importLayer, config, tileset)
+        const { layer, tilesetCanvas, tilecount } = yield call(importLayer, image, config, tileset)
         const { columns, mode, name, tileSize } = config
         const { w: tilewidth, h: tileheight } = tileSize
+
+        console.info(mode)
 
         const w = layer.width * tilewidth
         const h = layer.height * tileheight
@@ -282,7 +305,7 @@ export function* createLayerFromFile(action: AnyAction): Generator<StrictEffect,
                     tilewidth
                 })
             )
-        } else {
+        } else if (mode === IMPORT_MODES.NEW_LAYER) {
             yield put(changeLayers([...layers, { ...layer, name }]))
             yield put(
                 changeTileset({
@@ -296,10 +319,9 @@ export function* createLayerFromFile(action: AnyAction): Generator<StrictEffect,
 
         yield put(changeTilesetImage(blob))
         yield put(changeSelectedLayer(layer.id))
-        yield put(changeAppIsImportDialogOpen(false))
-        yield put(changeAppIsLoading(false))
         yield put(saveChanges())
         yield put(clear())
+        yield put(changeAppIsLoading(false))
     } catch (err) {
         logger.error(err)
     }
@@ -320,5 +342,6 @@ export default function* editorSaga(): Generator {
         yield takeLatest(EDITOR_SAVE_CHANGES, saveChangesSaga),
         yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage),
         yield takeLatest(EDITOR_CREATE_NEW_PROJECT, createNewProject),
-        yield takeLatest(EDITOR_CREATE_LAYER_FROM_FILE, createLayerFromFile)
+        yield takeLatest(EDITOR_CREATE_TILE_LAYER_FROM_FILE, createTileLayerFromFile),
+        yield takeLatest(EDITOR_CREATE_IMAGE_LAYER_FROM_FILE, createImageLayerFromFile)
 }

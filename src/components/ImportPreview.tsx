@@ -9,7 +9,8 @@ import {
     BG_IMAGE,
     SCALE_MIN,
     SCALE_MAX,
-    SCALE_STEP
+    SCALE_STEP,
+    IMPORT_MODES
 } from '../common/constants'
 
 import GridLines from './GridLines'
@@ -22,15 +23,17 @@ const StyledPreviewContainer = styled.div`
 `
 
 const StyledStage = styled(Stage)`
+    background: #222;
     cursor: move;
 `
 
 type Props = {
+    image: CanvasImageSource
     config: LayerImportConfig
 }
 
-const ImportPreview = ({ config }: Props): JSX.Element => {
-    const { offset, resolution, tileSize } = config
+const ImportPreview = ({ image, config }: Props): JSX.Element => {
+    const { offset, mode, resolution, tileSize } = config
 
     const width = Math.ceil((resolution.w + offset.x) / tileSize.w) * tileSize.w
     const height = Math.ceil((resolution.h + offset.y) / tileSize.h) * tileSize.h
@@ -38,14 +41,14 @@ const ImportPreview = ({ config }: Props): JSX.Element => {
     const [position, setPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
     const [scale, setScale] = useState<Konva.Vector2d>({ x: 2, y: 2 })
     const [stage, setStage] = useState<Konva.Stage>()
-    const [image, setImage] = useState<Konva.Rect>()
+    const [preview, setPreview] = useState<Konva.Rect>()
 
     const handleStage = useCallback(node => {
         setStage(node)
     }, [])
 
-    const handleImage = useCallback(node => {
-        setImage(node)
+    const handlePreview = useCallback(node => {
+        setPreview(node)
     }, [])
 
     const onScale = useCallback(
@@ -66,22 +69,17 @@ const ImportPreview = ({ config }: Props): JSX.Element => {
     )
 
     useEffect(() => {
-        if (image) {
-            image.setAttrs({
-                fillPatternImage: config.image,
-                height,
-                width
-            })
-            image.fillPatternOffset({ x: -offset.x, y: -offset.y })
-        }
-    }, [config, image, stage])
+        preview?.setAttrs({ fillPatternImage: image, height, width })
+    }, [image, height, width, preview])
 
     useEffect(() => {
-        if (stage) {
-            stage.scale(scale)
-            stage.position(position)
-            stage.batchDraw()
-        }
+        preview?.fillPatternOffset({ x: -offset.x, y: -offset.y })
+    }, [offset, preview])
+
+    useEffect(() => {
+        stage?.scale(scale)
+        stage?.position(position)
+        stage?.batchDraw()
     }, [position, scale, stage])
 
     return (
@@ -96,17 +94,19 @@ const ImportPreview = ({ config }: Props): JSX.Element => {
                 >
                     <Layer imageSmoothingEnabled={false}>
                         <Rect fillPatternImage={BG_IMAGE} {...{ height, width }} />
-                        <Rect fillPatternRepeat="no-repeat" ref={handleImage} />
-                        <GridLines
-                            {...{ height, width }}
-                            scale={scale.x}
-                            grid={{
-                                color: [255, 255, 255],
-                                height: tileSize.h,
-                                visible: true,
-                                width: tileSize.w
-                            }}
-                        />
+                        <Rect fillPatternRepeat="no-repeat" ref={handlePreview} />
+                        {mode !== IMPORT_MODES.NEW_IMAGE && (
+                            <GridLines
+                                {...{ height, width }}
+                                scale={scale.x}
+                                grid={{
+                                    color: [255, 255, 255],
+                                    height: tileSize.h,
+                                    visible: true,
+                                    width: tileSize.w
+                                }}
+                            />
+                        )}
                     </Layer>
                 </StyledStage>
             </StyledPreviewContainer>

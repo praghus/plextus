@@ -25,7 +25,8 @@ import {
     EDITOR_REMOVE_TILE_SUCCESS,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
-    EDITOR_TOGGLE_SHOW_GRID
+    EDITOR_TOGGLE_SHOW_GRID,
+    EDITOR_CHANGE_SELECTED_PALETTE
 } from './constants'
 
 function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
@@ -91,6 +92,11 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
             return {
                 ...state,
                 selected: { ...state.selected, layerId: action.payload.layerId }
+            }
+        case EDITOR_CHANGE_SELECTED_PALETTE:
+            return {
+                ...state,
+                selected: { ...state.selected, palette: action.payload.name }
             }
         case EDITOR_CHANGE_SELECTED_TILE:
             return {

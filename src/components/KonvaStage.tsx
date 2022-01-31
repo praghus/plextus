@@ -34,10 +34,10 @@ import {
 } from '../store/editor/actions'
 import CropTool from './CropTool'
 import GridLines from './GridLines'
-import TileLayer from './TileLayer'
-import StatusBar from './StatusBar'
+import KonvaLayer from './KonvaLayer'
 import Pointer from './Pointer'
-import ImageLayer from './ImageLayer'
+import SelectTool from './SelectTool'
+import StatusBar from './StatusBar'
 
 const styles = ({ selected }) => css`
     ${((selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP) &&
@@ -80,15 +80,15 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const [keyDown, setKeyDown] = useState<KeyboardEvent | null>(null)
 
     const isPointerVisible = useMemo(
-        () => !isMouseDown && isMouseOver && ![TOOLS.DRAG, TOOLS.CROP, TOOLS.OFFSET].includes(selected.tool),
+        () =>
+            isMouseOver &&
+            !isMouseDown &&
+            ![TOOLS.DRAG, TOOLS.CROP, TOOLS.SELECT, TOOLS.OFFSET].includes(selected.tool),
         [isMouseDown, isMouseOver, selected.tool]
     )
 
     const dispatch = useDispatch()
 
-    const onUndo = () => dispatch(undo())
-    const onRedo = () => dispatch(redo())
-    const onCrop = () => dispatch(crop())
     const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
     const onChangeSelectedArea = (rect: Rectangle) => dispatch(changeSelectedArea(rect))
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
@@ -98,7 +98,9 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
-
+    const onUndo = () => dispatch(undo())
+    const onRedo = () => dispatch(redo())
+    const onCrop = () => dispatch(crop())
     const onKeyUp = () => setKeyDown(null)
     const onKeyDown = (keyDown: KeyboardEvent) => setKeyDown(keyDown)
     const onDragEnd = () => stage && onChangePosition(stage.x(), stage.y())
@@ -208,22 +210,6 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
         }
     }, [keyDown])
 
-    const layerProps = {
-        canvas,
-        grid,
-        isMouseDown,
-        keyDown,
-        onChangeLayerOffset,
-        onChangePrimaryColor,
-        onChangeSelectedTile,
-        onChangeTileset,
-        onSaveTilesetImage,
-        selected,
-        tileset,
-        tilesetCanvas,
-        workspace
-    }
-
     return (
         <div>
             <div css={styles({ selected })}>
@@ -249,25 +235,46 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
                         />
                         {backgroundColor && <Rect width={canvas.width} height={canvas.height} fill={backgroundColor} />}
                         {stage &&
-                            layers.map(layer =>
-                                layer.image ? (
-                                    <ImageLayer
-                                        key={`layer-${layer.id}`}
-                                        {...{ ...layerProps, layer, onChangeLayerImage, stage }}
-                                    />
-                                ) : (
-                                    <TileLayer
-                                        key={`layer-${layer.id}`}
-                                        {...{ ...layerProps, layer, onChangeLayerData, stage }}
-                                    />
-                                )
-                            )}
+                            layers.map(layer => (
+                                <KonvaLayer
+                                    key={`layer-${layer.id}`}
+                                    {...{
+                                        grid,
+                                        isMouseDown,
+                                        keyDown,
+                                        layer,
+                                        onChangeLayerData,
+                                        onChangeLayerImage,
+                                        onChangeLayerOffset,
+                                        onChangePrimaryColor,
+                                        onChangeSelectedTile,
+                                        onChangeTileset,
+                                        onSaveTilesetImage,
+                                        selected,
+                                        stage,
+                                        tileset,
+                                        tilesetCanvas,
+                                        workspace
+                                    }}
+                                />
+                            ))}
                         {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, grid, onChangeSelectedArea }} />}
+                        {selected.tool === TOOLS.SELECT && (
+                            <SelectTool {...{ canvas, grid, isMouseDown, pointerPosition, workspace }} />
+                        )}
                         <GridLines
                             x={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.x : 0}
                             y={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.y : 0}
-                            width={(selectedLayer?.image && selectedLayer?.width) || canvas.width}
-                            height={(selectedLayer?.image && selectedLayer?.height) || canvas.height}
+                            width={
+                                selectedLayer
+                                    ? selectedLayer.width * (selectedLayer.image ? 1 : tileset.tilewidth)
+                                    : canvas.width
+                            }
+                            height={
+                                selectedLayer
+                                    ? selectedLayer.height * (selectedLayer.image ? 1 : tileset.tileheight)
+                                    : canvas.height
+                            }
                             scale={workspace.scale}
                             {...{ grid }}
                         />

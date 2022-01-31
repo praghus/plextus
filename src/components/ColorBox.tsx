@@ -30,7 +30,7 @@ type Props = {
 
 const ColorBox = ({ onClick, selected, rgba }: Props): JSX.Element => (
     <StyledColorBox
-        onClick={() => onClick(rgba)}
+        onClick={() => onClick(rgba.length > 3 ? rgba : [...rgba, 255])}
         className={`color-button ${selected ? 'selected' : null}`}
         style={{ backgroundColor: getRgbaValue(rgba) }}
     />

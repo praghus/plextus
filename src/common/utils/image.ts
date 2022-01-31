@@ -12,15 +12,6 @@ export const getImage = (src: string): Promise<HTMLImageElement> =>
         image.onerror = reject
     })
 
-// rename to getImage and add image source
-// export const getImageDimensions = (file: any): Promise<{ w: number; h: number }> =>
-//     new Promise((resolve, reject) => {
-//         const i = new Image()
-//         i.src = file
-//         i.onload = () => resolve({ w: i.width, h: i.height })
-//         i.onerror = reject
-//     })
-
 export const createEmptyImage = (width: number, height: number): Promise<Blob> =>
     new Promise(resolve => {
         const canvasElement: any = document.createElement('canvas')
@@ -96,8 +87,8 @@ export const getTilesetHashData = async (
     return { tempTiles, tempTilesHash }
 }
 
-export const importLayer = async (config: LayerImportConfig, tileset: Tileset) => {
-    const { image, columns, mode, name, offset, resolution, tileSize } = config
+export const importLayer = async (image: CanvasImageSource, config: LayerImportConfig, tileset: Tileset) => {
+    const { columns, mode, name, offset, resolution, tileSize } = config
     if (image) {
         const layerCanvas: any = document.createElement('canvas')
         const layerContext: CanvasRenderingContext2D = layerCanvas.getContext('2d')
