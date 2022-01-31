@@ -104,9 +104,9 @@ export function fillColor(
 ): void {
     const [r, g, b] = selectedColor
     const a = !isNaN(selectedColor[3]) ? selectedColor[3] : 255
-    const pixelStack = [[pos.x, pos.y]]
+    const pixelStack = [[Math.floor(pos.x), Math.floor(pos.y)]]
     const colorLayer = ctx.getImageData(0, 0, bufferImage.width, bufferImage.height)
-    const startPos = (pos.y * bufferImage.width + pos.x) * 4
+    const startPos = (Math.floor(pos.y) * bufferImage.width + Math.floor(pos.x)) * 4
     const startR = colorLayer.data[startPos]
     const startG = colorLayer.data[startPos + 1]
     const startB = colorLayer.data[startPos + 2]

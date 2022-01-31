@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { makeStyles } from '@material-ui/core/styles'
@@ -28,7 +28,7 @@ import {
     Visibility as VisibilityIcon,
     VisibilityOff as VisibilityOffIcon
 } from '@material-ui/icons'
-import { createEmptyImage, uploadImage } from '../common/utils/image'
+import { createEmptyImage } from '../common/utils/image'
 import { changeItemPosition } from '../common/utils/array'
 import { createEmptyLayer, createImageLayer, getLayerById } from '../store/editor/utils'
 import { Layer } from '../store/editor/types'
@@ -42,6 +42,7 @@ import {
 import { selectCanvas, selectSelected, selectLayers, selectTileset } from '../store/editor/selectors'
 import ConfirmationDialog from './ConfirmationDialog'
 import LayerPropertiesDialog from './LayerPropertiesDialog'
+import ImageUpload from './ImageUpload'
 
 const useStyles = makeStyles(theme => ({
     layersList: {
@@ -85,6 +86,8 @@ const LayersList = (): JSX.Element => {
     const [opacity, setOpacity] = useState(currentLayer ? currentLayer.opacity : 255)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
     const [propertiesDialogOpen, setPropertiesDialogOpen] = useState(false)
+    const [editingLayer, setEditingLayer] = useState<Layer | null>()
+    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
 
     const { t } = useTranslation()
 
@@ -96,26 +99,16 @@ const LayersList = (): JSX.Element => {
     const onChangeLayerName = (layerId: string, value: string) => dispatch(changeLayerName(layerId, value))
     const onOpacityChange = (e: any, value: any) => setOpacity(value)
     const onOpacityChangeCommitted = (e: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
-    const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)
-    const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
-
-    const [editingLayer, setEditingLayer] = useState<Layer | null>()
-    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
-    const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
-
     const handleClick = (e: React.MouseEvent) => setAnchorEl(e.currentTarget as HTMLAnchorElement)
     const handleClose = () => setAnchorEl(null)
 
-    const onConfirmRemoveLayer = () => {
+    const onRemoveLayer = () => {
         const index = layers.indexOf(currentLayer)
         const newLayers = [...layers]
         newLayers.splice(index, 1)
-
         onChangeLayers(newLayers)
         setConfirmationDialogOpen(false)
-        if (newLayers.length) {
-            onChangeSelectedLayer(newLayers[newLayers.length - 1].id)
-        }
+        newLayers.length && onChangeSelectedLayer(newLayers[newLayers.length - 1].id)
     }
 
     const onRenameLayer = () => {
@@ -134,7 +127,7 @@ const LayersList = (): JSX.Element => {
 
     const onCreateTileLayer = () => {
         const newLayer = createEmptyLayer(
-            t('new_tile_layer'),
+            t('i18_new_tile_layer'),
             Math.round(canvas.width / tileset.tilewidth),
             Math.round(canvas.height / tileset.tileheight)
         )
@@ -144,23 +137,16 @@ const LayersList = (): JSX.Element => {
     }
 
     const onCreateImageLayer = async () => {
-        const imageBlob = await createEmptyImage(canvas.width, canvas.height)
-        if (imageBlob) {
-            const newLayer = createImageLayer(t('new_image_layer'), imageBlob, canvas.width, canvas.height)
+        const blob = await createEmptyImage(canvas.width, canvas.height)
+        if (blob) {
+            const newLayer = createImageLayer(
+                t('i18_new_image_layer'),
+                window.URL.createObjectURL(blob),
+                canvas.width,
+                canvas.height
+            )
             onChangeLayers([...layers, newLayer])
             onChangeSelectedLayer(newLayer.id)
-        }
-        handleClose()
-    }
-
-    const onImageUpload = async e => {
-        const file = e.target.files[0]
-        const { blob, width, height } = await uploadImage(file)
-        if (blob) {
-            onChangeLayers([
-                ...layers,
-                createImageLayer(file.name.split('.').slice(0, -1).join('.'), blob, width, height)
-            ])
         }
         handleClose()
     }
@@ -174,24 +160,27 @@ const LayersList = (): JSX.Element => {
         setPropertiesDialogOpen(false)
     }
 
+    const selectedLayer = useMemo(
+        () => layers.find(({ id }) => id === selected.layerId) || null,
+        [layers, selected.layerId]
+    )
+
     return (
         <>
-            <Typography gutterBottom>{t('layers')}</Typography>
+            <Typography gutterBottom>{t('i18_layers')}</Typography>
             <ConfirmationDialog
-                title={t('hold_on')}
-                message={t('delete_layer_confirmation')}
+                title={t('i18_hold_on')}
+                message={t('i18_delete_layer_confirmation')}
                 open={confirmationDialogOpen}
-                onConfirm={onConfirmRemoveLayer}
-                onClose={onCancelRemoveLayer}
+                onConfirm={onRemoveLayer}
+                onClose={() => setConfirmationDialogOpen(false)}
             />
-
             <LayerPropertiesDialog
                 layer={selectedLayer}
                 open={propertiesDialogOpen}
                 onSave={onUpdateLayer}
                 onClose={() => setPropertiesDialogOpen(false)}
             />
-
             <List className={classes.layersList}>
                 {reversedList.map((layer: Layer) => (
                     <ListItem
@@ -273,64 +262,55 @@ const LayersList = (): JSX.Element => {
                 </StyledSliderContainer>
                 <StyledButtonContainer>
                     <IconButton size="small" onClick={handleClick}>
-                        <Tooltip title={t('new_layer') as string} placement="top">
+                        <Tooltip title={t('i18_new_layer') as string} placement="top">
                             <AddIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
-
                     <IconButton
                         size="small"
                         disabled={layers.indexOf(currentLayer) === 0}
                         onClick={() => onChangeLayerOrder(1)}
                     >
-                        <Tooltip title={t('layer_order_down') as string} placement="top">
+                        <Tooltip title={t('i18_layer_order_down') as string} placement="top">
                             <ArrowDownwardIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
-
                     <IconButton
                         size="small"
                         disabled={layers.indexOf(currentLayer) === layers.length - 1}
                         onClick={() => onChangeLayerOrder(-1)}
                     >
-                        <Tooltip title={t('layer_order_up') as string} placement="top">
+                        <Tooltip title={t('i18_layer_order_up') as string} placement="top">
                             <ArrowUpwardIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
-                    <IconButton size="small" onClick={onOpenConfirmationDialog}>
-                        <Tooltip title={t('delete_layer') as string} placement="top">
+                    <IconButton size="small" onClick={() => setConfirmationDialogOpen(true)}>
+                        <Tooltip title={t('i18_delete_layer') as string} placement="top">
                             <DeleteForeverIcon fontSize="small" />
                         </Tooltip>
                     </IconButton>
                 </StyledButtonContainer>
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
                     <MenuItem onClick={onCreateTileLayer}>
-                        {t('tile_layer')}
+                        {t('i18_tile_layer')}
                         <ListItemSecondaryAction>
                             <AppsIcon fontSize="small" />
                         </ListItemSecondaryAction>
                     </MenuItem>
                     <MenuItem onClick={onCreateImageLayer}>
-                        {t('image_layer_empty')}
+                        {t('i18_image_layer')}
                         <ListItemSecondaryAction>
                             <ImageIcon fontSize="small" />
                         </ListItemSecondaryAction>
                     </MenuItem>
-                    <input
-                        type="file"
-                        hidden
-                        id="upload-input"
-                        accept="image/png, image/gif, image/jpeg"
-                        onChange={onImageUpload}
-                    />
-                    <label htmlFor="upload-input">
-                        <MenuItem>
-                            {t('image_layer_import')}
+                    <ImageUpload>
+                        <MenuItem onClick={handleClose}>
+                            {t('i18_import_image')}
                             <ListItemSecondaryAction>
                                 <ImageSearchIcon fontSize="small" />
                             </ListItemSecondaryAction>
                         </MenuItem>
-                    </label>
+                    </ImageUpload>
                 </Menu>
             </StyledBottomContainer>
         </>

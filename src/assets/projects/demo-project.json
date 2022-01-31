@@ -52,8 +52,8 @@
         "color": [0, 0, 0, 255],
         "layerId": "a3841a1f-4f7a-486b-8eaf-1bfe4f939cb8",
         "stamp": [],
-        "tileId": 2,
-        "tool": "STAMP",
+        "tileId": 1,
+        "tool": "DRAG",
         "toolSize": 1
     },
     "tileset": {
@@ -69,6 +69,6 @@
         "height": 1029,
         "x": 0,
         "y": 0,
-        "scale": 0
+        "scale": 1
     }
 }

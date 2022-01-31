@@ -2,10 +2,12 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { withStyles } from '@material-ui/core/styles'
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@material-ui/core'
-import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
-import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
+import { selectIsLoading, selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
+import { changeAppIsNewProjectDialogOpen } from '../store/app/actions'
 import { loadStateFromFile } from '../store/editor/actions'
-import demoProject from '../demo/demo-project.json'
+import { selectCanvas } from '../store/editor/selectors'
+import ImageUpload from './ImageUpload'
+import demoProject from '../assets/projects/demo-project.json'
 
 const StyledDialogContent = withStyles(theme => ({
     root: {
@@ -21,16 +23,18 @@ const StyledDialogActions = withStyles(theme => ({
 }))(DialogActions)
 
 const WelcomeDialog = (): JSX.Element => {
+    const canvas = useSelector(selectCanvas)
+    const isLoading = useSelector(selectIsLoading)
     const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
     const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
+    const isOpen = !canvas && !isLoading && !isImportDialogOpen && !isNewProjectDialogOpen
 
     const dispatch = useDispatch()
     const onLoadDemoProject = () => dispatch(loadStateFromFile(demoProject))
-    const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
     const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
 
     return (
-        <Dialog open={!isImportDialogOpen && !isNewProjectDialogOpen}>
+        <Dialog open={isOpen}>
             <DialogTitle disableTypography>
                 <Typography variant="h6">Welcome in Plextus v1.0</Typography>
             </DialogTitle>
@@ -49,8 +53,13 @@ const WelcomeDialog = (): JSX.Element => {
             </StyledDialogContent>
             <StyledDialogActions>
                 <Button onClick={() => onLoadDemoProject()}>See demo project</Button>
-                <Button onClick={() => onToggleImportDialog(true)}>Import image</Button>
-                <Button onClick={() => onToggleNewProjectDialog(true)}>Create new project</Button>
+                <Button component="label">
+                    Import image
+                    <ImageUpload />
+                </Button>
+                <Button variant="contained" onClick={() => onToggleNewProjectDialog(true)}>
+                    Create new project
+                </Button>
             </StyledDialogActions>
         </Dialog>
     )

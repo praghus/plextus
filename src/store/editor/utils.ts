@@ -2,12 +2,10 @@ import { v4 as uuidv4 } from 'uuid'
 import Konva from 'konva'
 import request from '../../common/utils/fetch-api'
 import { getCacheItem } from '../../common/utils/storage'
-import { dataURLToObjectURL, getDataFromObjectURL } from '../../common/utils/data'
+import { canvasToBlob, dataURLToObjectURL, getDataFromObjectURL } from '../../common/utils/data'
 import { APP_STORAGE_KEY } from '../app/constants'
 import { EDITOR_RESOURCE_NAME } from './constants'
 import { Layer, Tileset } from './types'
-
-const noop = Function.prototype
 
 export const getLayerById = (layers: Layer[], id: string) => layers.find(layer => layer.id === id)
 
@@ -18,7 +16,10 @@ export const getTilePos = (gid: number, tileset: Tileset): Konva.Vector2d => {
     return { x, y }
 }
 
-export const createEmptyTile = (tileset: Tileset, tilesetCanvas: HTMLCanvasElement, onSave = noop): void => {
+export const createEmptyTile = async (
+    tileset: Tileset,
+    tilesetCanvas: HTMLCanvasElement
+): Promise<{ blob: Blob; newTileId: number }> => {
     const { columns, tilecount, tilewidth, tileheight } = tileset
     const newTileId = tilecount + 1
     const pos = getTilePos(newTileId, tileset)
@@ -29,17 +30,19 @@ export const createEmptyTile = (tileset: Tileset, tilesetCanvas: HTMLCanvasEleme
     canvasElement.height = pos.y + tileheight
     canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height)
     canvasContext.drawImage(tilesetCanvas, 0, 0)
-    canvasElement.toBlob((blob: Blob) => {
-        blob && onSave(blob, newTileId)
-    }, 'image/png')
+
+    const blob = await canvasToBlob(canvasElement)
+    return { blob, newTileId }
+    // canvasElement.toBlob((blob: Blob) => {
+    //     blob && onSave(blob, newTileId)
+    // }, 'image/png')
 }
 
-export const createTileFromImageData = (
+export const createTileFromImageData = async (
     tileset: Tileset,
     tilesetCanvas: HTMLCanvasElement,
-    tile: ImageData,
-    onSave = noop
-): void => {
+    data: ImageData
+): Promise<{ blob: Blob; newTileId: number }> => {
     const { columns, tilecount, tilewidth, tileheight } = tileset
     const newTileId = tilecount + 1
     const pos = getTilePos(newTileId, tileset)
@@ -51,10 +54,10 @@ export const createTileFromImageData = (
     canvasElement.height = pos.y + tileheight
     canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height)
     canvasContext.drawImage(tilesetCanvas, 0, 0)
-    canvasContext.putImageData(tile, x, y)
-    canvasElement.toBlob((blob: Blob) => {
-        blob && onSave(blob, newTileId)
-    }, 'image/png')
+    canvasContext.putImageData(data, x, y)
+
+    const blob = await canvasToBlob(canvasElement)
+    return { blob, newTileId }
 }
 
 export const createEmptyLayer = (name: string, width: number, height: number): Layer => ({
@@ -68,10 +71,10 @@ export const createEmptyLayer = (name: string, width: number, height: number): L
     width
 })
 
-export const createImageLayer = (name: string, blob: Blob, width: number, height: number): Layer => ({
+export const createImageLayer = (name: string, image: string, width: number, height: number): Layer => ({
     height,
     id: uuidv4(),
-    image: window.URL.createObjectURL(blob),
+    image,
     name,
     offset: { x: 0, y: 0 },
     opacity: 255,

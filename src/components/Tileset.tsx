@@ -147,18 +147,17 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         [container, scale, stage]
     )
 
-    const onAddTile = () => {
-        createEmptyTile(tileset, tilesetCanvas, (blob: Blob, newTileId: number) => {
-            onSaveTilesetImage(blob)
-            onChangeTileset({ ...tileset, tilecount: newTileId })
-            onChangeSelectedTile(newTileId)
-            if (stage) {
-                repositionStage(
-                    ((newTileId - 1) % columns) * tilewidth * scale.x,
-                    Math.ceil(newTileId / columns - 1) * tileheight * scale.y
-                )
-            }
-        })
+    const onAddTile = async () => {
+        const { blob, newTileId } = await createEmptyTile(tileset, tilesetCanvas)
+        onSaveTilesetImage(blob)
+        onChangeTileset({ ...tileset, tilecount: newTileId })
+        onChangeSelectedTile(newTileId)
+        if (stage) {
+            repositionStage(
+                ((newTileId - 1) % columns) * tilewidth * scale.x,
+                Math.ceil(newTileId / columns - 1) * tileheight * scale.y
+            )
+        }
     }
 
     const onDeleteTile = (tileId: number) => {
@@ -222,8 +221,8 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     return (
         <>
             <ConfirmationDialog
-                title={t('hold_on')}
-                message={t('delete_tile_confirmation')}
+                title={t('i18_hold_on')}
+                message={t('i18_delete_tile_confirmation')}
                 open={confirmationDialogOpen}
                 onConfirm={() => onDeleteTile(selected.tileId)}
                 onClose={onCancelRemoveLayer}
@@ -286,7 +285,6 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         </>
     )
 }
-
 Tileset.displayName = 'Tileset'
 
 export default Tileset

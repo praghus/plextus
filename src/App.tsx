@@ -7,7 +7,7 @@ import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { getImage } from './common/utils/image'
 import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from './common/constants'
 import { EDITOR_RESOURCE_NAME } from './store/editor/constants'
-import { selectIsLoaded } from './store/app/selectors'
+import { selectIsLoading } from './store/app/selectors'
 import { selectCanvas, selectTileset } from './store/editor/selectors'
 import { adjustWorkspaceSize } from './store/editor/actions'
 import reducer from './store/editor/reducer'
@@ -20,6 +20,8 @@ import KonvaStage from './components/KonvaStage'
 import Footer from './components/Footer'
 import TabContainer from './components/TabsContainer'
 import WelcomeDialog from './components/WelcomeDialog'
+import ImportDialog from './components/ImportDialog'
+import NewProjectDialog from './components/NewProjectDialog'
 
 const StyledWrapper = styled.div`
     flex-direction: column;
@@ -68,7 +70,7 @@ const App = (): JSX.Element => {
     useInjectSaga({ key: EDITOR_RESOURCE_NAME, saga })
 
     const canvas = useSelector(selectCanvas)
-    const isLoaded = useSelector(selectIsLoaded)
+    const isLoading = useSelector(selectIsLoading)
     const tileset = useSelector(selectTileset)
 
     const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
@@ -102,9 +104,12 @@ const App = (): JSX.Element => {
 
     return (
         <StyledWrapper>
-            <ToastContainer theme="dark" autoClose={3000} />
+            <ToastContainer theme="dark" autoClose={2000} />
+            <WelcomeDialog />
+            <ImportDialog />
+            <NewProjectDialog />
             <StyledContainer>
-                <LoadingIndicator loading={!isLoaded} />
+                <LoadingIndicator loading={isLoading} />
                 <ToolBar />
                 <StyledMiddleContainer>{canvas && <KonvaStage {...{ tilesetCanvas }} />}</StyledMiddleContainer>
                 <StyledRightContainer>
@@ -112,7 +117,6 @@ const App = (): JSX.Element => {
                     <LayersList />
                 </StyledRightContainer>
             </StyledContainer>
-            {!canvas && isLoaded && <WelcomeDialog />}
             <StyledFooter />
         </StyledWrapper>
     )

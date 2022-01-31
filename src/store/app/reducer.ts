@@ -4,11 +4,11 @@ import {
     APP_REHYDRATE_STORE_SUCCESS,
     APP_REHYDRATE_STORE_ERROR,
     APP_REHYDRATE_STORE_START,
-    APP_CHANGE_IS_IMPORT_DIALOG_OPEN,
     APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN,
     APP_CHANGE_LAST_UPDATE_TIME,
     APP_CHANGE_IS_LOADING,
-    INITIAL_STATE
+    INITIAL_STATE,
+    APP_CHANGE_IMPORTED_IMAGE
 } from './constants'
 
 function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
@@ -17,14 +17,12 @@ function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
             return {
                 ...state,
                 error: null,
-                isLoaded: false,
                 isLoading: true
             }
         case APP_REHYDRATE_STORE_SUCCESS:
             return {
                 ...state,
                 error: null,
-                isLoaded: true,
                 isLoading: false,
                 lastUpdateTime: performance.now()
             }
@@ -32,13 +30,7 @@ function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
             return {
                 ...state,
                 error: action.payload?.error.message,
-                isLoaded: false,
                 isLoading: false
-            }
-        case APP_CHANGE_IS_IMPORT_DIALOG_OPEN:
-            return {
-                ...state,
-                isImportDialogOpen: action.payload.isImportDialogOpen
             }
         case APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN:
             return {
@@ -54,6 +46,11 @@ function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
             return {
                 ...state,
                 isLoading: action.payload.isLoading
+            }
+        case APP_CHANGE_IMPORTED_IMAGE:
+            return {
+                ...state,
+                importedImage: action.payload.image
             }
         default:
             return state

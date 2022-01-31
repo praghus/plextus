@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
@@ -7,7 +7,6 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     FormControlLabel,
     FormControl,
@@ -19,10 +18,11 @@ import {
     Typography
 } from '@material-ui/core'
 import { IMPORT_MODES } from '../common/constants'
-import { changeAppIsLoading } from '../store/app/actions'
-import { createNewLayerFromFile } from '../store/editor/actions'
+import { changeAppImportedImage } from '../store/app/actions'
+import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../store/editor/actions'
+import { selectImportedImage } from '../store/app/selectors'
 import { selectCanvas, selectTileset } from '../store/editor/selectors'
-import { uploadImage } from '../common/utils/image'
+import { getImage } from '../common/utils/image'
 import { LayerImportConfig } from '../store/editor/types'
 import ImportPreview from './ImportPreview'
 
@@ -36,27 +36,25 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-type Props = {
-    onClose: () => void
-}
-
-const ImportDialog = ({ onClose }: Props): JSX.Element => {
+const ImportDialog = (): JSX.Element => {
     const classes = useStyles()
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
+    const importedImage = useSelector(selectImportedImage)
 
     const { t } = useTranslation()
 
     const dispatch = useDispatch()
-    const onChangeAppIsLoading = (value: boolean) => dispatch(changeAppIsLoading(value))
-    const onCreateNewLayerFromFile = (config: LayerImportConfig) => dispatch(createNewLayerFromFile(config))
+    const onClose = () => dispatch(changeAppImportedImage())
+    const onCreateNewImageLayerFromFile = (config: LayerImportConfig) => dispatch(createNewImageLayerFromFile(config))
+    const onCreateNewTileLayerFromFile = (image: CanvasImageSource, config: LayerImportConfig) =>
+        dispatch(createNewTileLayerFromFile(image, config))
 
-    const [isProcessing, setIsProcessing] = useState(false)
-    const [isLoaded, setIsLoaded] = useState(false)
+    const [image, setImage] = useState<CanvasImageSource>()
     const [config, setConfig] = useState<LayerImportConfig>({
         columns: tileset.columns,
         mode: IMPORT_MODES.NEW_PROJECT,
-        name: '',
+        name: 'Imported layer',
         offset: { x: 0, y: 0 },
         resolution: { h: canvas?.height ?? 0, w: canvas?.width ?? 0 },
         tileSize: { h: tileset.tileheight, w: tileset.tilewidth }
@@ -64,46 +62,8 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
 
     const { columns, mode, name, offset, resolution, tileSize } = config
 
-    useEffect(() => {
-        if (mode === IMPORT_MODES.NEW_LAYER) {
-            setConfig({
-                ...config,
-                columns: tileset.columns,
-                tileSize: { h: tileset.tileheight, w: tileset.tilewidth }
-            })
-        }
-    }, [mode])
-
     const setConfigProp = (key: string, value: any): void => {
         setConfig({ ...config, [key]: value })
-    }
-
-    const onChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files && e.target.files[0]
-        if (file) {
-            setIsLoaded(false)
-            setIsProcessing(true)
-
-            const { image, width, height } = await uploadImage(file)
-            const name = file.name.split('.').slice(0, -1).join('.')
-
-            setConfig({ ...config, image, name, resolution: { h: height, w: width } })
-            setIsProcessing(false)
-            setIsLoaded(true)
-        }
-    }, [])
-
-    const onSave = () => {
-        onCreateNewLayerFromFile(config)
-    }
-
-    const onCancel = () => {
-        if (isLoaded) {
-            setIsLoaded(false)
-            setConfigProp('image', undefined)
-        } else {
-            onClose()
-        }
     }
 
     const handleClose = (e: any, reason: string): void => {
@@ -112,111 +72,142 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
         }
     }
 
+    const onSave = () => {
+        config.mode === IMPORT_MODES.NEW_IMAGE
+            ? onCreateNewImageLayerFromFile(config)
+            : image && onCreateNewTileLayerFromFile(image, config)
+    }
+
+    useEffect(() => {
+        async function onLoadImage(src: string) {
+            const i = await getImage(src)
+            setImage(i)
+            setConfig({ ...config, resolution: { h: i.height, w: i.width } })
+        }
+        importedImage && onLoadImage(importedImage)
+    }, [importedImage])
+
+    useEffect(() => {
+        if (mode !== IMPORT_MODES.NEW_PROJECT) {
+            setConfig({
+                ...config,
+                columns: tileset.columns,
+                tileSize: { h: tileset.tileheight, w: tileset.tilewidth }
+            })
+            if (mode === IMPORT_MODES.NEW_IMAGE) {
+                setConfigProp('offset', { x: 0, y: 0 })
+            }
+        }
+    }, [mode])
+
     return (
-        <Dialog open={!isProcessing} onClose={handleClose}>
-            <DialogTitle>Import image</DialogTitle>
+        <Dialog open={!!importedImage} onClose={handleClose}>
+            <DialogTitle>{t('i18_import_image')}</DialogTitle>
             <DialogContent>
-                {isLoaded ? (
-                    <>
-                        {canvas && (
-                            <FormControl component="fieldset">
-                                <RadioGroup
-                                    row
-                                    aria-label="position"
-                                    name="position"
-                                    value={mode}
-                                    onChange={e => setConfigProp('mode', e.target.value as IMPORT_MODES)}
-                                >
-                                    <FormControlLabel
-                                        value={IMPORT_MODES.NEW_PROJECT}
-                                        control={<Radio color="primary" />}
-                                        label={t('as_a_new_project')}
-                                    />
-                                    <FormControlLabel
-                                        value={IMPORT_MODES.NEW_LAYER}
-                                        control={<Radio color="primary" />}
-                                        label={t('as_a_new_layer')}
-                                    />
-                                </RadioGroup>
-                            </FormControl>
-                        )}
-                        <Grid container>
-                            <TextField
-                                fullWidth
-                                className={classes.input}
-                                value={name}
-                                onChange={e => setConfigProp('name', e.target.value)}
-                                id="name"
-                                label={t('layer_name')}
-                                size="small"
-                                variant="outlined"
+                {canvas && (
+                    <FormControl component="fieldset">
+                        <RadioGroup
+                            row
+                            aria-label="position"
+                            name="position"
+                            value={mode}
+                            onChange={e => setConfigProp('mode', e.target.value as IMPORT_MODES)}
+                        >
+                            <FormControlLabel
+                                value={IMPORT_MODES.NEW_PROJECT}
+                                control={<Radio color="primary" />}
+                                label={t('i18_as_a_new_project')}
                             />
-                        </Grid>
-                        <ImportPreview {...{ config }} />
-                        <Grid container>
-                            {mode === IMPORT_MODES.NEW_PROJECT && (
-                                <>
-                                    <Grid item xs={2}>
-                                        <TextField
-                                            type="number"
-                                            className={classes.input}
-                                            value={tileSize.w}
-                                            onChange={event => {
-                                                const w = parseInt(event.target.value)
-                                                Number.isInteger(w) &&
-                                                    w > 0 &&
-                                                    setConfigProp('tileSize', { ...tileSize, w })
-                                            }}
-                                            InputProps={{
-                                                inputProps: { min: 1 }
-                                            }}
-                                            id="width"
-                                            label={t('tile_width')}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={2}>
-                                        <TextField
-                                            type="number"
-                                            className={classes.input}
-                                            value={tileSize.h}
-                                            onChange={event => {
-                                                const h = parseInt(event.target.value)
-                                                Number.isInteger(h) &&
-                                                    h > 0 &&
-                                                    setConfigProp('tileSize', { ...tileSize, h })
-                                            }}
-                                            InputProps={{
-                                                inputProps: { min: 1 }
-                                            }}
-                                            id="height"
-                                            label={t('tile_height')}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={4}>
-                                        <TextField
-                                            type="number"
-                                            className={classes.input}
-                                            value={columns}
-                                            onChange={event => {
-                                                const c = parseInt(event.target.value)
-                                                Number.isInteger(c) && c > 0 && setConfigProp('columns', c)
-                                            }}
-                                            InputProps={{
-                                                endAdornment: <InputAdornment position="end">columns</InputAdornment>,
-                                                inputProps: { min: 1 }
-                                            }}
-                                            id="cols"
-                                            label={t('tileset_maximum_width')}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                </>
-                            )}
+                            <FormControlLabel
+                                value={IMPORT_MODES.NEW_LAYER}
+                                control={<Radio color="primary" />}
+                                label={t('i18_as_a_new_layer')}
+                            />
+                            <FormControlLabel
+                                value={IMPORT_MODES.NEW_IMAGE}
+                                control={<Radio color="primary" />}
+                                label={t('i18_as_an_image')}
+                            />
+                        </RadioGroup>
+                    </FormControl>
+                )}
+                <Grid container>
+                    <TextField
+                        fullWidth
+                        className={classes.input}
+                        value={name}
+                        onChange={e => setConfigProp('name', e.target.value)}
+                        id="name"
+                        label={t('i18_layer_name')}
+                        size="small"
+                        variant="outlined"
+                    />
+                </Grid>
+                {image && <ImportPreview {...{ config, image }} />}
+                <Grid container>
+                    {mode === IMPORT_MODES.NEW_PROJECT && (
+                        <>
+                            <Grid item xs={2}>
+                                <TextField
+                                    type="number"
+                                    className={classes.input}
+                                    value={tileSize.w}
+                                    onChange={event => {
+                                        const w = parseInt(event.target.value)
+                                        Number.isInteger(w) && w > 0 && setConfigProp('tileSize', { ...tileSize, w })
+                                    }}
+                                    InputProps={{
+                                        inputProps: { min: 1 }
+                                    }}
+                                    id="width"
+                                    label={t('i18_tile_width')}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Grid>
+                            <Grid item xs={2}>
+                                <TextField
+                                    type="number"
+                                    className={classes.input}
+                                    value={tileSize.h}
+                                    onChange={event => {
+                                        const h = parseInt(event.target.value)
+                                        Number.isInteger(h) && h > 0 && setConfigProp('tileSize', { ...tileSize, h })
+                                    }}
+                                    InputProps={{
+                                        inputProps: { min: 1 }
+                                    }}
+                                    id="height"
+                                    label={t('i18_tile_height')}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    type="number"
+                                    className={classes.input}
+                                    value={columns}
+                                    onChange={event => {
+                                        const c = parseInt(event.target.value)
+                                        Number.isInteger(c) && c > 0 && setConfigProp('columns', c)
+                                    }}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">{t('i18_columns')}</InputAdornment>
+                                        ),
+                                        inputProps: { min: 1 }
+                                    }}
+                                    id="cols"
+                                    label={t('i18_tileset_maximum_width')}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Grid>
+                        </>
+                    )}
+                    {mode !== IMPORT_MODES.NEW_IMAGE && (
+                        <>
                             <Grid item xs={2}>
                                 <TextField
                                     type="number"
@@ -226,7 +217,7 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                         setConfigProp('offset', { ...offset, x: parseInt(event.target.value) })
                                     }
                                     id="offsetX"
-                                    label={t('offset_x')}
+                                    label={t('i18_offset_x')}
                                     size="small"
                                     variant="outlined"
                                 />
@@ -240,46 +231,29 @@ const ImportDialog = ({ onClose }: Props): JSX.Element => {
                                         setConfigProp('offset', { ...offset, y: parseInt(event.target.value) })
                                     }
                                     id="offsetY"
-                                    label={t('offset_y')}
+                                    label={t('i18_offset_y')}
                                     size="small"
                                     variant="outlined"
                                 />
                             </Grid>
-                        </Grid>
-                    </>
-                ) : (
-                    <DialogContentText>{t('choose_map_image')}</DialogContentText>
-                )}
+                        </>
+                    )}
+                </Grid>
             </DialogContent>
-
             <DialogActions>
-                {isLoaded && (
+                {resolution && (
                     <ImageResolutionInfo variant="caption" display="block">
                         {Math.ceil(resolution.w / tileSize.w) * tileSize.w} x{' '}
-                        {Math.ceil(resolution.h / tileSize.h) * tileSize.h} {t('pixels')}
+                        {Math.ceil(resolution.h / tileSize.h) * tileSize.h} {t('i18_pixels')}
                     </ImageResolutionInfo>
                 )}
                 <div style={{ flex: '1 0 0' }} />
-                <Button onClick={onCancel} color="primary">
-                    {t('cancel')}
+                <Button onClick={onClose} color="primary">
+                    {t('i18_cancel')}
                 </Button>
-                {isLoaded ? (
-                    <Button
-                        onClick={() => {
-                            setIsProcessing(true)
-                            onChangeAppIsLoading(true)
-                            onSave()
-                        }}
-                        variant="contained"
-                    >
-                        {t('save')}
-                    </Button>
-                ) : (
-                    <Button variant="contained" component="label">
-                        {t('upload_file')}
-                        <input type="file" hidden accept="image/png, image/gif, image/jpeg" {...{ onChange }} />
-                    </Button>
-                )}
+                <Button onClick={onSave} variant="contained">
+                    {t('i18_save')}
+                </Button>
             </DialogActions>
         </Dialog>
     )

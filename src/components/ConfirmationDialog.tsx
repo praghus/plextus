@@ -20,10 +20,10 @@ const ConfirmationDialog = ({ message, onConfirm, onClose, open, title }: Props)
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="primary">
-                    {t('cancel')}
+                    {t('i18_cancel')}
                 </Button>
                 <Button onClick={onConfirm} variant="contained" autoFocus>
-                    {t('yes')}
+                    {t('i18_yes')}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -53,7 +53,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
 
     return (
         <Dialog {...{ onClose, open }}>
-            <DialogTitle>{t('layer_properties')}</DialogTitle>
+            <DialogTitle>{t('i18_layer_properties')}</DialogTitle>
             <DialogContent>
                 {model && (
                     <form className={classes.root} noValidate autoComplete="off">
@@ -64,7 +64,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     fullWidth
                                     value={model.name}
                                     id="name"
-                                    label={t('name')}
+                                    label={t('i18_name')}
                                     size="small"
                                     variant="outlined"
                                     onChange={event => {
@@ -77,7 +77,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     type="number"
                                     value={model.offset.x}
                                     id="offsetX"
-                                    label={t('offset_x')}
+                                    label={t('i18_offset_x')}
                                     size="small"
                                     variant="outlined"
                                     onChange={event => {
@@ -90,7 +90,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     type="number"
                                     value={model.offset.y}
                                     id="offsetY"
-                                    label={t('offset_y')}
+                                    label={t('i18_offset_y')}
                                     size="small"
                                     variant="outlined"
                                     onChange={event => {
@@ -103,7 +103,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                     type="number"
                                     value={model.opacity}
                                     id="alpha"
-                                    label={t('alpha')}
+                                    label={t('i18_alpha')}
                                     size="small"
                                     variant="outlined"
                                     InputProps={{ inputProps: { max: 255, min: 0 } }}
@@ -117,7 +117,7 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                 />
                                 <FormControlLabel
                                     className={classes.label}
-                                    label={t('visible')}
+                                    label={t('i18_visible')}
                                     control={
                                         <Switch
                                             checked={model.visible}
@@ -136,10 +136,10 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="primary">
-                    {t('cancel')}
+                    {t('i18_cancel')}
                 </Button>
                 <Button onClick={() => onSave(model)} variant="contained" autoFocus>
-                    {t('save')}
+                    {t('i18_save')}
                 </Button>
             </DialogActions>
         </Dialog>

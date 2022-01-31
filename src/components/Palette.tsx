@@ -1,15 +1,22 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useEffect, useMemo, useState } from 'react'
 import styled from '@emotion/styled'
+import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { debounce } from 'lodash'
 import { Add as AddIcon, Remove as RemoveIcon } from '@material-ui/icons'
 import { FormControl, IconButton, MenuItem, Select } from '@material-ui/core'
-
+import { RgbaColorPicker } from 'react-colorful'
 import { PALETTES } from '../common/constants'
-import { changePalette, changePrimaryColor } from '../store/editor/actions'
+import { changePalette, changePrimaryColor, changeSelectedPalette } from '../store/editor/actions'
 import { selectPalette, selectSelected } from '../store/editor/selectors'
 import ColorBox from './ColorBox'
 
 const DEFAULT = 'DEFAULT'
+
+const StyledColorPicker = styled(RgbaColorPicker)`
+    width: auto !important;
+    margin: 15px 10px;
+`
 
 const StyledFormControl = styled(FormControl)`
     width: 100%;
@@ -39,33 +46,49 @@ const StyledButtonContainer = styled.div`
 
 const Palette = (): JSX.Element => {
     const [colors, setColors] = useState<number[][]>([])
-    const [current, setCurrent] = useState<string>(DEFAULT)
 
     const palette = useSelector(selectPalette)
     const selected = useSelector(selectSelected)
-    const selectedIndex = colors.map(c => c.join()).indexOf(selected.color.join())
+
+    const [r, g, b, a] = selected.color
+    const selectedIndex = useMemo(
+        () =>
+            colors
+                .map(c => (c.length > 3 ? c.join() : [...c, 255].join()))
+                .indexOf(selected.color.length > 3 ? selected.color.join() : [...selected.color, 255].join()),
+        [colors, selected.color]
+    )
+
+    const { t } = useTranslation()
 
     const dispatch = useDispatch()
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangePalette = (colors: number[][]) => dispatch(changePalette(colors))
+    const onChangeSelectedPalette = (name: string) => dispatch(changeSelectedPalette(name))
     const onAddColor = () => onChangePalette([...colors, selected.color])
     const onRemoveColor = () => {
         const newColors: number[][] = []
         onChangePalette(newColors.concat(colors.filter((arr, idx) => idx !== selectedIndex)))
     }
 
+    const onChange = debounce(
+        color => dispatch(changePrimaryColor([color.r, color.g, color.b, Math.round(color.a * 255)])),
+        300
+    )
+
     useEffect(() => {
-        setColors(palette)
-    }, [palette])
+        setColors(selected.palette === DEFAULT ? palette : PALETTES[selected.palette].colors)
+    }, [palette, selected.palette])
 
     return (
         <>
+            <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
             <StyledPalette>
                 <StyledFormControl>
                     <Select
-                        defaultValue={DEFAULT}
+                        value={selected.palette}
                         onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
-                            setCurrent(e.target.value as string)
+                            onChangeSelectedPalette(e.target.value as string)
                             setColors(
                                 e.target.value && e.target.value !== DEFAULT
                                     ? PALETTES[e.target.value as string].colors
@@ -73,7 +96,7 @@ const Palette = (): JSX.Element => {
                             )
                         }}
                     >
-                        <MenuItem value={DEFAULT}>Current plette</MenuItem>
+                        <MenuItem value={DEFAULT}>{t('i18_default_palette')}</MenuItem>
                         {Object.keys(PALETTES).map(pal => (
                             <MenuItem key={pal} value={pal}>
                                 {PALETTES[pal].name}
@@ -82,10 +105,10 @@ const Palette = (): JSX.Element => {
                     </Select>
                 </StyledFormControl>
                 <StyledColorsContainer>
-                    {colors.map(rgba => (
+                    {colors.map((rgba, i) => (
                         <ColorBox
                             key={rgba.join()}
-                            selected={rgba.join() === selected.color.join()}
+                            selected={selectedIndex === i}
                             onClick={onChangePrimaryColor}
                             {...{ rgba }}
                         />
@@ -93,7 +116,7 @@ const Palette = (): JSX.Element => {
                 </StyledColorsContainer>
             </StyledPalette>
             <StyledBottomContainer>
-                {current === DEFAULT && (
+                {selected.palette === DEFAULT && (
                     <StyledButtonContainer>
                         <IconButton disabled={selectedIndex > -1} size="small" onClick={onAddColor}>
                             <AddIcon fontSize="small" />

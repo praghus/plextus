@@ -13,8 +13,10 @@ import {
     TextField,
     Typography
 } from '@material-ui/core'
-import { selectTileset } from '../store/editor/selectors'
+import { changeAppIsNewProjectDialogOpen } from '../store/app/actions'
 import { createNewProject } from '../store/editor/actions'
+import { selectIsNewProjectDialogOpen } from '../store/app/selectors'
+import { selectTileset } from '../store/editor/selectors'
 import { ProjectConfig } from '../store/editor/types'
 
 const ImageResolutionInfo = withStyles({ root: { color: '#222' } })(Typography)
@@ -36,18 +38,12 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-type Props = {
-    onClose: () => void
-}
-
-const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
-    const tileset = useSelector(selectTileset)
+const NewProjectDialog = (): JSX.Element => {
     const classes = useStyles()
+    const tileset = useSelector(selectTileset)
+    const isOpen = useSelector(selectIsNewProjectDialogOpen)
 
     const { t } = useTranslation()
-
-    const dispatch = useDispatch()
-    const onCreateNewProject = (config: ProjectConfig) => dispatch(createNewProject(config))
 
     const [config, setConfig] = useState<ProjectConfig>({
         columns: tileset.columns,
@@ -56,6 +52,10 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
         tilewidth: tileset.tilewidth,
         w: 160 / tileset.tilewidth
     })
+
+    const dispatch = useDispatch()
+    const onCreateNewProject = (config: ProjectConfig) => dispatch(createNewProject(config))
+    const onClose = () => dispatch(changeAppIsNewProjectDialogOpen(false))
 
     const onSave = useCallback(() => {
         onCreateNewProject(config)
@@ -69,14 +69,14 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
     }, [])
 
     return (
-        <Dialog open onClose={handleClose} aria-labelledby="form-dialog-title">
-            <DialogTitle id="form-dialog-title">{t('new_project')}</DialogTitle>
+        <Dialog open={isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">{t('i18_new_project')}</DialogTitle>
             <DialogContent>
                 <form className={classes.root} noValidate autoComplete="off">
                     <Grid container>
                         <Grid item xs={7}>
                             <Typography variant="subtitle1" gutterBottom>
-                                Tileset
+                                {t('i18_tileset')}
                             </Typography>
                             <Grid item xs={12}>
                                 <TextField
@@ -134,7 +134,7 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                         </Grid>
                         <Grid item xs={5}>
                             <Typography variant="subtitle1" gutterBottom>
-                                Map
+                                {t('i18_map')}
                             </Typography>
                             <TextField
                                 className={classes.input}
@@ -181,10 +181,10 @@ const NewProjectDialog = ({ onClose }: Props): JSX.Element => {
                 </ImageResolutionInfo>
                 <div style={{ flex: '1 0 0' }} />
                 <Button onClick={onClose} color="primary">
-                    Cancel
+                    {t('i18_cancel')}
                 </Button>
                 <Button onClick={onSave} variant="contained">
-                    Create
+                    {t('i18_create')}
                 </Button>
             </DialogActions>
         </Dialog>

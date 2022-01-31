@@ -22,6 +22,7 @@ import {
     EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_SELECTED_AREA,
     EDITOR_CHANGE_SELECTED_LAYER,
+    EDITOR_CHANGE_SELECTED_PALETTE,
     EDITOR_CHANGE_SELECTED_TILE,
     EDITOR_CHANGE_TILESET,
     EDITOR_CHANGE_TOOL,
@@ -40,7 +41,8 @@ import {
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID,
     EDITOR_CREATE_NEW_PROJECT,
-    EDITOR_CREATE_LAYER_FROM_FILE,
+    EDITOR_CREATE_IMAGE_LAYER_FROM_FILE,
+    EDITOR_CREATE_TILE_LAYER_FROM_FILE,
     EDITOR_LOAD_STATE_FROM_FILE
 } from './constants'
 
@@ -97,6 +99,12 @@ export const changePalette = (palette: Pallete) =>
     ({
         payload: { palette },
         type: EDITOR_CHANGE_PALETTE
+    } as const)
+
+export const changeSelectedPalette = (name: string) =>
+    ({
+        payload: { name },
+        type: EDITOR_CHANGE_SELECTED_PALETTE
     } as const)
 
 export const changePosition = (x: number, y: number) =>
@@ -265,10 +273,16 @@ export const createNewProject = (config: ProjectConfig) =>
         type: EDITOR_CREATE_NEW_PROJECT
     } as const)
 
-export const createNewLayerFromFile = (config: LayerImportConfig) =>
+export const createNewImageLayerFromFile = (config: LayerImportConfig) =>
     ({
         payload: { config },
-        type: EDITOR_CREATE_LAYER_FROM_FILE
+        type: EDITOR_CREATE_IMAGE_LAYER_FROM_FILE
+    } as const)
+
+export const createNewTileLayerFromFile = (image: CanvasImageSource, config: LayerImportConfig) =>
+    ({
+        payload: { config, image },
+        type: EDITOR_CREATE_TILE_LAYER_FROM_FILE
     } as const)
 
 export const loadStateFromFile = (data: any) =>

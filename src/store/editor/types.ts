@@ -60,5 +60,4 @@ export type LayerImportConfig = {
     tileSize: Dim
     columns: number
     resolution: Dim
-    image?: CanvasImageSource
 }

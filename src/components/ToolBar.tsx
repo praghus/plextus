@@ -14,6 +14,7 @@ import {
     Crop as CropIcon,
     CancelPresentation as CancelPresentationIcon,
     FormatColorFill as FormatColorFillIcon,
+    PhotoSizeSelectSmall as PhotoSizeSelectSmallIcon,
     Menu as MenuIcon,
     PanTool as PanToolIcon,
     ControlCamera as ControlCameraIcon
@@ -21,15 +22,13 @@ import {
 import { TOOLS, TOOLS_DESC } from '../common/constants'
 import { exportToTmx } from '../common/utils/tmx'
 import { rgbaToHex } from '../common/utils/colors'
-import { selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
 import { selectCanvas, selectLayers, selectTileset, selectSelected } from '../store/editor/selectors'
-import { changeAppIsImportDialogOpen, changeAppIsNewProjectDialogOpen } from '../store/app/actions'
+import { changeAppIsNewProjectDialogOpen } from '../store/app/actions'
 import { clearProject, changePrimaryColor, changeTool, saveChanges } from '../store/editor/actions'
 import { undo, redo } from '../store/history/actions'
 import { EraserIcon, LineIcon, StampIcon, TileReplaceIcon } from './Icons'
-import ImportDialog from './ImportDialog'
-import NewProjectDialog from './NewProjectDialog'
 import ConfirmationDialog from './ConfirmationDialog'
+import ImageUpload from './ImageUpload'
 
 export const useStyles = makeStyles(theme => ({
     divider: {
@@ -85,8 +84,6 @@ const ToolBar = (): JSX.Element => {
     const canvas = useSelector(selectCanvas)
     const layers = useSelector(selectLayers)
     const tileset = useSelector(selectTileset)
-    const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
-    const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
 
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
@@ -99,8 +96,7 @@ const ToolBar = (): JSX.Element => {
     const handleClick = (e: React.MouseEvent) => setAnchorEl(e.currentTarget as HTMLAnchorElement)
     const onChangeTool = (tool: string) => tool && dispatch(changeTool(tool))
     const onSaveChanges = () => dispatch(saveChanges())
-    const onToggleImportDialog = (open: boolean) => dispatch(changeAppIsImportDialogOpen(open))
-    const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
+    const onShowNewProjectDialog = () => dispatch(changeAppIsNewProjectDialogOpen(true))
     const onUndo = () => dispatch(undo())
     const onRedo = () => dispatch(redo())
     const onCloseProject = () => dispatch(clearProject())
@@ -129,12 +125,10 @@ const ToolBar = (): JSX.Element => {
 
     return (
         <>
-            {isNewProjectDialogOpen && <NewProjectDialog onClose={() => onToggleNewProjectDialog(false)} />}
-            {isImportDialogOpen && <ImportDialog onClose={() => onToggleImportDialog(false)} />}
             <StyledMenuContainer>
                 <ConfirmationDialog
-                    title={t('hold_on')}
-                    message={t('close_project_message')}
+                    title={t('i18_hold_on')}
+                    message={t('i18_close_project_message')}
                     open={confirmationDialogOpen}
                     onConfirm={() => {
                         setConfirmationDialogOpen(false)
@@ -157,10 +151,10 @@ const ToolBar = (): JSX.Element => {
                             <MenuItem
                                 onClick={() => {
                                     handleClose()
-                                    onToggleNewProjectDialog(true)
+                                    onShowNewProjectDialog()
                                 }}
                             >
-                                {t('new_project')}
+                                {t('i18_new_project')}
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
@@ -168,27 +162,22 @@ const ToolBar = (): JSX.Element => {
                                     setConfirmationDialogOpen(true)
                                 }}
                             >
-                                {t('close_project')}
+                                {t('i18_close_project')}
                             </MenuItem>
                             <Divider orientation="horizontal" />
-                            <MenuItem onClick={onUndo}>{t('undo')}</MenuItem>
-                            <MenuItem onClick={onRedo}>{t('redo')}</MenuItem>
+                            <MenuItem onClick={onUndo}>{t('i18_undo')}</MenuItem>
+                            <MenuItem onClick={onRedo}>{t('i18_redo')}</MenuItem>
                             <Divider orientation="horizontal" />
-                            <MenuItem
-                                onClick={() => {
-                                    handleClose()
-                                    onToggleImportDialog(true)
-                                }}
-                            >
-                                {t('import_image')}
-                            </MenuItem>
+                            <ImageUpload>
+                                <MenuItem onClick={handleClose}>{t('i18_import_image')}</MenuItem>
+                            </ImageUpload>
                             <MenuItem
                                 onClick={() => {
                                     canvas && exportToTmx(canvas, layers, tileset)
                                     handleClose()
                                 }}
                             >
-                                {t('export_map')}
+                                {t('i18_export_map')}
                             </MenuItem>
                             <Divider orientation="horizontal" />
                             <MenuItem
@@ -197,11 +186,10 @@ const ToolBar = (): JSX.Element => {
                                     onSaveChanges()
                                 }}
                             >
-                                {t('save')}
+                                {t('i18_save')}
                             </MenuItem>
                         </Menu>
                         <Divider orientation="horizontal" className={classes.divider} />
-
                         {renderToolButton(TOOLS.DRAG, PanToolIcon)}
                         {renderToolButton(TOOLS.ERASER, EraserIcon)}
                         {renderToolButton(TOOLS.PENCIL, CreateIcon)}
@@ -209,18 +197,14 @@ const ToolBar = (): JSX.Element => {
                         {renderToolButton(TOOLS.PICKER, ColorizeIcon)}
                         {renderToolButton(TOOLS.FILL, FormatColorFillIcon)}
                         {renderToolButton(TOOLS.BRIGHTNESS, BrightnessMediumIcon)}
-
                         <Divider orientation="horizontal" className={classes.divider} />
-
                         {renderToolButton(TOOLS.STAMP, StampIcon)}
                         {renderToolButton(TOOLS.REPLACE, TileReplaceIcon)}
                         {renderToolButton(TOOLS.DELETE, CancelPresentationIcon)}
-
                         <Divider orientation="horizontal" className={classes.divider} />
-
                         {renderToolButton(TOOLS.OFFSET, ControlCameraIcon)}
+                        {renderToolButton(TOOLS.SELECT, PhotoSizeSelectSmallIcon)}
                         {renderToolButton(TOOLS.CROP, CropIcon)}
-
                         <Divider orientation="horizontal" className={classes.divider} />
                     </StyledToggleButtonGroup>
                     <StyledColorPicker>

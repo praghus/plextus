@@ -15,7 +15,8 @@ export const IMPORT_PREVIEW_HEIGHT = 300
 
 export enum IMPORT_MODES {
     NEW_PROJECT = 'NEW_PROJECT',
-    NEW_LAYER = 'NEW_LAYER'
+    NEW_LAYER = 'NEW_LAYER',
+    NEW_IMAGE = 'NEW_IMAGE'
 }
 
 export enum TOOLS {
@@ -30,6 +31,7 @@ export enum TOOLS {
     PENCIL = 'PENCIL',
     PICKER = 'PICKER',
     REPLACE = 'REPLACE',
+    SELECT = 'SELECT',
     STAMP = 'STAMP'
 }
 
@@ -45,6 +47,7 @@ export const TOOLS_DESC = {
     [TOOLS.PENCIL]: 'Pixel Tool',
     [TOOLS.PICKER]: 'Color Picker',
     [TOOLS.REPLACE]: 'Tile Replace Tool',
+    [TOOLS.SELECT]: 'Select Tool',
     [TOOLS.STAMP]: 'Tile Stamp Tool [Click], Tile Clone Tool [Alt+Click]'
 }
 
