@@ -6,7 +6,7 @@ Plextus is a pixel art editor designed to make tiled maps and tilesets. In addit
 
 ## [Demo](https://praghus.github.io/plextus/)
 
-[![showcase](https://user-images.githubusercontent.com/5312169/151996317-ec04571e-ebb3-4b12-97e2-ce140069a7b5.gif)](https://praghus.github.io/plextus/)
+[![showcase](https://user-images.githubusercontent.com/5312169/152001289-86bc7786-649a-471f-baa2-d95888149203.gif)](https://praghus.github.io/plextus/)
 
 ## Installation
 
