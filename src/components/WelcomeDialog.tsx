@@ -1,10 +1,11 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { withStyles } from '@material-ui/core/styles'
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@material-ui/core'
+import { withStyles } from '@mui/styles'
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material'
 import { selectIsLoading, selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../store/app/selectors'
 import { changeAppIsNewProjectDialogOpen } from '../store/app/actions'
 import { loadStateFromFile } from '../store/editor/actions'
+import { clear } from '../store/history/actions'
 import { selectCanvas } from '../store/editor/selectors'
 import ImageUpload from './ImageUpload'
 import demoProject from '../assets/projects/demo-project.json'
@@ -30,13 +31,16 @@ const WelcomeDialog = (): JSX.Element => {
     const isOpen = !canvas && !isLoading && !isImportDialogOpen && !isNewProjectDialogOpen
 
     const dispatch = useDispatch()
-    const onLoadDemoProject = () => dispatch(loadStateFromFile(demoProject))
+    const onLoadDemoProject = () => {
+        dispatch(clear())
+        dispatch(loadStateFromFile(demoProject))
+    }
     const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
 
     return (
         <Dialog open={isOpen}>
-            <DialogTitle disableTypography>
-                <Typography variant="h6">Welcome in Plextus v1.0</Typography>
+            <DialogTitle>
+                <Typography>Welcome in Plextus v1.0</Typography>
             </DialogTitle>
             <StyledDialogContent dividers>
                 <Typography gutterBottom>

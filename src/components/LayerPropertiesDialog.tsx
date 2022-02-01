@@ -1,39 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import {
+    Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     FormControlLabel,
-    Grid,
     Switch,
     TextField
-} from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
+} from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Layer } from '../store/editor/types'
-
-const useStyles = makeStyles(theme => ({
-    input: {
-        marginRight: theme.spacing(1),
-        marginTop: theme.spacing(2)
-    },
-    inputNarrow: {
-        marginRight: theme.spacing(1),
-        marginTop: theme.spacing(2),
-        width: '126px'
-    },
-    label: {
-        paddingLeft: theme.spacing(1),
-        paddingTop: theme.spacing(2)
-    },
-    root: {
-        '& > *': {
-            padding: theme.spacing(1)
-        }
-    }
-}))
 
 type Props = {
     layer: Layer | null
@@ -44,7 +22,6 @@ type Props = {
 
 const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Element => {
     const { t } = useTranslation()
-    const classes = useStyles()
     const [model, setModel] = useState<Layer | null>(null)
 
     useEffect(() => {
@@ -56,85 +33,90 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
             <DialogTitle>{t('i18_layer_properties')}</DialogTitle>
             <DialogContent>
                 {model && (
-                    <form className={classes.root} noValidate autoComplete="off">
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <TextField
-                                    className={classes.input}
-                                    fullWidth
-                                    value={model.name}
-                                    id="name"
-                                    label={t('i18_name')}
-                                    size="small"
-                                    variant="outlined"
-                                    onChange={event => {
-                                        const name = event.target.value
-                                        setModel({ ...model, name })
-                                    }}
-                                />
-                                <TextField
-                                    className={classes.inputNarrow}
-                                    type="number"
-                                    value={model.offset.x}
-                                    id="offsetX"
-                                    label={t('i18_offset_x')}
-                                    size="small"
-                                    variant="outlined"
-                                    onChange={event => {
-                                        const x = parseInt(event.target.value)
-                                        Number.isInteger(x) && setModel({ ...model, offset: { ...model.offset, x } })
-                                    }}
-                                />
-                                <TextField
-                                    className={classes.inputNarrow}
-                                    type="number"
-                                    value={model.offset.y}
-                                    id="offsetY"
-                                    label={t('i18_offset_y')}
-                                    size="small"
-                                    variant="outlined"
-                                    onChange={event => {
-                                        const y = parseInt(event.target.value)
-                                        Number.isInteger(y) && setModel({ ...model, offset: { ...model.offset, y } })
-                                    }}
-                                />
-                                <TextField
-                                    className={classes.inputNarrow}
-                                    type="number"
-                                    value={model.opacity}
-                                    id="alpha"
-                                    label={t('i18_alpha')}
-                                    size="small"
-                                    variant="outlined"
-                                    InputProps={{ inputProps: { max: 255, min: 0 } }}
-                                    onChange={event => {
-                                        const opacity = parseInt(event.target.value)
-                                        Number.isInteger(opacity) &&
-                                            opacity >= 0 &&
-                                            opacity <= 255 &&
-                                            setModel({ ...model, opacity })
-                                    }}
-                                />
-                                <FormControlLabel
-                                    className={classes.label}
-                                    label={t('i18_visible')}
-                                    control={
-                                        <Switch
-                                            checked={model.visible}
-                                            name="visible"
-                                            onChange={event => {
-                                                const visible = event.target.checked
-                                                setModel({ ...model, visible })
-                                            }}
-                                        />
-                                    }
-                                />
-                            </Grid>
-                        </Grid>
-                    </form>
+                    <Box
+                        component="form"
+                        sx={{
+                            '& > :not(style)': { m: 1, width: '400px' }
+                        }}
+                        noValidate
+                        autoComplete="off"
+                    >
+                        <TextField
+                            value={model.name}
+                            id="name"
+                            label={t('i18_name') as string}
+                            size="small"
+                            variant="standard"
+                            onChange={event => {
+                                const name = event.target.value
+                                setModel({ ...model, name })
+                            }}
+                        />
+                        <Box>
+                            <TextField
+                                type="number"
+                                value={model.offset.x}
+                                id="offsetX"
+                                label={t('i18_offset_x') as string}
+                                size="small"
+                                variant="outlined"
+                                onChange={event => {
+                                    const x = parseInt(event.target.value)
+                                    Number.isInteger(x) && setModel({ ...model, offset: { ...model.offset, x } })
+                                }}
+                                sx={{ maxWidth: '120px' }}
+                            />
+                            <TextField
+                                type="number"
+                                value={model.offset.y}
+                                id="offsetY"
+                                label={t('i18_offset_y') as string}
+                                size="small"
+                                variant="outlined"
+                                onChange={event => {
+                                    const y = parseInt(event.target.value)
+                                    Number.isInteger(y) && setModel({ ...model, offset: { ...model.offset, y } })
+                                }}
+                                sx={{ marginLeft: '15px', maxWidth: '120px' }}
+                            />
+                            <TextField
+                                type="number"
+                                value={model.opacity}
+                                id="alpha"
+                                label={t('i18_alpha') as string}
+                                size="small"
+                                variant="outlined"
+                                InputProps={{ inputProps: { max: 255, min: 0 } }}
+                                onChange={event => {
+                                    const opacity = parseInt(event.target.value)
+                                    Number.isInteger(opacity) &&
+                                        opacity >= 0 &&
+                                        opacity <= 255 &&
+                                        setModel({ ...model, opacity })
+                                }}
+                                sx={{ marginLeft: '15px', width: '120px' }}
+                            />
+                        </Box>
+                    </Box>
                 )}
             </DialogContent>
             <DialogActions>
+                {model && (
+                    <FormControlLabel
+                        label={t('i18_visible') as string}
+                        control={
+                            <Switch
+                                checked={model.visible}
+                                name="visible"
+                                onChange={event => {
+                                    const visible = event.target.checked
+                                    setModel({ ...model, visible })
+                                }}
+                            />
+                        }
+                        sx={{ marginLeft: '10px', marginRight: 'auto' }}
+                    />
+                )}
                 <Button onClick={onClose} color="primary">
                     {t('i18_cancel')}
                 </Button>

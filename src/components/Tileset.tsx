@@ -4,8 +4,8 @@ import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Image, Layer, Rect, Stage } from 'react-konva'
-import { Add as AddIcon, DeleteForever as DeleteForeverIcon, SaveAlt as SaveAltIcon } from '@material-ui/icons'
-import { IconButton, Slider, Tooltip } from '@material-ui/core'
+import { Add as AddIcon, DeleteForever as DeleteForeverIcon, SaveAlt as SaveAltIcon } from '@mui/icons-material'
+import { IconButton, Slider, Tooltip } from '@mui/material'
 import { getTilesetDimensions, createEmptyTile, getTilePos } from '../store/editor/utils'
 import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } from '../store/editor/actions'
 import { selectGrid, selectSelected, selectTileset } from '../store/editor/selectors'
@@ -19,7 +19,21 @@ const StyledTilesetImageContainer = styled.div`
     overflow: auto;
     margin-bottom: 10px;
     height: calc(45vh);
-    background: #151515;
+    background: #121212;
+    ::-webkit-scrollbar {
+        width: 0.7em;
+        height: 0.7em;
+    }
+    ::-webkit-scrollbar-corner {
+        background-color: #252525;
+    }
+    ::-webkit-scrollbar-track {
+        background-color: #252525;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: #666;
+        outline: 1px solid #666;
+    }
 `
 
 const StyledBottomContainer = styled.div`
@@ -28,14 +42,14 @@ const StyledBottomContainer = styled.div`
 `
 
 const StyledButtonContainer = styled.div`
-    width: 72px;
+    width: 85px;
     display: flex;
     padding: 4px;
     margin-right: 10px;
 `
 
 const StyledSliderContainer = styled.div`
-    width: 240px;
+    width: 230px;
     display: flex;
     padding-top: 4px;
     padding-right: 10px;
@@ -136,7 +150,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
     )
 
     const onScale = useCallback(
-        (newScale: any): void => {
+        (newScale: number): void => {
             if (container && stage) {
                 container.scrollTop = 0
                 container.scrollLeft = 0
@@ -160,6 +174,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
         }
     }
 
+    // todo: cunsider useCallback here
     const onDeleteTile = (tileId: number) => {
         if (tilesetContext) {
             const newTileCount = tilecount > 1 ? tilecount - 1 : 1
@@ -187,7 +202,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
             tilesetCanvas.toBlob(blob => {
                 onRemoveTile(tileId, {
                     ...tileset,
-                    image: window.URL.createObjectURL(blob),
+                    image: window.URL.createObjectURL(blob as Blob),
                     tilecount: newTileCount
                 })
                 if (tileId > newTileCount) {
@@ -256,11 +271,12 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
                 <StyledSliderContainer>
                     {scale && (
                         <Slider
+                            size="small"
                             step={SCALE_STEP}
                             min={0.5}
                             max={10}
                             value={scale.x}
-                            onChange={(event, value) => onScale(value)}
+                            onChange={(_, value) => onScale(value as number)}
                         />
                     )}
                 </StyledSliderContainer>

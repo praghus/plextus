@@ -1,7 +1,7 @@
 import { StringTMap } from 'common/types'
 import { AnyAction } from 'redux'
 import { Canvas, DeflatedLayer, Layer, Pallete, Rectangle, Tileset, ProjectConfig, LayerImportConfig } from './types'
-import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/constants'
+import { RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/constants'
 import {
     EDITOR_CHANGE_CANVAS,
     EDITOR_CHANGE_CANVAS_BACKGROUND,
@@ -47,7 +47,7 @@ import {
 } from './constants'
 
 export const adjustWorkspaceSize = (): AnyAction =>
-    changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT - FOOTER_HEIGHT)
+    changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT)
 
 export const clearProject = () =>
     ({

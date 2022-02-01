@@ -1,10 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
-import { ThemeProvider } from '@material-ui/core/styles'
+import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Global, css } from '@emotion/react'
 import { store } from './store/store'
-import theme from './themes/theme-dark'
 import App from './App'
 
 import './common/translations/i18n'
@@ -24,21 +23,20 @@ const styles = css`
         background-color: #252525;
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
-    &::-webkit-scrollbar {
-        width: 0.7em;
-        height: 0.7em;
-    }
-    &::-webkit-scrollbar-corner {
-        background-color: #252525;
-    }
-    &::-webkit-scrollbar-track {
-        background-color: #252525;
-    }
-    &::-webkit-scrollbar-thumb {
-        background-color: #666;
-        outline: 1px solid #666;
-    }
 `
+
+const theme = createTheme({
+    components: {
+        MuiButtonBase: {
+            defaultProps: {
+                disableRipple: true
+            }
+        }
+    },
+    palette: {
+        mode: 'dark'
+    }
+})
 
 const MOUNT_NODE = document.getElementById('root') as HTMLElement
 

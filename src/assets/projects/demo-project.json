@@ -51,6 +51,7 @@
         "area": null,
         "color": [0, 0, 0, 255],
         "layerId": "a3841a1f-4f7a-486b-8eaf-1bfe4f939cb8",
+        "palette": "DEFAULT",
         "stamp": [],
         "tileId": 1,
         "tool": "DRAG",

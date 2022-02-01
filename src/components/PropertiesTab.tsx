@@ -2,30 +2,12 @@ import React, { useCallback, useState } from 'react'
 import styled from '@emotion/styled'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
-import { ColorPicker } from 'material-ui-color'
-import { makeStyles } from '@material-ui/core/styles'
-import { Card, CardContent, Grid, InputAdornment, Slider, TextField, Typography } from '@material-ui/core'
+import { ColorPicker } from 'mui-color'
+import { Card, CardContent, Grid, InputAdornment, Slider, TextField, Typography } from '@mui/material'
 import { selectCanvas, selectGrid, selectSelected } from '../store/editor/selectors'
 import { changeCanvasBackground, changeGridColor, changeGridPitch, changeToolSize } from '../store/editor/actions'
 import { rgbaToHex } from '../common/utils/colors'
-import { Create as CreateIcon } from '@material-ui/icons'
-
-const useStyles = makeStyles(theme => ({
-    card: {
-        marginBottom: theme.spacing(2)
-    },
-    grid: {
-        marginBottom: theme.spacing(1)
-    },
-    input: {
-        width: 42
-    },
-    root: {
-        '& > *': {
-            padding: theme.spacing(1)
-        }
-    }
-}))
+import { Create as CreateIcon } from '@mui/icons-material'
 
 const StyledPropContainer = styled.div`
     display: flex;
@@ -36,9 +18,8 @@ const PropertiesTab = (): JSX.Element => {
     const canvas = useSelector(selectCanvas)
     const grid = useSelector(selectGrid)
     const selected = useSelector(selectSelected)
-    const classes = useStyles()
 
-    const [canvasBackground, setCanvasBackground] = useState<any>(rgbaToHex(canvas.background || [0, 0, 0, 0]))
+    const [canvasBackground, setCanvasBackground] = useState<any>(rgbaToHex(canvas?.background || [0, 0, 0, 0]))
     const [gridColor, setGridColor] = useState<any>(rgbaToHex(grid.color))
     const [toolSize, setToolSize] = useState<number>(selected.toolSize)
 
@@ -57,10 +38,10 @@ const PropertiesTab = (): JSX.Element => {
     )
 
     return (
-        <Card className={classes.card}>
+        <Card sx={{ borderRadius: 0, marginBottom: '10px' }}>
             <CardContent>
                 <Typography variant="subtitle1">Pixel tool size</Typography>
-                <Grid container spacing={2} alignItems="center" className={classes.grid}>
+                <Grid container spacing={2} alignItems="center">
                     <Grid item>
                         <CreateIcon />
                     </Grid>
@@ -70,8 +51,8 @@ const PropertiesTab = (): JSX.Element => {
                             max={4}
                             marks
                             value={typeof toolSize === 'number' ? toolSize : 0}
-                            onChange={(event, value) => setToolSize(value as number)}
-                            onChangeCommitted={(event, value) => {
+                            onChange={(_, value) => setToolSize(value as number)}
+                            onChangeCommitted={(_, value) => {
                                 Number.isInteger(value) && value > 0 && onChangeToolSize(value as number)
                             }}
                         />
@@ -84,8 +65,9 @@ const PropertiesTab = (): JSX.Element => {
                         <Typography variant="subtitle1">Grid pitch every</Typography>
                         <StyledPropContainer>
                             <TextField
-                                fullWidth
                                 type="number"
+                                size="small"
+                                fullWidth={true}
                                 value={grid.pitch}
                                 onChange={event => {
                                     const pitch = parseInt(event.target.value)
@@ -103,7 +85,7 @@ const PropertiesTab = (): JSX.Element => {
                             <ColorPicker
                                 hideTextfield
                                 value={gridColor}
-                                onChange={color => {
+                                onChange={(color: any) => {
                                     setGridColor(color)
                                     color.rgb && onChangeGridColor(color.rgb)
                                 }}
@@ -116,7 +98,7 @@ const PropertiesTab = (): JSX.Element => {
                             <ColorPicker
                                 hideTextfield
                                 value={canvasBackground}
-                                onChange={color => {
+                                onChange={(color: any) => {
                                     setCanvasBackground(color)
                                     color.rgb && onChangeCanvasBackground(color.alpha > 0 ? color.rgb : null)
                                 }}

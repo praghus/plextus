@@ -1,9 +1,8 @@
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
-export const FOOTER_HEIGHT = 30
 export const LEFT_BAR_WIDTH = 60
 export const RIGHT_BAR_WIDTH = 340
-export const STATUS_BAR_HEIGHT = 30
+export const STATUS_BAR_HEIGHT = 34
 
 export const SCALE_BY = 1.2
 export const SCALE_MIN = 0.25
