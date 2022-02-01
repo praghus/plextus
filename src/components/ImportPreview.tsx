@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
-import Slider from '@material-ui/core/Slider'
+import Slider from '@mui/material/Slider'
 import { Stage, Layer, Rect } from 'react-konva'
 import {
     IMPORT_PREVIEW_WIDTH,
@@ -52,7 +52,7 @@ const ImportPreview = ({ image, config }: Props): JSX.Element => {
     }, [])
 
     const onScale = useCallback(
-        (newScale: any): void => {
+        (newScale: number): void => {
             if (stage) {
                 const x = IMPORT_PREVIEW_WIDTH / 2
                 const y = IMPORT_PREVIEW_HEIGHT / 2
@@ -111,11 +111,13 @@ const ImportPreview = ({ image, config }: Props): JSX.Element => {
                 </StyledStage>
             </StyledPreviewContainer>
             <Slider
+                sx={{ marginBottom: '10px' }}
+                size="small"
                 value={scale.x}
                 step={SCALE_STEP}
                 min={SCALE_MIN}
                 max={SCALE_MAX}
-                onChange={(event, value) => onScale(value)}
+                onChange={(_, value) => onScale(value as number)}
             />
         </>
     )

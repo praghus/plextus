@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { makeStyles } from '@material-ui/core/styles'
 import styled from '@emotion/styled'
 import {
     IconButton,
@@ -14,9 +13,8 @@ import {
     MenuItem,
     Slider,
     TextField,
-    Tooltip,
-    Typography
-} from '@material-ui/core'
+    Tooltip
+} from '@mui/material'
 import {
     Add as AddIcon,
     Apps as AppsIcon,
@@ -27,7 +25,7 @@ import {
     ImageSearch as ImageSearchIcon,
     Visibility as VisibilityIcon,
     VisibilityOff as VisibilityOffIcon
-} from '@material-ui/icons'
+} from '@mui/icons-material'
 import { createEmptyImage } from '../common/utils/image'
 import { changeItemPosition } from '../common/utils/array'
 import { createEmptyLayer, createImageLayer, getLayerById } from '../store/editor/utils'
@@ -44,38 +42,43 @@ import ConfirmationDialog from './ConfirmationDialog'
 import LayerPropertiesDialog from './LayerPropertiesDialog'
 import ImageUpload from './ImageUpload'
 
-const useStyles = makeStyles(theme => ({
-    layersList: {
-        backgroundColor: theme.palette.background.paper,
-        height: '100%',
-        maxWidth: 360,
-        overflow: 'auto',
-        position: 'relative',
-        width: '100%'
-    }
-}))
-
 const StyledBottomContainer = styled.div`
     display: flex;
     justify-content: flex-end;
 `
 
 const StyledButtonContainer = styled.div`
-    width: 100px;
+    width: 115px;
     display: flex;
     padding: 4px;
     margin-right: 10px;
 `
 
 const StyledSliderContainer = styled.div`
-    width: 212px;
+    width: 200px;
     display: flex;
     padding-top: 4px;
     padding-right: 10px;
 `
 
+const StyledLayersList = styled(List)`
+    ::-webkit-scrollbar {
+        width: 0.7em;
+        height: 0.7em;
+    }
+    ::-webkit-scrollbar-corner {
+        background-color: #252525;
+    }
+    ::-webkit-scrollbar-track {
+        background-color: #252525;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: #666;
+        outline: 1px solid #666;
+    }
+`
+
 const LayersList = (): JSX.Element => {
-    const classes = useStyles()
     const canvas = useSelector(selectCanvas)
     const layers = useSelector(selectLayers)
     const selected = useSelector(selectSelected)
@@ -167,7 +170,6 @@ const LayersList = (): JSX.Element => {
 
     return (
         <>
-            <Typography gutterBottom>{t('i18_layers')}</Typography>
             <ConfirmationDialog
                 title={t('i18_hold_on')}
                 message={t('i18_delete_layer_confirmation')}
@@ -181,7 +183,17 @@ const LayersList = (): JSX.Element => {
                 onSave={onUpdateLayer}
                 onClose={() => setPropertiesDialogOpen(false)}
             />
-            <List className={classes.layersList}>
+            <StyledLayersList
+                sx={{
+                    backgroundColor: theme => theme.palette.background.paper,
+                    height: '100%',
+                    marginTop: '10px',
+                    maxWidth: 360,
+                    overflow: 'auto',
+                    position: 'relative',
+                    width: '100%'
+                }}
+            >
                 {reversedList.map((layer: Layer) => (
                     <ListItem
                         dense
@@ -212,10 +224,10 @@ const LayersList = (): JSX.Element => {
                         {layer.id === editingLayer?.id ? (
                             <TextField
                                 autoFocus
-                                fullWidth
+                                fullWidth={true}
                                 size="small"
                                 type="text"
-                                variant="outlined"
+                                variant="standard"
                                 value={editingLayer.name}
                                 onBlur={onRenameLayer}
                                 onChange={e => {
@@ -249,10 +261,11 @@ const LayersList = (): JSX.Element => {
                         </ListItemSecondaryAction>
                     </ListItem>
                 ))}
-            </List>
+            </StyledLayersList>
             <StyledBottomContainer>
                 <StyledSliderContainer>
                     <Slider
+                        size="small"
                         min={0}
                         max={255}
                         value={opacity}
@@ -290,25 +303,58 @@ const LayersList = (): JSX.Element => {
                         </Tooltip>
                     </IconButton>
                 </StyledButtonContainer>
-                <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+                <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    PaperProps={{
+                        elevation: 0,
+                        sx: {
+                            '& .MuiAvatar-root': {
+                                height: 32,
+                                ml: -0.5,
+                                mr: 1,
+                                width: 32
+                            },
+                            '&:before': {
+                                bgcolor: 'background.paper',
+                                content: '""',
+                                display: 'block',
+                                height: 10,
+                                position: 'absolute',
+                                right: 14,
+                                top: 0,
+                                transform: 'translateY(-50%) rotate(45deg)',
+                                width: 10,
+                                zIndex: 0
+                            },
+                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                            mt: 1.5,
+                            overflow: 'visible'
+                        }
+                    }}
+                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                    onClose={handleClose}
+                >
                     <MenuItem onClick={onCreateTileLayer}>
-                        {t('i18_tile_layer')}
-                        <ListItemSecondaryAction>
+                        <ListItemIcon>
                             <AppsIcon fontSize="small" />
-                        </ListItemSecondaryAction>
+                        </ListItemIcon>
+                        {t('i18_tile_layer')}
                     </MenuItem>
                     <MenuItem onClick={onCreateImageLayer}>
-                        {t('i18_image_layer')}
-                        <ListItemSecondaryAction>
+                        <ListItemIcon>
                             <ImageIcon fontSize="small" />
-                        </ListItemSecondaryAction>
+                        </ListItemIcon>
+                        {t('i18_image_layer')}
                     </MenuItem>
                     <ImageUpload>
                         <MenuItem onClick={handleClose}>
-                            {t('i18_import_image')}
-                            <ListItemSecondaryAction>
+                            <ListItemIcon>
                                 <ImageSearchIcon fontSize="small" />
-                            </ListItemSecondaryAction>
+                            </ListItemIcon>
+                            {t('i18_import_image')}
                         </MenuItem>
                     </ImageUpload>
                 </Menu>

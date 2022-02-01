@@ -1,5 +1,5 @@
 import React from 'react'
-import SvgIcon from '@material-ui/core/SvgIcon'
+import SvgIcon from '@mui/material/SvgIcon'
 
 const TileReplaceIcon = (props): JSX.Element => (
     <SvgIcon viewBox="0 0 1024 1024" {...props}>

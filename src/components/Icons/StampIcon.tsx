@@ -1,5 +1,5 @@
 import React from 'react'
-import SvgIcon from '@material-ui/core/SvgIcon'
+import SvgIcon from '@mui/material/SvgIcon'
 
 const StampIcon = (props): JSX.Element => (
     <SvgIcon {...props} viewBox="0 0 229.885 229.885">

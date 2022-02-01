@@ -2,76 +2,59 @@ import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux'
-import { makeStyles } from '@material-ui/core/styles'
-import { Button, Slider, Tooltip } from '@material-ui/core'
+import { useTheme } from '@mui/material/styles'
+import { Button, Slider, Stack, Tooltip } from '@mui/material'
 import {
     AspectRatio as AspectRatioIcon,
     GridOn as GridOnIcon,
     GridOff as GridOffIcon,
     ZoomIn as ZoomInIcon,
     ZoomOut as ZoomOutIcon
-} from '@material-ui/icons'
+} from '@mui/icons-material'
 import { changePosition, changeScale, toggleShowGrid } from '../store/editor/actions'
-import { SCALE_MIN, SCALE_MAX, SCALE_BY, SCALE_STEP } from '../common/constants'
+import { SCALE_MIN, SCALE_MAX, SCALE_BY } from '../common/constants'
 import { selectCanvas, selectGrid, selectTileset, selectWorkspace } from '../store/editor/selectors'
 import { centerStage, getCoordsFromPos, getPointerRelativePos } from '../common/utils/konva'
 import { Layer } from '../store/editor/types'
-
-export const useStyles = makeStyles(() => ({
-    button: {
-        backgroundColor: 'transparent',
-        color: '#666',
-        fontSize: 12,
-        padding: '0 5px',
-        textTransform: 'lowercase',
-        whiteSpace: 'nowrap'
-    },
-    zoomButton: {
-        cursor: 'pointer'
-    }
-}))
 
 const StyledStatusBar = styled.div`
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
-    height: 30px;
     padding: 0;
     font-size: 12px;
-    line-height: 30px;
+    line-height: 32px;
     background-color: #151515;
-`
-
-const StyledInfoContainer = styled.div`
-    display: flex;
-    width: 50%;
-`
-
-const StyledSliderContainer = styled.div`
-    display: flex;
-    width: 50%;
-    color: #666;
-    font-size: 11px;
-    svg {
-        color: #333;
-        margin: 5px;
-    }
-`
-
-const StyledScaleContainer = styled.div`
-    width: 50px;
-    margin-left: 15px;
 `
 
 const StyledCol = styled.div`
     color: #666;
     margin: 0 10px;
+    font-size: 12px;
+    font-weight: 500;
     svg {
         color: #333;
         margin-right: 5px;
     }
 `
+
+const marks = [
+    { label: '0%', value: 0 },
+    { label: '100%', value: 1.0 },
+    { label: '500%', value: 5.0 },
+    { label: '1000%', value: 10.0 },
+    { label: '2000%', value: 20.0 }
+]
+
+const StyledButton = styled(Button)({
+    backgroundColor: 'transparent',
+    color: '#666',
+    fontSize: 12,
+    padding: '0 5px',
+    textTransform: 'lowercase',
+    whiteSpace: 'nowrap'
+})
 
 type Props = {
     pointerPosition: Konva.Vector2d | null
@@ -80,7 +63,7 @@ type Props = {
 }
 
 const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Element => {
-    const classes = useStyles()
+    const theme = useTheme()
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
@@ -113,7 +96,7 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
     }, [stage, canvas, workspace])
 
     const onZoom = useCallback(
-        (value: any) => {
+        (value: number) => {
             const sx = workspace.width / 2
             const sy = workspace.height / 2
             const oldScale = stage.scaleX()
@@ -147,30 +130,32 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
         }
     }
 
+    const lightIconColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
+
     useEffect(() => {
         scale && setValue(scale)
     }, [scale])
 
     return (
         <StyledStatusBar>
-            <StyledInfoContainer>
+            <Stack spacing={2} direction="row" sx={{ mb: 1, px: 1 }} alignItems="center">
                 <StyledCol>
                     <Tooltip title="Toggle grid" placement="top">
-                        <Button onClick={() => onToggleShowGrid(!grid.visible)} className={classes.button}>
+                        <StyledButton onClick={() => onToggleShowGrid(!grid.visible)}>
                             {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width} x {grid.height}]:{' '}
                             {grid.visible ? `On` : `Off`}
-                        </Button>
+                        </StyledButton>
                     </Tooltip>
                 </StyledCol>
                 <StyledCol>
                     <Tooltip title="Center and fit to view size" placement="top">
-                        <Button onClick={onCenter} className={classes.button}>
+                        <StyledButton onClick={onCenter}>
                             <AspectRatioIcon onClick={onCenter} />
                             {canvas &&
                                 `${canvas.width} x ${canvas.height} px [${canvas.width / grid.width} x ${
                                     canvas.height / grid.height
                                 }]`}
-                        </Button>
+                        </StyledButton>
                     </Tooltip>
                 </StyledCol>
                 {selectedLayer && selectedLayer.data && (
@@ -178,20 +163,30 @@ const StatusBar = ({ pointerPosition, selectedLayer, stage }: Props): JSX.Elemen
                         {x}, {y} [{gid || 'empty'}]
                     </StyledCol>
                 )}
-            </StyledInfoContainer>
-            <StyledSliderContainer>
-                <ZoomOutIcon onClick={onZoomOut} className={classes.zoomButton} />
+            </Stack>
+            <Stack
+                spacing={1}
+                direction="row"
+                sx={{ marginLeft: 'auto', mb: 1, px: 1, width: '50%' }}
+                alignItems="center"
+            >
+                <ZoomOutIcon htmlColor={lightIconColor} onClick={onZoomOut} />
                 <Slider
-                    {...{ value }}
-                    step={SCALE_STEP}
+                    {...{ marks, value }}
+                    size="small"
+                    step={1}
                     min={SCALE_MIN}
                     max={SCALE_MAX}
-                    onChange={(e, value) => onZoom(value)}
+                    onChange={(_, value) => onZoom(value as number)}
                     onChangeCommitted={onZoomCommitted}
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={(scale: number) => `${Math.round(100 * scale)}%`}
+                    sx={{
+                        paddingTop: '16px'
+                    }}
                 />
-                <StyledScaleContainer>{Math.round(100 * scale)}%</StyledScaleContainer>
-                <ZoomInIcon onClick={onZoomIn} className={classes.zoomButton} />
-            </StyledSliderContainer>
+                <ZoomInIcon htmlColor={lightIconColor} onClick={onZoomIn} />
+            </Stack>
         </StyledStatusBar>
     )
 }

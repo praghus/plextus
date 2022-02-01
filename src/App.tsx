@@ -5,7 +5,7 @@ import { ToastContainer } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { getImage } from './common/utils/image'
-import { FOOTER_HEIGHT, RIGHT_BAR_WIDTH } from './common/constants'
+import { RIGHT_BAR_WIDTH } from './common/constants'
 import { EDITOR_RESOURCE_NAME } from './store/editor/constants'
 import { selectIsLoading } from './store/app/selectors'
 import { selectCanvas, selectTileset } from './store/editor/selectors'
@@ -17,7 +17,6 @@ import LoadingIndicator from './components/LoadingIndicator'
 import LayersList from './components/LayersList'
 import ToolBar from './components/ToolBar'
 import KonvaStage from './components/KonvaStage'
-import Footer from './components/Footer'
 import TabContainer from './components/TabsContainer'
 import WelcomeDialog from './components/WelcomeDialog'
 import ImportDialog from './components/ImportDialog'
@@ -34,12 +33,8 @@ const StyledWrapper = styled.div`
 `
 
 const StyledContainer = styled.div`
-    height: calc(100vh - ${FOOTER_HEIGHT}px);
+    height: calc(100vh);
     display: flex;
-`
-
-const StyledFooter = styled(Footer)`
-    height: ${FOOTER_HEIGHT}px;
 `
 
 const StyledMiddleContainer = styled.div`
@@ -104,7 +99,7 @@ const App = (): JSX.Element => {
 
     return (
         <StyledWrapper>
-            <ToastContainer theme="dark" autoClose={2000} />
+            <ToastContainer position="bottom-left" theme="dark" autoClose={2000} />
             <WelcomeDialog />
             <ImportDialog />
             <NewProjectDialog />
@@ -117,7 +112,6 @@ const App = (): JSX.Element => {
                     <LayersList />
                 </StyledRightContainer>
             </StyledContainer>
-            <StyledFooter />
         </StyledWrapper>
     )
 }

@@ -3,8 +3,8 @@ import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { debounce } from 'lodash'
-import { Add as AddIcon, Remove as RemoveIcon } from '@material-ui/icons'
-import { FormControl, IconButton, MenuItem, Select } from '@material-ui/core'
+import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
+import { FormControl, IconButton, MenuItem, Select } from '@mui/material'
 import { RgbaColorPicker } from 'react-colorful'
 import { PALETTES } from '../common/constants'
 import { changePalette, changePrimaryColor, changeSelectedPalette } from '../store/editor/actions'
@@ -16,11 +16,6 @@ const DEFAULT = 'DEFAULT'
 const StyledColorPicker = styled(RgbaColorPicker)`
     width: auto !important;
     margin: 15px 10px;
-`
-
-const StyledFormControl = styled(FormControl)`
-    width: 100%;
-    padding: 0;
 `
 
 const StyledColorsContainer = styled.div`
@@ -77,17 +72,20 @@ const Palette = (): JSX.Element => {
     )
 
     useEffect(() => {
-        setColors(selected.palette === DEFAULT ? palette : PALETTES[selected.palette].colors)
+        setColors(
+            selected.palette === DEFAULT || !PALETTES[selected.palette] ? palette : PALETTES[selected.palette].colors
+        )
     }, [palette, selected.palette])
 
     return (
         <>
             <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
             <StyledPalette>
-                <StyledFormControl>
+                <FormControl sx={{ padding: '5px', width: '100%' }}>
                     <Select
+                        size="small"
                         value={selected.palette}
-                        onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
+                        onChange={e => {
                             onChangeSelectedPalette(e.target.value as string)
                             setColors(
                                 e.target.value && e.target.value !== DEFAULT
@@ -103,7 +101,7 @@ const Palette = (): JSX.Element => {
                             </MenuItem>
                         ))}
                     </Select>
-                </StyledFormControl>
+                </FormControl>
                 <StyledColorsContainer>
                     {colors.map((rgba, i) => (
                         <ColorBox

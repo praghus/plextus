@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { makeStyles, withStyles } from '@material-ui/core/styles'
 import {
     Button,
     Dialog,
@@ -16,7 +15,7 @@ import {
     RadioGroup,
     TextField,
     Typography
-} from '@material-ui/core'
+} from '@mui/material'
 import { IMPORT_MODES } from '../common/constants'
 import { changeAppImportedImage } from '../store/app/actions'
 import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../store/editor/actions'
@@ -26,18 +25,7 @@ import { getImage } from '../common/utils/image'
 import { LayerImportConfig } from '../store/editor/types'
 import ImportPreview from './ImportPreview'
 
-const ImageResolutionInfo = withStyles({ root: { color: '#222' } })(Typography)
-
-const useStyles = makeStyles(theme => ({
-    input: {
-        marginRight: theme.spacing(1),
-        marginTop: theme.spacing(1),
-        minWidth: '80px'
-    }
-}))
-
 const ImportDialog = (): JSX.Element => {
-    const classes = useStyles()
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
     const importedImage = useSelector(selectImportedImage)
@@ -116,41 +104,39 @@ const ImportDialog = (): JSX.Element => {
                             <FormControlLabel
                                 value={IMPORT_MODES.NEW_PROJECT}
                                 control={<Radio color="primary" />}
-                                label={t('i18_as_a_new_project')}
+                                label={t('i18_as_a_new_project') as string}
                             />
                             <FormControlLabel
                                 value={IMPORT_MODES.NEW_LAYER}
                                 control={<Radio color="primary" />}
-                                label={t('i18_as_a_new_layer')}
+                                label={t('i18_as_a_new_layer') as string}
                             />
                             <FormControlLabel
                                 value={IMPORT_MODES.NEW_IMAGE}
                                 control={<Radio color="primary" />}
-                                label={t('i18_as_an_image')}
+                                label={t('i18_as_an_image') as string}
                             />
                         </RadioGroup>
                     </FormControl>
                 )}
-                <Grid container>
-                    <TextField
-                        fullWidth
-                        className={classes.input}
-                        value={name}
-                        onChange={e => setConfigProp('name', e.target.value)}
-                        id="name"
-                        label={t('i18_layer_name')}
-                        size="small"
-                        variant="outlined"
-                    />
-                </Grid>
+
+                <TextField
+                    fullWidth={true}
+                    value={name}
+                    onChange={e => setConfigProp('name', e.target.value)}
+                    id="name"
+                    label={t('i18_layer_name')}
+                    size="small"
+                    variant="standard"
+                />
+
                 {image && <ImportPreview {...{ config, image }} />}
-                <Grid container>
+                <Grid container spacing={1}>
                     {mode === IMPORT_MODES.NEW_PROJECT && (
                         <>
                             <Grid item xs={2}>
                                 <TextField
                                     type="number"
-                                    className={classes.input}
                                     value={tileSize.w}
                                     onChange={event => {
                                         const w = parseInt(event.target.value)
@@ -168,7 +154,6 @@ const ImportDialog = (): JSX.Element => {
                             <Grid item xs={2}>
                                 <TextField
                                     type="number"
-                                    className={classes.input}
                                     value={tileSize.h}
                                     onChange={event => {
                                         const h = parseInt(event.target.value)
@@ -186,7 +171,6 @@ const ImportDialog = (): JSX.Element => {
                             <Grid item xs={4}>
                                 <TextField
                                     type="number"
-                                    className={classes.input}
                                     value={columns}
                                     onChange={event => {
                                         const c = parseInt(event.target.value)
@@ -211,7 +195,6 @@ const ImportDialog = (): JSX.Element => {
                             <Grid item xs={2}>
                                 <TextField
                                     type="number"
-                                    className={classes.input}
                                     value={offset.x}
                                     onChange={event =>
                                         setConfigProp('offset', { ...offset, x: parseInt(event.target.value) })
@@ -225,7 +208,6 @@ const ImportDialog = (): JSX.Element => {
                             <Grid item xs={2}>
                                 <TextField
                                     type="number"
-                                    className={classes.input}
                                     value={offset.y}
                                     onChange={event =>
                                         setConfigProp('offset', { ...offset, y: parseInt(event.target.value) })
@@ -242,10 +224,10 @@ const ImportDialog = (): JSX.Element => {
             </DialogContent>
             <DialogActions>
                 {resolution && (
-                    <ImageResolutionInfo variant="caption" display="block">
+                    <Typography variant="caption" display="block" sx={{ color: '#ccc', padding: '5px 20px' }}>
                         {Math.ceil(resolution.w / tileSize.w) * tileSize.w} x{' '}
                         {Math.ceil(resolution.h / tileSize.h) * tileSize.h} {t('i18_pixels')}
-                    </ImageResolutionInfo>
+                    </Typography>
                 )}
                 <div style={{ flex: '1 0 0' }} />
                 <Button onClick={onClose} color="primary">
