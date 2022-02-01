@@ -71,5 +71,5 @@ Plextus is [MIT licensed](./LICENSE).
 ## See also
 
 -   [Konva](https://konvajs.org/)
--   [Material-UI](https://material-ui.com/)
+-   [MUI](https://mui.com/)
 -   [Tiled](https://www.mapeditor.org/)
