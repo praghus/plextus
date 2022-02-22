@@ -44,3 +44,12 @@ export function convertArrayToObject<T>(array: any[], key: string): StringTMap<T
         initialValue
     )
 }
+
+export function spliceIntoChunks<T>(arr: T[], chunkSize = 1): T[][] {
+    const res: any[] = []
+    while (arr.length > 0) {
+        const chunk = arr.splice(0, chunkSize)
+        res.push(chunk)
+    }
+    return res
+}

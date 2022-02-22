@@ -96,12 +96,12 @@ export const actionLine = (
     drawPixel(Math.round(endPos.x), Math.round(endPos.y))
 }
 
-export function fillColor(
+export const fillColor = (
     pos: Konva.Vector2d,
     selectedColor: number[],
     bufferImage: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D
-): void {
+): void => {
     const [r, g, b] = selectedColor
     const a = !isNaN(selectedColor[3]) ? selectedColor[3] : 255
     const pixelStack = [[Math.floor(pos.x), Math.floor(pos.y)]]
@@ -118,8 +118,22 @@ export function fillColor(
         return
     }
 
-    floodFill()
-    function floodFill() {
+    const matchStartColor = (pixelPos: number) => {
+        const r = colorLayer.data[pixelPos]
+        const g = colorLayer.data[pixelPos + 1]
+        const b = colorLayer.data[pixelPos + 2]
+        const a = colorLayer.data[pixelPos + 3]
+        return r === startR && g === startG && b === startB && a === startA
+    }
+
+    const colorPixel = (pixelPos: number) => {
+        colorLayer.data[pixelPos] = r
+        colorLayer.data[pixelPos + 1] = g
+        colorLayer.data[pixelPos + 2] = b
+        colorLayer.data[pixelPos + 3] = a
+    }
+
+    const floodFill = () => {
         const newPos = pixelStack.pop() as number[]
         x = newPos[0]
         y = newPos[1]
@@ -169,20 +183,7 @@ export function fillColor(
         }
     }
 
+    floodFill()
+
     ctx.putImageData(colorLayer, 0, 0)
-
-    function matchStartColor(pixelPos: number) {
-        const r = colorLayer.data[pixelPos]
-        const g = colorLayer.data[pixelPos + 1]
-        const b = colorLayer.data[pixelPos + 2]
-        const a = colorLayer.data[pixelPos + 3]
-        return r === startR && g === startG && b === startB && a === startA
-    }
-
-    function colorPixel(pixelPos: number) {
-        colorLayer.data[pixelPos] = r
-        colorLayer.data[pixelPos + 1] = g
-        colorLayer.data[pixelPos + 2] = b
-        colorLayer.data[pixelPos + 3] = a
-    }
 }

@@ -3,7 +3,7 @@ import { call, put, StrictEffect, select, takeLatest } from 'redux-saga/effects'
 import { toast } from 'react-toastify'
 import i18n from '../../common/translations/i18n'
 import logger from '../../common/utils/logger'
-import { importLayer } from '../../common/utils/image'
+import { importLayer, generateReducedPalette, reduceColors } from '../../common/utils/image'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
 import { canvasToBlob } from '../../common/utils/data'
@@ -36,7 +36,8 @@ import {
     changeSelectedTile,
     changeTileset,
     saveChanges,
-    changeTilesetImage
+    changeTilesetImage,
+    changePalette
 } from './actions'
 import { clear } from '../history/actions'
 import { APP_STORAGE_KEY } from '../app/constants'
@@ -283,10 +284,8 @@ export function* createTileLayerFromFile(action: AnyAction): Generator<StrictEff
         const tileset: Tileset = yield select(selectTileset)
 
         const { layer, tilesetCanvas, tilecount } = yield call(importLayer, image, config, tileset)
-        const { columns, mode, name, tileSize } = config
+        const { columns, colorsCount, mode, name, tileSize, reducedColors } = config
         const { w: tilewidth, h: tileheight } = tileSize
-
-        console.info(mode)
 
         const w = layer.width * tilewidth
         const h = layer.height * tileheight
@@ -315,9 +314,14 @@ export function* createTileLayerFromFile(action: AnyAction): Generator<StrictEff
             )
         }
 
-        const blob = yield call(canvasToBlob, tilesetCanvas)
+        const tilesetImage = reducedColors
+            ? yield call(reduceColors, tilesetCanvas, colorsCount)
+            : yield call(canvasToBlob, tilesetCanvas)
 
-        yield put(changeTilesetImage(blob))
+        const palette = yield call(generateReducedPalette, tilesetImage)
+
+        yield put(changePalette(palette))
+        yield put(changeTilesetImage(tilesetImage))
         yield put(changeSelectedLayer(layer.id))
         yield put(saveChanges())
         yield put(clear())

@@ -3,7 +3,8 @@ import JSZip from 'jszip'
 import { create } from 'xmlbuilder2'
 import { Buffer } from 'buffer'
 import { saveAs } from 'file-saver'
-import { Canvas, Layer, Tileset } from 'store/editor/types'
+import { Canvas, Layer, Tileset } from '../../store/editor/types'
+import { TILESET_FILENAME } from '../constants'
 import { componentToHex } from './colors'
 import logger from './logger'
 
@@ -79,23 +80,12 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
     const doc = create({
         map: {
             '@': {
-                
-
-height: canvas.height / tileset.tileheight, 
-                
-
-
-infinite: false, 
-                
-
-nextlayerid: layers.length,
-                
-// move to const
-orientation: 'orthogonal',
-                
-renderorder: 'right-down',
-                // move to const
-tiledversion: '1.7.1',
+                height: canvas.height / tileset.tileheight,
+                infinite: false,
+                nextlayerid: layers.length,
+                orientation: 'orthogonal',
+                renderorder: 'right-down',
+                tiledversion: '1.7.1',
                 tileheight,
                 tilewidth,
                 type: 'map',
@@ -115,7 +105,7 @@ tiledversion: '1.7.1',
                 image: {
                     '@': {
                         height: (1 + Math.round(tilecount / columns)) * tileheight,
-                        source: './images/tileset.png',
+                        source: `./images/${TILESET_FILENAME}`,
                         width: columns * tilewidth
                     }
                 }
@@ -132,7 +122,7 @@ tiledversion: '1.7.1',
 
     zip.file('ReadMe.txt', 'Exported from Plextus!\n--\nDownload Tiled from https://www.mapeditor.org/\n')
     zip.file('tiledmap.tmx', tiledmapTmx)
-    imagesFolder.file('tileset.png', tilesetImage)
+    imagesFolder.file(TILESET_FILENAME, tilesetImage)
     layerImages.map(({ filename, data }) => imagesFolder.file(filename, data))
 
     zip.generateAsync({ type: 'blob' })

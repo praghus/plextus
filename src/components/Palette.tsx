@@ -94,7 +94,7 @@ const Palette = (): JSX.Element => {
                             )
                         }}
                     >
-                        <MenuItem value={DEFAULT}>{t('i18_default_palette')}</MenuItem>
+                        <MenuItem value={DEFAULT}>{t('i18_current_palette')}</MenuItem>
                         {Object.keys(PALETTES).map(pal => (
                             <MenuItem key={pal} value={pal}>
                                 {PALETTES[pal].name}

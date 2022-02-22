@@ -1,19 +1,22 @@
 import { v4 as uuidv4 } from 'uuid'
-import { IMPORT_MODES } from '../constants'
+import { execute } from 'wasm-imagemagick'
+import { IMPORT_MODES, TILESET_FILENAME } from '../constants'
 import { INITIAL_STATE } from '../../store/editor/constants'
 import { LayerImportConfig, Tileset } from '../../store/editor/types'
+import { spliceIntoChunks } from './array'
 import { canvasToBlob } from './data'
 
-export const getImage = (src: string): Promise<HTMLImageElement> =>
-    new Promise<HTMLImageElement>((resolve, reject) => {
+export function getImage(src: string): Promise<HTMLImageElement> {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
         const image: HTMLImageElement = new window.Image()
         image.src = src
         image.onload = () => resolve(image)
         image.onerror = reject
     })
+}
 
-export const createEmptyImage = (width: number, height: number): Promise<Blob> =>
-    new Promise(resolve => {
+export function createEmptyImage(width: number, height: number): Promise<Blob> {
+    return new Promise(resolve => {
         const canvasElement: any = document.createElement('canvas')
         const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
         canvasElement.width = width
@@ -21,20 +24,21 @@ export const createEmptyImage = (width: number, height: number): Promise<Blob> =
         ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
         canvasElement.toBlob((blob: Blob) => resolve(blob), 'image/png')
     })
+}
 
-export const downloadImage = (canvas: HTMLCanvasElement) => {
+export function downloadImage(canvas: HTMLCanvasElement): void {
     const downloadLink = document.createElement('a')
     const dataURL = canvas.toDataURL('image/png')
     const url = dataURL.replace(/^data:image\/png/, 'data:application/octet-stream')
-    downloadLink.setAttribute('download', 'tileset.png')
+    downloadLink.setAttribute('download', TILESET_FILENAME)
     downloadLink.setAttribute('href', url)
     downloadLink.click()
 }
 
-export const uploadImage = (
+export function uploadImage(
     file: Blob
-): Promise<{ image: HTMLImageElement; blob: Blob; width: number; height: number }> =>
-    new Promise((resolve, reject) => {
+): Promise<{ image: HTMLImageElement; blob: Blob; width: number; height: number }> {
+    return new Promise((resolve, reject) => {
         const canvasElement: any = document.createElement('canvas')
         const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
         const imageReader = new FileReader()
@@ -56,10 +60,11 @@ export const uploadImage = (
             } else reject()
         }
     })
+}
 
-export const getTilesetHashData = async (
+export async function getTilesetHashData(
     tileset: Tileset
-): Promise<{ tempTiles: ImageData[]; tempTilesHash: string[] }> => {
+): Promise<{ tempTiles: ImageData[]; tempTilesHash: string[] }> {
     const { image, columns, tilecount, tilewidth, tileheight } = tileset
     const canvasElement: any = document.createElement('canvas')
     const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
@@ -87,7 +92,7 @@ export const getTilesetHashData = async (
     return { tempTiles, tempTilesHash }
 }
 
-export const importLayer = async (image: CanvasImageSource, config: LayerImportConfig, tileset: Tileset) => {
+export async function importLayer(image: CanvasImageSource, config: LayerImportConfig, tileset: Tileset) {
     const { columns, mode, name, offset, resolution, tileSize } = config
     if (image) {
         const layerCanvas: any = document.createElement('canvas')
@@ -158,14 +163,63 @@ export const importLayer = async (image: CanvasImageSource, config: LayerImportC
     } else throw new Error('No image data for processing!')
 }
 
-// // Generate new palette from tileset
-// for (let y = 0; y < tilesetCanvas.height; y += 1) {
-//   for (let x = 0; x < tilesetCanvas.width; x += 1) {
-//     const p = Object.values(tilesetContext.getImageData(x, y, 1, 1).data)
-//     p[3] = 255
-//     if (tempPalette.indexOf(p.join()) === -1) {
-//       tempPalette.push(p.join())
-//     }
-//   }
-// }
-// onChangePalette(getOrderedPalette(tempPalette))
+export async function reduceColors(canvas: HTMLCanvasElement, colorsCount: 256): Promise<Blob> {
+    const blob = await canvasToBlob(canvas)
+    const fetchedSourceImage = await new Response(blob).arrayBuffer()
+    const sourceBytes = new Uint8Array(fetchedSourceImage)
+
+    const { outputFiles, exitCode } = await execute({
+        commands: [`convert ${TILESET_FILENAME} +dither -alpha off -colors ${colorsCount} remap.png`],
+        inputFiles: [{ content: sourceBytes, name: TILESET_FILENAME }]
+    })
+    if (exitCode === 0) {
+        const reducedBlob = outputFiles[0].blob
+        return reducedBlob.slice(0, reducedBlob.size, 'image/png')
+    }
+    return blob
+}
+
+export async function generateReducedPalette(blob: Blob): Promise<number[][]> {
+    const fetchedSourceImage = await new Response(blob).arrayBuffer()
+    const sourceBytes = new Uint8Array(fetchedSourceImage)
+    const canvas: any = document.createElement('canvas')
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')
+    const tempPalette: string[] = []
+
+    const { outputFiles, exitCode } = await execute({
+        commands: [`convert ${TILESET_FILENAME} -alpha off -unique-colors palette.png`],
+        inputFiles: [{ content: sourceBytes, name: TILESET_FILENAME }]
+    })
+
+    if (exitCode === 0) {
+        const reducedBlob = outputFiles[0].blob
+        const pal = reducedBlob.slice(0, reducedBlob.size, 'image/png')
+        const paletteImg = await getImage(window.URL.createObjectURL(pal))
+        const { width, height } = paletteImg
+
+        canvas.width = width
+        canvas.height = height
+        ctx.clearRect(0, 0, width, height)
+        ctx.drawImage(paletteImg, 0, 0)
+
+        const data = ctx.getImageData(0, 0, width, height).data
+
+        return spliceIntoChunks<number>(Array.from(data), 4)
+            .map(([r, g, b]) => [r, g, b])
+            .filter(c => {
+                const h = c.toString()
+                if (tempPalette.indexOf(h) === -1) {
+                    tempPalette.push(h)
+                    return true
+                }
+                return false
+            })
+    }
+    return []
+}
+
+// 'convert tileset.png +dither -remap netscape: remap.png',
+// 'convert tileset.png +dither -posterize 6 remap.png',
+// 'convert remap.png -unique-colors palette.png'
+// 'convert remap.png -format %c -depth 8 histogram:info:-'
+// console.info(stdout.join('\n').match(/#(?:[0-9a-fA-F]{3}){1,2}/g))

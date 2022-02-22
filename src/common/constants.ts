@@ -12,6 +12,8 @@ export const SCALE_STEP = 0.5
 export const IMPORT_PREVIEW_WIDTH = 550
 export const IMPORT_PREVIEW_HEIGHT = 300
 
+export const TILESET_FILENAME = 'tileset.png'
+
 export enum IMPORT_MODES {
     NEW_PROJECT = 'NEW_PROJECT',
     NEW_LAYER = 'NEW_LAYER',
