@@ -33,9 +33,6 @@ export const createEmptyTile = async (
 
     const blob = await canvasToBlob(canvasElement)
     return { blob, newTileId }
-    // canvasElement.toBlob((blob: Blob) => {
-    //     blob && onSave(blob, newTileId)
-    // }, 'image/png')
 }
 
 export const createTileFromImageData = async (

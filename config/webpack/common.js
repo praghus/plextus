@@ -1,9 +1,13 @@
 const { resolve } = require('path')
 const webpack = require('webpack')
+const CopyPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     context: resolve(__dirname, '../../src'),
+    experiments: {
+        asyncWebAssembly: true
+    },
     externals: {
         react: 'React',
         'react-dom': 'ReactDOM'
@@ -35,6 +39,18 @@ module.exports = {
         new HtmlWebpackPlugin({ template: 'index.html.ejs' }),
         new webpack.ProvidePlugin({
             process: 'process/browser'
+        }),
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: resolve(__dirname, '../../node_modules/wasm-imagemagick/dist/magick.wasm'),
+                    to: '.'
+                },
+                {
+                    from: resolve(__dirname, '../../node_modules/wasm-imagemagick/dist/magick.js'),
+                    to: '.'
+                }
+            ]
         })
     ],
     resolve: {

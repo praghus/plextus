@@ -7,9 +7,10 @@ export const TRANSLATIONS_EN = {
     i18_choose_map_image: 'Choose a graphic file containing a tiled map.',
     i18_close_project: 'Close project',
     i18_close_project_message: `Closing the project will clear the workspace and remove the entire tileset. The unexported project will be deleted. are you sure you want to do this?`,
+    i18_colors: 'Colors',
     i18_columns: 'Columns',
     i18_create: 'Create',
-    i18_default_palette: 'Default palette',
+    i18_current_palette: 'Current palette',
     i18_delete_layer: 'Delete Layer',
     i18_delete_layer_confirmation: 'Are you sure you want to remove this layer?',
     i18_delete_tile_confirmation: 'Are you sure you want to delete this tile?',
@@ -44,6 +45,7 @@ export const TRANSLATIONS_EN = {
     i18_tileset_maximum_width: 'Tileset maximum width',
     i18_undo: 'Undo',
     i18_upload_file: 'Upload File',
+    i18_use_reduced_palette: 'Use reduced palette',
     i18_visible: 'Visible',
     i18_yes: 'Yes'
 }

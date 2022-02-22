@@ -8,7 +8,7 @@ module.exports = merge(commonConfig, {
     entry: './index.tsx',
     mode: 'production',
     output: {
-        filename: 'js/bundle.[contenthash].min.js',
+        filename: 'bundle.[contenthash].min.js',
         path: resolve(__dirname, '../../dist'),
         publicPath: '/plextus/'
     },
