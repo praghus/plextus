@@ -68,11 +68,11 @@ const ImportDialog = (): JSX.Element => {
 
     const { columns, colorsCount, mode, name, offset, reducedColors, resolution, tileSize } = config
 
-    const setConfigProp = (key: string, value: any): void => {
+    const setConfigProp = (key: string, value: string | number | {}): void => {
         setConfig({ ...config, [key]: value })
     }
 
-    const handleClose = (e: any, reason: string): void => {
+    const handleClose = (e: {}, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }

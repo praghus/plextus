@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import styled from '@emotion/styled'
-import { useTheme } from '@mui/material/styles'
+import { useTheme, Theme } from '@mui/material/styles'
 import { debounce } from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -15,7 +15,7 @@ import {
     ToggleButtonGroup,
     Tooltip
 } from '@mui/material'
-import { ColorPicker } from 'mui-color'
+import { ColorPicker, Color, ColorValue } from 'mui-color'
 import {
     BrightnessMedium as BrightnessMediumIcon,
     Colorize as ColorizeIcon,
@@ -58,16 +58,16 @@ const StyledColorPicker = styled.div`
     padding: 2px 3px;
 `
 
-const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }: any) => ({
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }: { theme?: Theme }) => ({
     '& .MuiToggleButtonGroup-grouped': {
         '&.Mui-disabled': {
             border: 0
         },
         '&:first-of-type': {
-            borderRadius: theme.shape.borderRadius
+            borderRadius: (theme && theme.shape.borderRadius) || 0
         },
         '&:not(:first-of-type)': {
-            borderRadius: theme.shape.borderRadius
+            borderRadius: (theme && theme.shape.borderRadius) || 0
         },
         border: 0,
         margin: '3px',
@@ -85,7 +85,7 @@ const ToolBar = (): JSX.Element => {
 
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-    const [primaryColor, setPrimaryColor] = useState<any>(rgbaToHex(selected.color))
+    const [primaryColor, setPrimaryColor] = useState<string>(rgbaToHex(selected.color))
 
     const { t } = useTranslation()
 
@@ -107,7 +107,7 @@ const ToolBar = (): JSX.Element => {
     const lightIconColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
 
     const renderToolButton = useCallback(
-        (value: string, Icon: any) => (
+        (value: string, Icon: React.ElementType) => (
             <ToggleButton {...{ value }}>
                 <Tooltip title={TOOLS_DESC[value]} placement="right">
                     <div>
@@ -261,11 +261,10 @@ const ToolBar = (): JSX.Element => {
                         <ColorPicker
                             hideTextfield
                             value={primaryColor}
-                            onChange={(color: any) => {
-                                setPrimaryColor(color)
-                                if (!color.error) {
-                                    onChangePrimaryColor(color.rgb)
-                                }
+                            onChange={(color: ColorValue) => {
+                                const { rgb } = color as Color
+                                setPrimaryColor(rgbaToHex(rgb))
+                                onChangePrimaryColor(rgb)
                             }}
                         />
                     </StyledColorPicker>

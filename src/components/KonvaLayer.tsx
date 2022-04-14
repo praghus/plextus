@@ -13,7 +13,7 @@ import {
     pickColor
 } from '../common/utils/konva'
 import { getImage } from '../common/utils/image'
-import { isValidArray } from '../common/utils/array'
+import { isArray } from '../common/utils/array'
 import { getRgbaValue } from '../common/utils/colors'
 import { Grid, Layer, Selected, Tileset, Workspace } from '../store/editor/types'
 
@@ -27,7 +27,7 @@ type Props = {
     onChangeLayerOffset: (layerId: string, x: number, y: number) => void
     onChangePrimaryColor: (color: number[]) => void
     onChangeSelectedTile: (tileId: number) => void
-    onChangeTileset: (tileset: any) => void
+    onChangeTileset: (tileset: Tileset) => void
     onSaveTilesetImage: (blob: Blob) => void
     selected: Selected
     stage: Konva.Stage
@@ -132,9 +132,9 @@ const KonvaLayer = ({
     }
 
     const redraw = (): void => {
-        if (ctx && layer.data && isValidArray(layer.data)) {
+        if (ctx && isArray(layer.data)) {
             ctx.clearRect(0, 0, width, height)
-            layer.data.map((gid, i) => drawTile(gid, i))
+            layer.data.map(drawTile)
             stage.batchDraw()
         }
     }
@@ -385,10 +385,10 @@ const KonvaLayer = ({
     }
 
     useEffect(() => {
-        const canvasElement: any = document.createElement('canvas')
-        const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
-        const canvasBufferElement: any = document.createElement('canvas')
-        const canvasBufferContext: CanvasRenderingContext2D = canvasBufferElement.getContext('2d')
+        const canvasElement = document.createElement('canvas')
+        const canvasContext = canvasElement.getContext('2d') as CanvasRenderingContext2D
+        const canvasBufferElement = document.createElement('canvas')
+        const canvasBufferContext = canvasBufferElement.getContext('2d') as CanvasRenderingContext2D
 
         canvasElement.width = width
         canvasElement.height = height

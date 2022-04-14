@@ -113,8 +113,7 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 ...state,
                 tileset: {
                     ...state.tileset,
-                    ...action.payload.tileset,
-                    lastUpdateTime: performance.now()
+                    ...action.payload.tileset
                 }
             }
         case EDITOR_CHANGE_TOOL:
@@ -173,8 +172,7 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
                 ...state,
                 tileset: {
                     ...state.tileset,
-                    image: action.payload.image,
-                    lastUpdateTime: action.payload.lastUpdateTime
+                    image: action.payload.image
                 }
             }
         default:

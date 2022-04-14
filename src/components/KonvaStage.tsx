@@ -6,7 +6,7 @@ import { jsx, css } from '@emotion/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
 import { undo, redo } from '../store/history/actions'
-import { Rectangle } from '../store/editor/types'
+import { Rectangle, Tileset } from '../store/editor/types'
 import { SCALE_BY, TOOLS, BG_IMAGE } from '../common/constants'
 import { centerStage } from '../common/utils/konva'
 import { getRgbaValue } from '../common/utils/colors'
@@ -95,7 +95,7 @@ const KonvaStage = ({ tilesetCanvas }: Props): JSX.Element | null => {
     const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
-    const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
+    const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
     const onUndo = () => dispatch(undo())

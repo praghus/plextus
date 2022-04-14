@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import { PALETTES, DEFAULT_TILESET_IMAGE, TOOLS } from '../../common/constants'
-import { Canvas, DeflatedLayer, Rectangle } from './types'
+import { Canvas, DeflatedLayer, Grid, Rectangle } from './types'
 
 export const EDITOR_RESOURCE_NAME = 'editor'
 export const EDITOR_TILESET_RESOURCE_KEY = 'tileset'
@@ -58,7 +58,7 @@ export const INITIAL_STATE = {
         pitch: 10,
         visible: true,
         width: 16
-    },
+    } as Grid,
     layers: [] as DeflatedLayer[] | [],
     palette: DEFAULT_PALLETE,
     selected: {
@@ -75,7 +75,6 @@ export const INITIAL_STATE = {
         columns: 10,
         firstgid: 1,
         image: DEFAULT_TILESET_IMAGE,
-        lastUpdateTime: performance.now(),
         tilecount: 1,
         tileheight: 16,
         tilewidth: 16

@@ -42,7 +42,7 @@ const NewProjectDialog = (): JSX.Element => {
         onClose()
     }, [])
 
-    const handleClose = useCallback((e: any, reason: string): void => {
+    const handleClose = useCallback((e: {}, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }

@@ -79,7 +79,7 @@ const Tileset = ({ tilesetCanvas }: Props): JSX.Element => {
 
     const dispatch = useDispatch()
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
-    const onChangeTileset = (tileset: any) => dispatch(changeTileset(tileset))
+    const onChangeTileset = (tileset: TilesetType) => dispatch(changeTileset(tileset))
     const onRemoveTile = (tileId: number, tileset: TilesetType) => dispatch(removeTile(tileId, tileset))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
     const onOpenConfirmationDialog = () => setConfirmationDialogOpen(true)

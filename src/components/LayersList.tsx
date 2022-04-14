@@ -100,8 +100,6 @@ const LayersList = (): JSX.Element => {
     const onChangeLayerVisible = (layerId: string, value: boolean) => dispatch(changeLayerVisible(layerId, value))
     const onChangeLayerOpacity = (layerId: string, value: number) => dispatch(changeLayerOpacity(layerId, value))
     const onChangeLayerName = (layerId: string, value: string) => dispatch(changeLayerName(layerId, value))
-    const onOpacityChange = (e: any, value: any) => setOpacity(value)
-    const onOpacityChangeCommitted = (e: any, value: any) => onChangeLayerOpacity(currentLayer.id, value)
     const handleClick = (e: React.MouseEvent) => setAnchorEl(e.currentTarget as HTMLAnchorElement)
     const handleClose = () => setAnchorEl(null)
 
@@ -125,7 +123,7 @@ const LayersList = (): JSX.Element => {
         const index = layers.indexOf(currentLayer)
         const from = dir > 0 ? index - 1 : index
         const to = dir > 0 ? index : index + 1
-        onChangeLayers(changeItemPosition([...layers], from, to))
+        onChangeLayers(changeItemPosition<Layer>([...layers], from, to))
     }
 
     const onCreateTileLayer = () => {
@@ -269,8 +267,10 @@ const LayersList = (): JSX.Element => {
                         min={0}
                         max={255}
                         value={opacity}
-                        onChange={onOpacityChange}
-                        onChangeCommitted={onOpacityChangeCommitted}
+                        onChange={(e: {}, value: number | number[]) => setOpacity(value as number)}
+                        onChangeCommitted={(e: {}, value: number | number[]) =>
+                            onChangeLayerOpacity(currentLayer.id, value as number)
+                        }
                     />
                 </StyledSliderContainer>
                 <StyledButtonContainer>

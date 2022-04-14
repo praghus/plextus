@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import styled from '@emotion/styled'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
-import { ColorPicker } from 'mui-color'
+import { ColorPicker, Color, ColorValue } from 'mui-color'
 import { Card, CardContent, Grid, InputAdornment, Slider, TextField, Typography } from '@mui/material'
 import { selectCanvas, selectGrid, selectSelected } from '../store/editor/selectors'
 import { changeCanvasBackground, changeGridColor, changeGridPitch, changeToolSize } from '../store/editor/actions'
@@ -19,8 +19,8 @@ const PropertiesTab = (): JSX.Element => {
     const grid = useSelector(selectGrid)
     const selected = useSelector(selectSelected)
 
-    const [canvasBackground, setCanvasBackground] = useState<any>(rgbaToHex(canvas?.background || [0, 0, 0, 0]))
-    const [gridColor, setGridColor] = useState<any>(rgbaToHex(grid.color))
+    const [canvasBackground, setCanvasBackground] = useState<string>(rgbaToHex(canvas?.background || [0, 0, 0, 0]))
+    const [gridColor, setGridColor] = useState<string>(rgbaToHex(grid.color))
     const [toolSize, setToolSize] = useState<number>(selected.toolSize)
 
     const dispatch = useDispatch()
@@ -85,9 +85,10 @@ const PropertiesTab = (): JSX.Element => {
                             <ColorPicker
                                 hideTextfield
                                 value={gridColor}
-                                onChange={(color: any) => {
-                                    setGridColor(color)
-                                    color.rgb && onChangeGridColor(color.rgb)
+                                onChange={(color: ColorValue) => {
+                                    const { rgb } = color as Color
+                                    setGridColor(rgbaToHex(rgb))
+                                    onChangeGridColor(rgb)
                                 }}
                             />
                             Grid color
@@ -98,9 +99,10 @@ const PropertiesTab = (): JSX.Element => {
                             <ColorPicker
                                 hideTextfield
                                 value={canvasBackground}
-                                onChange={(color: any) => {
-                                    setCanvasBackground(color)
-                                    color.rgb && onChangeCanvasBackground(color.alpha > 0 ? color.rgb : null)
+                                onChange={(color: ColorValue) => {
+                                    const { rgb, alpha } = color as Color
+                                    setCanvasBackground(rgbaToHex(rgb))
+                                    onChangeCanvasBackground(alpha > 0 ? rgb : null)
                                 }}
                             />
                             Background color

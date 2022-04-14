@@ -3,6 +3,7 @@ import { get, includes } from 'lodash'
 import { add } from './actions'
 import { HISTORY_REDO, HISTORY_UNDO } from './constants'
 import { selectUndoItem, selectRedoItem } from './selectors'
+import { HistoryState, UndoRedoAction } from './types'
 
 function createUndoMiddleware({ getViewState, setViewState, revertingActions }): Middleware {
     const SUPPORTED_ACTIONS = Object.keys(revertingActions)
@@ -47,7 +48,7 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }):
             return ret
         }
 
-    function getUndoAction(undoItem: any) {
+    function getUndoAction(undoItem: UndoRedoAction) {
         const { action, before } = undoItem
         const { type } = action
         const actionCreator = get(revertingActions[type], 'action', revertingActions[type])
@@ -57,7 +58,7 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }):
         return actionCreator(action, before)
     }
 
-    function getBefore(state: any, action: AnyAction) {
+    function getBefore(state: HistoryState, action: AnyAction) {
         const beforeFactory = get(revertingActions[action.type], 'getBefore')
         return beforeFactory && beforeFactory(state, action)
     }
