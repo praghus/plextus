@@ -20,7 +20,10 @@ const encodeLayer = async (data: Buffer) =>
 
 export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tileset) => {
     const { columns, tilewidth, tileheight, tilecount } = tileset
-    const layerImages: any = []
+    const layerImages: {
+        data: Blob
+        filename: string
+    }[] = []
 
     const mapLayers = await Promise.all(
         layers.map(async ({ data, image, name, visible, offset, opacity, width, height }, i) => {

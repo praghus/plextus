@@ -5,26 +5,27 @@ import { brightenDarken, getRgbaValue } from './colors'
 
 const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
 
-export const getCoordsFromPos = (grid: Grid, pos: Konva.Vector2d): Konva.Vector2d => ({
-    x: Math.ceil(pos.x / grid.width) - 1,
-    y: Math.ceil(pos.y / grid.height) - 1
-})
+export function getCoordsFromPos(grid: Grid, pos: Konva.Vector2d): Konva.Vector2d {
+    return { x: Math.ceil(pos.x / grid.width) - 1, y: Math.ceil(pos.y / grid.height) - 1 }
+}
 
-export const getPointerRelativePos = (
+export function getPointerRelativePos(
     workspace: Workspace,
     pos: Konva.Vector2d,
     offset?: Konva.Vector2d
-): Konva.Vector2d => ({
-    x: (pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale,
-    y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
-})
+): Konva.Vector2d {
+    return {
+        x: (pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale,
+        y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
+    }
+}
 
-export const centerStage = (
+export function centerStage(
     stage: Konva.Stage,
     canvas: Canvas,
     workspace: Workspace,
     cb: (x: number, y: number, scale: number) => void
-): void => {
+): void {
     const leftPadding = LEFT_BAR_WIDTH + 50
     const dimension = canvas.height > canvas.width ? 'height' : 'width'
     const scale = (dimension === 'width' ? workspace.width - leftPadding : workspace.height) / canvas[dimension]
@@ -38,15 +39,16 @@ export const centerStage = (
     cb(x, y, scale)
 }
 
-export const pickColor = (ctx: CanvasRenderingContext2D, x: number, y: number) =>
-    Object.values(ctx.getImageData(x, y, 1, 1).data)
+export function pickColor(ctx: CanvasRenderingContext2D, x: number, y: number): number[] {
+    return Object.values(ctx.getImageData(x, y, 1, 1).data)
+}
 
-export const actionDraw = (
+export function actionDraw(
     pos: Konva.Vector2d,
     selected: Selected,
     ctx: CanvasRenderingContext2D,
     keyDown?: KeyboardEvent | null
-): void => {
+): void {
     const { tool, toolSize } = selected
     switch (tool) {
         case TOOLS.BRIGHTNESS:
@@ -63,13 +65,13 @@ export const actionDraw = (
     }
 }
 
-export const actionLine = (
+export function actionLine(
     startPos: Konva.Vector2d,
     endPos: Konva.Vector2d,
     selected: Selected,
     ctx: CanvasRenderingContext2D,
     keyDown?: KeyboardEvent | null
-): void => {
+): void {
     const drawPixel = (x: number, y: number): void => actionDraw({ x, y }, selected, ctx, keyDown)
     const ang = getAngle(endPos.x - startPos.x, endPos.y - startPos.y)
     const tri =
@@ -96,12 +98,12 @@ export const actionLine = (
     drawPixel(Math.round(endPos.x), Math.round(endPos.y))
 }
 
-export const fillColor = (
+export function fillColor(
     pos: Konva.Vector2d,
     selectedColor: number[],
     bufferImage: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D
-): void => {
+): void {
     const [r, g, b] = selectedColor
     const a = !isNaN(selectedColor[3]) ? selectedColor[3] : 255
     const pixelStack = [[Math.floor(pos.x), Math.floor(pos.y)]]

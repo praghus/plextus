@@ -84,8 +84,8 @@ const App = (): JSX.Element => {
     useLayoutEffect(() => {
         async function getTilesetImage(src: string) {
             const image = await getImage(src)
-            const canvasElement: any = document.createElement('canvas')
-            const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
+            const canvasElement = document.createElement('canvas')
+            const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
             canvasElement.width = image.width
             canvasElement.height = image.height
             ctx.drawImage(image, 0, 0)

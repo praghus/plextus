@@ -23,8 +23,8 @@ export const createEmptyTile = async (
     const { columns, tilecount, tilewidth, tileheight } = tileset
     const newTileId = tilecount + 1
     const pos = getTilePos(newTileId, tileset)
-    const canvasElement: any = document.createElement('canvas')
-    const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
+    const canvasElement = document.createElement('canvas')
+    const canvasContext = canvasElement.getContext('2d') as CanvasRenderingContext2D
 
     canvasElement.width = columns * tilewidth
     canvasElement.height = pos.y + tileheight
@@ -43,8 +43,8 @@ export const createTileFromImageData = async (
     const { columns, tilecount, tilewidth, tileheight } = tileset
     const newTileId = tilecount + 1
     const pos = getTilePos(newTileId, tileset)
-    const canvasElement: any = document.createElement('canvas')
-    const canvasContext: CanvasRenderingContext2D = canvasElement.getContext('2d')
+    const canvasElement = document.createElement('canvas')
+    const canvasContext = canvasElement.getContext('2d') as CanvasRenderingContext2D
     const { x, y } = getTilePos(newTileId, tileset)
 
     canvasElement.width = columns * tilewidth

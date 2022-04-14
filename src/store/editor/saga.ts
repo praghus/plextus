@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { call, put, StrictEffect, select, takeLatest } from 'redux-saga/effects'
+import { call, put, select, takeLatest } from 'redux-saga/effects'
 import { toast } from 'react-toastify'
 import i18n from '../../common/translations/i18n'
 import logger from '../../common/utils/logger'
@@ -62,8 +62,9 @@ import {
 } from './constants'
 import { DeflatedLayer, Grid, Layer, Canvas, Selected, Tileset } from './types'
 import { createEmptyLayer, createImageLayer, getStateToSave } from './utils'
+import { SagaIterator } from 'redux-saga'
 
-export function* clearProject(): Generator<StrictEffect, void, any> {
+export function* clearProject(): SagaIterator<void> {
     try {
         // historyData.forEach(URL.revokeObjectURL)
         clearCache()
@@ -73,7 +74,7 @@ export function* clearProject(): Generator<StrictEffect, void, any> {
     }
 }
 
-export function* changeLayersSaga(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* changeLayersSaga(action: AnyAction): SagaIterator<void> {
     const { layers } = action.payload
     try {
         const changedLayers = layers.map((layer: Layer) =>
@@ -85,7 +86,7 @@ export function* changeLayersSaga(action: AnyAction): Generator<StrictEffect, vo
     }
 }
 
-function* changeLayerProp(layerId: string, value: any): Generator<StrictEffect, void, any> {
+function* changeLayerProp(layerId: string, value: {}): SagaIterator<void> {
     try {
         const layers: DeflatedLayer[] = yield select(selectRawLayers)
         const changedLayers = layers.map(layer => (layer.id === layerId ? { ...layer, ...value } : layer))
@@ -125,7 +126,7 @@ export function* changeLayerVisible(action: AnyAction): Generator {
     yield changeLayerProp(layerId, { visible })
 }
 
-export function* cropArea(): Generator<StrictEffect, void, any> {
+export function* cropArea(): SagaIterator<void> {
     try {
         const grid: Grid = yield select(selectGrid)
         const canvas: Canvas = yield select(selectCanvas)
@@ -169,7 +170,7 @@ export function* cropArea(): Generator<StrictEffect, void, any> {
     }
 }
 
-export function* removeLayer(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* removeLayer(action: AnyAction): SagaIterator<void> {
     const { layerId } = action.payload
     try {
         const layers: DeflatedLayer[] = yield select(selectRawLayers)
@@ -180,7 +181,7 @@ export function* removeLayer(action: AnyAction): Generator<StrictEffect, void, a
     }
 }
 
-export function* removeTile(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* removeTile(action: AnyAction): SagaIterator<void> {
     const { tileId, tileset } = action.payload
     try {
         yield put(changeAppIsLoading(true))
@@ -202,7 +203,7 @@ export function* removeTile(action: AnyAction): Generator<StrictEffect, void, an
     }
 }
 
-export function* saveChangesSaga(): Generator<StrictEffect, void, any> {
+export function* saveChangesSaga(): SagaIterator<void> {
     try {
         const state = yield select(state => state)
         const toSave = yield call(() => getStateToSave(state))
@@ -214,17 +215,17 @@ export function* saveChangesSaga(): Generator<StrictEffect, void, any> {
     }
 }
 
-export function* setTilesetImage(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* setTilesetImage(action: AnyAction): SagaIterator<void> {
     const { blob } = action.payload
     try {
-        const image: any = window.URL.createObjectURL(blob)
+        const image: string = window.URL.createObjectURL(blob)
         yield put(changeTilesetImageSuccess(image))
     } catch (err) {
         logger.error(err)
     }
 }
 
-export function* createNewProject(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* createNewProject(action: AnyAction): SagaIterator<void> {
     const { config } = action.payload
     try {
         const workspace = yield select(selectWorkspace)
@@ -258,7 +259,7 @@ export function* createNewProject(action: AnyAction): Generator<StrictEffect, vo
     }
 }
 
-export function* createImageLayerFromFile(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* createImageLayerFromFile(action: AnyAction): SagaIterator<void> {
     const { config } = action.payload
     try {
         yield put(changeAppIsLoading(true))
@@ -274,7 +275,7 @@ export function* createImageLayerFromFile(action: AnyAction): Generator<StrictEf
     }
 }
 
-export function* createTileLayerFromFile(action: AnyAction): Generator<StrictEffect, void, any> {
+export function* createTileLayerFromFile(action: AnyAction): SagaIterator<void> {
     const { image, config } = action.payload
     try {
         yield put(changeAppIsLoading(true))

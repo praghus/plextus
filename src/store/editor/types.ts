@@ -2,7 +2,6 @@ import { IMPORT_MODES } from '../../common/constants'
 import { INITIAL_STATE } from './constants'
 
 export type EditorState = typeof INITIAL_STATE
-export type Grid = typeof INITIAL_STATE.grid
 export type Pallete = typeof INITIAL_STATE.palette
 export type Selected = typeof INITIAL_STATE.selected
 export type Tileset = typeof INITIAL_STATE.tileset
@@ -24,6 +23,14 @@ export type Layer = {
     offset: Vec2
     image?: string
     data?: number[]
+}
+
+export type Grid = {
+    color: number[]
+    width: number
+    height: number
+    visible: boolean
+    pitch?: number
 }
 
 export type DeflatedLayer = {
@@ -62,4 +69,14 @@ export type LayerImportConfig = {
     colorsCount: number
     reducedColors: boolean
     resolution: Dim
+}
+
+export type ProjectFile = {
+    canvas: Canvas
+    grid: Grid
+    layers: DeflatedLayer[]
+    palette: Pallete
+    tileset: Tileset
+    workspace: Workspace
+    selected: {}
 }

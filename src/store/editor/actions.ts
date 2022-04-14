@@ -1,6 +1,16 @@
 import { StringTMap } from 'common/types'
 import { AnyAction } from 'redux'
-import { Canvas, DeflatedLayer, Layer, Pallete, Rectangle, Tileset, ProjectConfig, LayerImportConfig } from './types'
+import {
+    Canvas,
+    DeflatedLayer,
+    Layer,
+    Pallete,
+    Rectangle,
+    Tileset,
+    ProjectConfig,
+    LayerImportConfig,
+    ProjectFile
+} from './types'
 import { RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/constants'
 import {
     EDITOR_CHANGE_CANVAS,
@@ -167,7 +177,7 @@ export const changeTilesetImage = (blob: Blob) =>
         type: EDITOR_SET_TILESET_IMAGE
     } as const)
 
-export const changeTilesetImageSuccess = (image: ImageData) =>
+export const changeTilesetImageSuccess = (image: string) =>
     ({
         payload: { image },
         type: EDITOR_SET_TILESET_IMAGE_SUCCESS
@@ -285,7 +295,7 @@ export const createNewTileLayerFromFile = (image: CanvasImageSource, config: Lay
         type: EDITOR_CREATE_TILE_LAYER_FROM_FILE
     } as const)
 
-export const loadStateFromFile = (data: any) =>
+export const loadStateFromFile = (data: ProjectFile) =>
     ({
         payload: { data },
         type: EDITOR_LOAD_STATE_FROM_FILE

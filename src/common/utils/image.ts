@@ -16,13 +16,12 @@ export function getImage(src: string): Promise<HTMLImageElement> {
 }
 
 export function createEmptyImage(width: number, height: number): Promise<Blob> {
-    return new Promise(resolve => {
-        const canvasElement: any = document.createElement('canvas')
-        const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
-        canvasElement.width = width
+    return new Promise((resolve, reject) => {
+        const canvasElement = document.createElement('canvas')
+        const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
         canvasElement.height = height
         ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
-        canvasElement.toBlob((blob: Blob) => resolve(blob), 'image/png')
+        canvasElement.toBlob((blob: Blob | null) => (blob ? resolve(blob) : reject()), 'image/png')
     })
 }
 
@@ -39,8 +38,8 @@ export function uploadImage(
     file: Blob
 ): Promise<{ image: HTMLImageElement; blob: Blob; width: number; height: number }> {
     return new Promise((resolve, reject) => {
-        const canvasElement: any = document.createElement('canvas')
-        const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
+        const canvasElement = document.createElement('canvas')
+        const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
         const imageReader = new FileReader()
         imageReader.readAsDataURL(file)
         imageReader.onload = async ev => {
@@ -66,8 +65,8 @@ export async function getTilesetHashData(
     tileset: Tileset
 ): Promise<{ tempTiles: ImageData[]; tempTilesHash: string[] }> {
     const { image, columns, tilecount, tilewidth, tileheight } = tileset
-    const canvasElement: any = document.createElement('canvas')
-    const ctx: CanvasRenderingContext2D = canvasElement.getContext('2d')
+    const canvasElement = document.createElement('canvas')
+    const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
     const tempTiles: ImageData[] = []
     const tempTilesHash: string[] = []
     const tw = columns * tilewidth
@@ -95,10 +94,10 @@ export async function getTilesetHashData(
 export async function importLayer(image: CanvasImageSource, config: LayerImportConfig, tileset: Tileset) {
     const { columns, mode, name, offset, resolution, tileSize } = config
     if (image) {
-        const layerCanvas: any = document.createElement('canvas')
-        const layerContext: CanvasRenderingContext2D = layerCanvas.getContext('2d')
-        const tilesetCanvas: any = document.createElement('canvas')
-        const tilesetContext: CanvasRenderingContext2D = tilesetCanvas.getContext('2d')
+        const layerCanvas = document.createElement('canvas')
+        const layerContext = layerCanvas.getContext('2d') as CanvasRenderingContext2D
+        const tilesetCanvas = document.createElement('canvas')
+        const tilesetContext = tilesetCanvas.getContext('2d') as CanvasRenderingContext2D
 
         const { w: layerwidth, h: layerheight } = resolution
         const { w: tilewidth, h: tileheight } = tileSize
@@ -182,8 +181,8 @@ export async function reduceColors(canvas: HTMLCanvasElement, colorsCount: 256):
 export async function generateReducedPalette(blob: Blob): Promise<number[][]> {
     const fetchedSourceImage = await new Response(blob).arrayBuffer()
     const sourceBytes = new Uint8Array(fetchedSourceImage)
-    const canvas: any = document.createElement('canvas')
-    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const tempPalette: string[] = []
 
     const { outputFiles, exitCode } = await execute({
@@ -217,9 +216,3 @@ export async function generateReducedPalette(blob: Blob): Promise<number[][]> {
     }
     return []
 }
-
-// 'convert tileset.png +dither -remap netscape: remap.png',
-// 'convert tileset.png +dither -posterize 6 remap.png',
-// 'convert remap.png -unique-colors palette.png'
-// 'convert remap.png -format %c -depth 8 histogram:info:-'
-// console.info(stdout.join('\n').match(/#(?:[0-9a-fA-F]{3}){1,2}/g))

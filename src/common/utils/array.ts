@@ -1,18 +1,12 @@
-import { StringTMap } from 'common/types'
-
 export const { isArray } = Array
 
-export function isValidArray(array: any[]): boolean {
-    return isArray(array) && array.length > 0
-}
-
-export function changeItemPosition(array: any[], from: number, to: number): any[] {
+export function changeItemPosition<T>(array: T[], from: number, to: number): T[] {
     ;[array[from], array[to]] = [array[to], array[from]]
     return array
 }
 
-export function addOrRemoveItem<T>(array = [], element: T): any[] {
-    const arr: any[] = [].concat(array)
+export function addOrRemoveItem<T>(array = [], element: T): T[] {
+    const arr: T[] = [].concat(array)
 
     if (arr.includes(element)) {
         arr.splice(arr.indexOf(element), 1)
@@ -23,8 +17,8 @@ export function addOrRemoveItem<T>(array = [], element: T): any[] {
     return arr.sort()
 }
 
-export function removeItem<T>(array = [], element: T): any[] {
-    const arr: any[] = [].concat(array)
+export function removeItem<T>(array = [], element: T): T[] {
+    const arr: T[] = [].concat(array)
 
     if (arr.includes(element)) {
         arr.splice(arr.indexOf(element), 1)
@@ -34,19 +28,8 @@ export function removeItem<T>(array = [], element: T): any[] {
     return arr.sort()
 }
 
-export function convertArrayToObject<T>(array: any[], key: string): StringTMap<T> {
-    const initialValue = {}
-    return array.reduce(
-        (obj, item) => ({
-            ...obj,
-            [item[key]]: item
-        }),
-        initialValue
-    )
-}
-
 export function spliceIntoChunks<T>(arr: T[], chunkSize = 1): T[][] {
-    const res: any[] = []
+    const res: T[][] = []
     while (arr.length > 0) {
         const chunk = arr.splice(0, chunkSize)
         res.push(chunk)
