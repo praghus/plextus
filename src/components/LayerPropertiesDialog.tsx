@@ -47,8 +47,8 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                             label={t('i18_name') as string}
                             size="small"
                             variant="standard"
-                            onChange={event => {
-                                const name = event.target.value
+                            onChange={e => {
+                                const name = e.target.value
                                 setModel({ ...model, name })
                             }}
                         />
@@ -60,8 +60,8 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                 label={t('i18_offset_x') as string}
                                 size="small"
                                 variant="outlined"
-                                onChange={event => {
-                                    const x = parseInt(event.target.value)
+                                onChange={e => {
+                                    const x = parseInt(e.target.value)
                                     Number.isInteger(x) && setModel({ ...model, offset: { ...model.offset, x } })
                                 }}
                                 sx={{ maxWidth: '120px' }}
@@ -73,8 +73,8 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                 label={t('i18_offset_y') as string}
                                 size="small"
                                 variant="outlined"
-                                onChange={event => {
-                                    const y = parseInt(event.target.value)
+                                onChange={e => {
+                                    const y = parseInt(e.target.value)
                                     Number.isInteger(y) && setModel({ ...model, offset: { ...model.offset, y } })
                                 }}
                                 sx={{ marginLeft: '15px', maxWidth: '120px' }}
@@ -87,8 +87,8 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                                 size="small"
                                 variant="outlined"
                                 InputProps={{ inputProps: { max: 255, min: 0 } }}
-                                onChange={event => {
-                                    const opacity = parseInt(event.target.value)
+                                onChange={e => {
+                                    const opacity = parseInt(e.target.value)
                                     Number.isInteger(opacity) &&
                                         opacity >= 0 &&
                                         opacity <= 255 &&
@@ -108,8 +108,8 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props): JSX.Ele
                             <Switch
                                 checked={model.visible}
                                 name="visible"
-                                onChange={event => {
-                                    const visible = event.target.checked
+                                onChange={e => {
+                                    const visible = e.target.checked
                                     setModel({ ...model, visible })
                                 }}
                             />

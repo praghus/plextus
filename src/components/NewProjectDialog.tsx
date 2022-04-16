@@ -42,7 +42,7 @@ const NewProjectDialog = (): JSX.Element => {
         onClose()
     }, [])
 
-    const handleClose = useCallback((e: {}, reason: string): void => {
+    const handleClose = useCallback((e: React.SyntheticEvent<Element, Event>, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }
@@ -67,8 +67,8 @@ const NewProjectDialog = (): JSX.Element => {
                         type="number"
                         value={config.tilewidth}
                         InputProps={{ inputProps: { min: 1 } }}
-                        onChange={event => {
-                            const tilewidth = parseInt(event.target.value)
+                        onChange={e => {
+                            const tilewidth = parseInt(e.target.value)
                             Number.isInteger(tilewidth) && tilewidth > 0 && setConfig({ ...config, tilewidth })
                         }}
                         id="tileWidth"
@@ -80,8 +80,8 @@ const NewProjectDialog = (): JSX.Element => {
                         type="number"
                         value={config.tileheight}
                         InputProps={{ inputProps: { min: 1 } }}
-                        onChange={event => {
-                            const tileheight = parseInt(event.target.value)
+                        onChange={e => {
+                            const tileheight = parseInt(e.target.value)
                             Number.isInteger(tileheight) && tileheight > 0 && setConfig({ ...config, tileheight })
                         }}
                         id="tileHeight"
@@ -92,8 +92,8 @@ const NewProjectDialog = (): JSX.Element => {
                     <TextField
                         type="number"
                         value={config.columns}
-                        onChange={event => {
-                            const columns = parseInt(event.target.value)
+                        onChange={e => {
+                            const columns = parseInt(e.target.value)
                             Number.isInteger(columns) && columns > 0 && setConfig({ ...config, columns })
                         }}
                         InputProps={{
@@ -111,8 +111,8 @@ const NewProjectDialog = (): JSX.Element => {
                     <TextField
                         type="number"
                         value={config.w}
-                        onChange={event => {
-                            const w = parseInt(event.target.value)
+                        onChange={e => {
+                            const w = parseInt(e.target.value)
                             Number.isInteger(w) && w > 0 && setConfig({ ...config, w })
                         }}
                         InputProps={{
@@ -127,8 +127,8 @@ const NewProjectDialog = (): JSX.Element => {
                     <TextField
                         type="number"
                         value={config.h}
-                        onChange={event => {
-                            const h = parseInt(event.target.value)
+                        onChange={e => {
+                            const h = parseInt(e.target.value)
                             Number.isInteger(h) && h > 0 && setConfig({ ...config, h })
                         }}
                         InputProps={{

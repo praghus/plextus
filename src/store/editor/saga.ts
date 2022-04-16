@@ -63,6 +63,7 @@ import {
 import { DeflatedLayer, Grid, Layer, Canvas, Selected, Tileset } from './types'
 import { createEmptyLayer, createImageLayer, getStateToSave } from './utils'
 import { SagaIterator } from 'redux-saga'
+import { StringTMap } from 'common/types'
 
 export function* clearProject(): SagaIterator<void> {
     try {
@@ -86,7 +87,7 @@ export function* changeLayersSaga(action: AnyAction): SagaIterator<void> {
     }
 }
 
-function* changeLayerProp(layerId: string, value: {}): SagaIterator<void> {
+function* changeLayerProp(layerId: string, value: StringTMap<number | string | boolean>): SagaIterator<void> {
     try {
         const layers: DeflatedLayer[] = yield select(selectRawLayers)
         const changedLayers = layers.map(layer => (layer.id === layerId ? { ...layer, ...value } : layer))

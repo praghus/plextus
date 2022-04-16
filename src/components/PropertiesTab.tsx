@@ -69,8 +69,8 @@ const PropertiesTab = (): JSX.Element => {
                                 size="small"
                                 fullWidth={true}
                                 value={grid.pitch}
-                                onChange={event => {
-                                    const pitch = parseInt(event.target.value)
+                                onChange={e => {
+                                    const pitch = parseInt(e.target.value)
                                     Number.isInteger(pitch) && pitch >= 0 && onChangeGridPitch(pitch)
                                 }}
                                 InputProps={{

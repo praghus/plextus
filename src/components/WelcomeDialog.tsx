@@ -9,6 +9,7 @@ import { clear } from '../store/history/actions'
 import { selectCanvas } from '../store/editor/selectors'
 import ImageUpload from './ImageUpload'
 import demoProject from '../assets/projects/demo-project.json'
+import { ProjectFile } from 'store/editor/types'
 
 const StyledDialogContent = withStyles(theme => ({
     root: {
@@ -33,7 +34,7 @@ const WelcomeDialog = (): JSX.Element => {
     const dispatch = useDispatch()
     const onLoadDemoProject = () => {
         dispatch(clear())
-        dispatch(loadStateFromFile(demoProject))
+        dispatch(loadStateFromFile(demoProject as ProjectFile))
     }
     const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
 
