@@ -78,5 +78,5 @@ export type ProjectFile = {
     palette: Pallete
     tileset: Tileset
     workspace: Workspace
-    selected: {}
+    selected: Selected
 }

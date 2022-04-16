@@ -87,7 +87,7 @@ export const changeGridColor = (color: number[]) =>
         type: EDITOR_CHANGE_GRID_COLOR
     } as const)
 
-export const changeGridPitch = pitch =>
+export const changeGridPitch = (pitch: number) =>
     ({
         payload: { pitch },
         type: EDITOR_CHANGE_GRID_PITCH

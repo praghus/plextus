@@ -5,7 +5,6 @@ import { debounce } from 'lodash'
 import {
     Box,
     Button,
-    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -21,7 +20,6 @@ import {
     TextField,
     Typography
 } from '@mui/material'
-import { green } from '@mui/material/colors'
 import { IMPORT_MODES } from '../common/constants'
 import { changeAppImportedImage } from '../store/app/actions'
 import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../store/editor/actions'
@@ -68,11 +66,14 @@ const ImportDialog = (): JSX.Element => {
 
     const { columns, colorsCount, mode, name, offset, reducedColors, resolution, tileSize } = config
 
-    const setConfigProp = (key: string, value: string | number | {}): void => {
+    const setConfigProp = (
+        key: string,
+        value: boolean | number | string | { x?: number; y?: number; w?: number; h?: number }
+    ): void => {
         setConfig({ ...config, [key]: value })
     }
 
-    const handleClose = (e: {}, reason: string): void => {
+    const handleClose = (e: React.SyntheticEvent<Element, Event>, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }
@@ -167,8 +168,8 @@ const ImportDialog = (): JSX.Element => {
                                         <TextField
                                             type="number"
                                             value={tileSize.w}
-                                            onChange={event => {
-                                                const w = parseInt(event.target.value)
+                                            onChange={e => {
+                                                const w = parseInt(e.target.value)
                                                 Number.isInteger(w) &&
                                                     w > 0 &&
                                                     setConfigProp('tileSize', { ...tileSize, w })
@@ -186,8 +187,8 @@ const ImportDialog = (): JSX.Element => {
                                         <TextField
                                             type="number"
                                             value={tileSize.h}
-                                            onChange={event => {
-                                                const h = parseInt(event.target.value)
+                                            onChange={e => {
+                                                const h = parseInt(e.target.value)
                                                 Number.isInteger(h) &&
                                                     h > 0 &&
                                                     setConfigProp('tileSize', { ...tileSize, h })
@@ -205,8 +206,8 @@ const ImportDialog = (): JSX.Element => {
                                         <TextField
                                             type="number"
                                             value={columns}
-                                            onChange={event => {
-                                                const c = parseInt(event.target.value)
+                                            onChange={e => {
+                                                const c = parseInt(e.target.value)
                                                 Number.isInteger(c) && c > 0 && setConfigProp('columns', c)
                                             }}
                                             InputProps={{
@@ -229,8 +230,8 @@ const ImportDialog = (): JSX.Element => {
                                         <TextField
                                             type="number"
                                             value={offset.x}
-                                            onChange={event =>
-                                                setConfigProp('offset', { ...offset, x: parseInt(event.target.value) })
+                                            onChange={e =>
+                                                setConfigProp('offset', { ...offset, x: parseInt(e.target.value) })
                                             }
                                             id="offsetX"
                                             label={t('i18_offset_x')}
@@ -242,8 +243,8 @@ const ImportDialog = (): JSX.Element => {
                                         <TextField
                                             type="number"
                                             value={offset.y}
-                                            onChange={event =>
-                                                setConfigProp('offset', { ...offset, y: parseInt(event.target.value) })
+                                            onChange={e =>
+                                                setConfigProp('offset', { ...offset, y: parseInt(e.target.value) })
                                             }
                                             id="offsetY"
                                             label={t('i18_offset_y')}
@@ -262,9 +263,7 @@ const ImportDialog = (): JSX.Element => {
                                                 <Switch
                                                     checked={reducedColors}
                                                     name="reduced"
-                                                    onChange={event =>
-                                                        setConfigProp('reducedColors', event.target.checked)
-                                                    }
+                                                    onChange={e => setConfigProp('reducedColors', e.target.checked)}
                                                 />
                                             }
                                             sx={{ marginLeft: '10px', marginRight: 'auto' }}
@@ -275,8 +274,8 @@ const ImportDialog = (): JSX.Element => {
                                             type="number"
                                             disabled={!config.reducedColors}
                                             value={colorsCount}
-                                            onChange={event => {
-                                                const c = parseInt(event.target.value)
+                                            onChange={e => {
+                                                const c = parseInt(e.target.value)
                                                 Number.isInteger(c) && c > 1 && setConfigProp('colorsCount', c)
                                             }}
                                             InputProps={{
@@ -305,24 +304,9 @@ const ImportDialog = (): JSX.Element => {
                 <Button onClick={onClose} color="primary" disabled={isProcessing}>
                     {t('i18_cancel')}
                 </Button>
-                <Box sx={{ m: 1, position: 'relative' }}>
-                    <Button onClick={onSave} variant="contained" disabled={isProcessing}>
-                        {t('i18_save')}
-                    </Button>
-                    {isProcessing && (
-                        <CircularProgress
-                            size={24}
-                            sx={{
-                                color: green[500],
-                                left: '50%',
-                                marginLeft: '-12px',
-                                marginTop: '-12px',
-                                position: 'absolute',
-                                top: '50%'
-                            }}
-                        />
-                    )}
-                </Box>
+                <Button onClick={onSave} variant="contained" disabled={isProcessing}>
+                    {t('i18_save')}
+                </Button>
             </DialogActions>
         </Dialog>
     )

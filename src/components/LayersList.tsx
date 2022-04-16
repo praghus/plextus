@@ -267,10 +267,11 @@ const LayersList = (): JSX.Element => {
                         min={0}
                         max={255}
                         value={opacity}
-                        onChange={(e: {}, value: number | number[]) => setOpacity(value as number)}
-                        onChangeCommitted={(e: {}, value: number | number[]) =>
-                            onChangeLayerOpacity(currentLayer.id, value as number)
-                        }
+                        onChange={(e: Event, value: number | number[]) => setOpacity(value as number)}
+                        onChangeCommitted={(
+                            e: Event | React.SyntheticEvent<Element, Event>,
+                            value: number | number[]
+                        ) => onChangeLayerOpacity(currentLayer.id, value as number)}
                     />
                 </StyledSliderContainer>
                 <StyledButtonContainer>
