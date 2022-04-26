@@ -1,5 +1,5 @@
 import Konva from 'konva'
-import { LEFT_BAR_WIDTH, TOOLS } from '../../common/constants'
+import { LEFT_BAR_WIDTH, STATUS_BAR_HEIGHT, TOOLS } from '../../common/constants'
 import { Canvas, Grid, Selected, Workspace } from '../../store/editor/types'
 import { brightenDarken, getRgbaValue } from './colors'
 
@@ -27,10 +27,12 @@ export function centerStage(
     cb: (x: number, y: number, scale: number) => void
 ): void {
     const leftPadding = LEFT_BAR_WIDTH + 50
-    const dimension = canvas.height > canvas.width ? 'height' : 'width'
-    const scale = (dimension === 'width' ? workspace.width - leftPadding : workspace.height) / canvas[dimension]
+    const topPadding = STATUS_BAR_HEIGHT + 50
+    const dimension = canvas.height >= canvas.width ? 'height' : 'width'
+    const scale =
+        (dimension === 'width' ? workspace.width - leftPadding : workspace.height - topPadding) / canvas[dimension]
     const x = (workspace.width + leftPadding / 2 - canvas.width * scale) / 2
-    const y = (workspace.height - canvas.height * scale) / 2
+    const y = (workspace.height + topPadding / 2 - STATUS_BAR_HEIGHT - canvas.height * scale) / 2
 
     stage.position({ x, y })
     stage.scale({ x: scale, y: scale })

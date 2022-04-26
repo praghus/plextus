@@ -1,7 +1,7 @@
 import React from 'react'
 import SvgIcon from '@mui/material/SvgIcon'
 
-const StampIcon = (props): JSX.Element => (
+const StampIcon: React.FunctionComponent = props => (
     <SvgIcon {...props} viewBox="0 0 229.885 229.885">
         <path
             d={`M209.442,140.885h-54.674c-7.302-8.819-10.738-18.59-10.738-30.487c0-19.465,11.974-43.381,12.075-43.582

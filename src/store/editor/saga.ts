@@ -209,7 +209,7 @@ export function* saveChangesSaga(): SagaIterator<void> {
         const state = yield select(state => state)
         const toSave = yield call(() => getStateToSave(state))
         yield call(() => setCacheBlob(APP_STORAGE_KEY, JSON.stringify(toSave), 'application/json'))
-        toast.success(i18n.t('i18_map_saved'))
+        toast.success(i18n.t('i18_map_saved') as string)
         logger.info('Saving to store')
     } catch (err) {
         logger.error(err)

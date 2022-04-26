@@ -14,3 +14,4 @@ export const selectIsNewProjectDialogOpen = createSelector(
     selectApp,
     ({ isNewProjectDialogOpen }) => isNewProjectDialogOpen
 )
+export const selectAppTheme = createSelector(selectApp, ({ theme }) => theme)

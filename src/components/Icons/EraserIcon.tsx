@@ -1,7 +1,7 @@
 import React from 'react'
 import SvgIcon from '@mui/material/SvgIcon'
 
-const EraserIcon = (props): JSX.Element => (
+const EraserIcon: React.FunctionComponent = props => (
     <SvgIcon {...props}>
         <path
             d={`M5.662 23l-5.369-5.365c-.195-.195-.293-.45-.293-.707 
