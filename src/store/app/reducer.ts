@@ -7,8 +7,9 @@ import {
     APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN,
     APP_CHANGE_LAST_UPDATE_TIME,
     APP_CHANGE_IS_LOADING,
-    INITIAL_STATE,
-    APP_CHANGE_IMPORTED_IMAGE
+    APP_CHANGE_IMPORTED_IMAGE,
+    APP_CHANGE_THEME,
+    INITIAL_STATE
 } from './constants'
 
 function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
@@ -51,6 +52,11 @@ function appReducer(state = INITIAL_STATE, action: AnyAction): AppState {
             return {
                 ...state,
                 importedImage: action.payload.image
+            }
+        case APP_CHANGE_THEME:
+            return {
+                ...state,
+                theme: action.payload.theme
             }
         default:
             return state

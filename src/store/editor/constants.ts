@@ -53,7 +53,7 @@ const layerId = uuidv4()
 export const INITIAL_STATE = {
     canvas: null as Canvas | null,
     grid: {
-        color: [255, 255, 255, 200],
+        color: [0, 0, 0, 255],
         height: 16,
         pitch: 10,
         visible: true,

@@ -23,6 +23,8 @@
     "baseUrl": "./src",
     "types": [
       "node",
+      "react/next", 
+      "react-dom/next",
       "@types/jest",
       "@types/enzyme-adapter-react-16",
       "@types/webpack-env",
