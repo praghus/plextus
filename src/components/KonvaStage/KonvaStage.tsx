@@ -41,6 +41,7 @@ import { Pointer } from '../Pointer'
 import { SelectTool } from '../SelectTool'
 import { StatusBar } from '../StatusBar'
 import { TransparentBackground } from '../TransparentBackground'
+import { TileInfoLabel } from '../TileInfoLabel'
 import { styles } from './KonvaStage.styled'
 
 interface Props {
@@ -277,8 +278,9 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                         )}
                     </Layer>
                 </Stage>
+                <TileInfoLabel {...{ pointerPosition, selectedLayer }} />
             </div>
-            {stage && <StatusBar {...{ pointerPosition, selectedLayer, stage }} />}
+            {stage && <StatusBar {...{ stage }} />}
         </div>
     )
 }

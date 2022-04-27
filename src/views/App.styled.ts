@@ -7,7 +7,7 @@ export const StyledWrapper = styled.div`
     display: flex;
     margin: 0 auto;
     padding: 0;
-    background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default || '#222'};
+    background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
     min-height: 100%;
     min-width: 100%;
 `
@@ -20,7 +20,7 @@ export const StyledContainer = styled.div`
 export const StyledMiddleContainer = styled.div`
     display: flex;
     flex-direction: column;
-    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#222' : '#EEE')};
+    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#111' : '#bbb')};
     width: 100%;
     height: 100%;
 `
@@ -33,9 +33,9 @@ export const StyledRightContainer = styled.div`
     flex-direction: column;
     padding: 5px;
     height: 100%;
-    background-color: ${({ theme }: IMuiTheme) => theme?.palette.action.disabledBackground || '#333'};
-    border-top: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider || '#222'};
-    border-left: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider || '#222'};
-    color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary || '#ccc'};
+    background-color: ${({ theme }: IMuiTheme) => theme?.palette.action.disabledBackground};
+    border-top: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider};
+    border-left: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider};
+    color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary};
     font-size: small;
 `
