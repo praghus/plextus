@@ -23,7 +23,7 @@ export const StyledSliderContainer = styled.div`
 `
 
 export const StyledLayersList = styled(List)`
-    background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
+    height: 100%;
     overflow: auto;
     position: relative;
     width: '100%';
