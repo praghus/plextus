@@ -8,7 +8,6 @@ import { selectCanvas, selectGrid, selectSelected } from '../../store/editor/sel
 import { changeCanvasBackground, changeGridColor, changeGridPitch, changeToolSize } from '../../store/editor/actions'
 import { rgbaToHex } from '../../common/utils/colors'
 import { Create as CreateIcon } from '@mui/icons-material'
-import { ThemeSwitch } from '../ThemeSwitch'
 import { StyledPropContainer } from './PropertiesTab.styled'
 
 const PropertiesTab: React.FunctionComponent = () => {
@@ -102,9 +101,6 @@ const PropertiesTab: React.FunctionComponent = () => {
                             />
                             Background color
                         </StyledPropContainer>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <ThemeSwitch />
                     </Grid>
                 </Grid>
             </CardContent>

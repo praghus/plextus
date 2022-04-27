@@ -13,37 +13,24 @@ import {
 
 import { changePosition, changeScale, toggleShowGrid } from '../../store/editor/actions'
 import { SCALE_MIN, SCALE_MAX, SCALE_BY } from '../../common/constants'
-import { selectCanvas, selectGrid, selectTileset, selectWorkspace } from '../../store/editor/selectors'
-import { centerStage, getCoordsFromPos, getPointerRelativePos } from '../../common/utils/konva'
-// import { ThemeSwitch } from './ThemeSwitch'
+import { selectCanvas, selectGrid, selectWorkspace } from '../../store/editor/selectors'
+import { centerStage } from '../../common/utils/konva'
+import { ThemeSwitch } from '../ThemeSwitch'
 import { StyledStatusBar, StyledCol, StyledButton } from './StatusBar.styled'
-import { Layer } from '../../store/editor/types'
 
 const marks = [{ value: 0 }, { value: 1.0 }, { value: 5.0 }, { value: 10.0 }, { value: 20.0 }]
 
 interface Props {
-    pointerPosition: Konva.Vector2d | null
-    selectedLayer: Layer | null
     stage: Konva.Stage
 }
 
-const StatusBar: React.FunctionComponent<Props> = ({ pointerPosition, selectedLayer, stage }) => {
+const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
     const theme = useTheme()
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
-    const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
 
     const { scale } = workspace
-    const offset = selectedLayer?.offset || { x: 0, y: 0 }
-    const pointerRelPosition = getPointerRelativePos(workspace, pointerPosition as Konva.Vector2d, offset)
-    const { x, y } = getCoordsFromPos(grid, pointerRelPosition)
-
-    const gid = selectedLayer
-        ? selectedLayer.data &&
-          selectedLayer.width &&
-          selectedLayer.data[x + ((selectedLayer.width * tileset.tilewidth) / grid.width) * y]
-        : null
 
     const [value, setValue] = useState(scale)
 
@@ -104,10 +91,11 @@ const StatusBar: React.FunctionComponent<Props> = ({ pointerPosition, selectedLa
     return (
         <StyledStatusBar>
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                <ThemeSwitch tiny />
                 <StyledCol>
                     <Tooltip title="Toggle grid" placement="top">
                         <StyledButton onClick={() => onToggleShowGrid(!grid.visible)}>
-                            {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width} x {grid.height}]:{' '}
+                            {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width}x{grid.height}]:{' '}
                             {grid.visible ? `On` : `Off`}
                         </StyledButton>
                     </Tooltip>
@@ -117,22 +105,12 @@ const StatusBar: React.FunctionComponent<Props> = ({ pointerPosition, selectedLa
                         <StyledButton onClick={onCenter}>
                             <AspectRatioIcon onClick={onCenter} />
                             {canvas &&
-                                `${canvas.width} x ${canvas.height} px [${canvas.width / grid.width} x ${
+                                `${canvas.width}x${canvas.height}px [${canvas.width / grid.width}x${
                                     canvas.height / grid.height
                                 }]`}
                         </StyledButton>
                     </Tooltip>
                 </StyledCol>
-                {selectedLayer &&
-                    selectedLayer.data &&
-                    x >= 0 &&
-                    y >= 0 &&
-                    x < canvas.width / grid.width &&
-                    x < canvas.height / grid.height && (
-                        <StyledCol>
-                            {x}, {y} [{gid || 'empty'}]
-                        </StyledCol>
-                    )}
             </Stack>
             <Stack
                 spacing={1}

@@ -20,7 +20,7 @@ const GridLines = forwardRef<Konva.Group | null, Props>(({ grid, width, height, 
         const getStrokeWidth = (i: number) => (grid.pitch && i % grid.pitch === 0 ? 0.5 / scale : 0.2 / scale)
         const line = (key: string, points: number[], strokeWidth: number): ReactElement => (
             <Line
-                dash={dash && grid.width * scale > 8 ? [2 / scale, 1 / scale] : undefined}
+                dash={dash && grid.width * scale > 8 ? [2 / scale, 2 / scale] : undefined}
                 {...{
                     key,
                     points,

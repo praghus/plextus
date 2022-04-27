@@ -7,13 +7,17 @@ import { selectAppTheme } from '../../store/app/selectors'
 import { changeAppTheme } from '../../store/app/actions'
 import { StyledThemeSwitch } from './ThemeSwitch.styled'
 
-const ThemeSwitch: React.FunctionComponent = () => {
+interface Props {
+    tiny?: boolean
+}
+
+const ThemeSwitch: React.FunctionComponent<Props> = ({ tiny }) => {
     const appTheme = useSelector(selectAppTheme)
     const dispatch = useDispatch()
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         dispatch(changeAppTheme(e.target.checked ? THEMES.DARK : THEMES.LIGHT))
 
-    return <StyledThemeSwitch sx={{ m: 1 }} checked={appTheme === THEMES.DARK} {...{ onChange }} />
+    return <StyledThemeSwitch sx={{ m: 1 }} checked={appTheme === THEMES.DARK} {...{ onChange, tiny }} />
 }
 ThemeSwitch.displayName = 'ThemeSwitch'
 

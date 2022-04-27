@@ -11,8 +11,8 @@ export const StyledBottomContainer = styled.div`
 export const StyledButtonContainer = styled.div`
     width: 115px;
     display: flex;
-    padding: 4px;
-    margin-right: 10px;
+    padding-top: 4px;
+    margin-right: 6px;
 `
 
 export const StyledSliderContainer = styled.div`
@@ -24,9 +24,6 @@ export const StyledSliderContainer = styled.div`
 
 export const StyledLayersList = styled(List)`
     background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
-    height: 100%;
-    margin-top: 10px;
-    max-width: 360px;
     overflow: auto;
     position: relative;
     width: '100%';
@@ -36,10 +33,10 @@ export const StyledLayersList = styled(List)`
         height: 0.7em;
     }
     ::-webkit-scrollbar-corner {
-        background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
+        background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#111' : '#bbb')};
     }
     ::-webkit-scrollbar-track {
-        background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
+        background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#111' : '#bbb')};
     }
     ::-webkit-scrollbar-thumb {
         background-color: ${({ theme }: IMuiTheme) => theme?.palette.action.disabled};

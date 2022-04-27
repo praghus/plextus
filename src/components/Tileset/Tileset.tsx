@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Image, Layer, Rect, Stage } from 'react-konva'
 import { Add as AddIcon, DeleteForever as DeleteForeverIcon, SaveAlt as SaveAltIcon } from '@mui/icons-material'
-import { IconButton, Slider, Tooltip } from '@mui/material'
+import { Card, IconButton, Slider, Tooltip } from '@mui/material'
 
 import { getTilesetDimensions, createEmptyTile, getTilePos } from '../../store/editor/utils'
 import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } from '../../store/editor/actions'
@@ -208,31 +208,32 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                 onConfirm={() => onDeleteTile(selected.tileId)}
                 onClose={onCancelRemoveLayer}
             />
-            <StyledTilesetImageContainer ref={handleContainer} {...{ onScroll }}>
-                <div
-                    style={{
-                        height: imageDimensions.h * scale.y,
-                        width: imageDimensions.w * scale.x
-                    }}
-                >
-                    <Stage ref={handleStage} width={size.w} height={size.h} {...{ scale }}>
-                        <Layer imageSmoothingEnabled={false}>
-                            {tilesetCanvas && <Image image={tilesetCanvas} {...{ onMouseDown }} />}
-                            <Rect
-                                x={position.x}
-                                y={position.y}
-                                width={tileset.tilewidth}
-                                height={tileset.tileheight}
-                                // shadowBlur={5}
-                                strokeWidth={2 / scale.x}
-                                stroke="#96cdff"
-                                fill="rgba(150,200,255,0.4)"
-                            />
-                        </Layer>
-                    </Stage>
-                </div>
-            </StyledTilesetImageContainer>
-
+            <Card sx={{ borderRadius: 0 }}>
+                <StyledTilesetImageContainer ref={handleContainer} {...{ onScroll }}>
+                    <div
+                        style={{
+                            height: imageDimensions.h * scale.y,
+                            width: imageDimensions.w * scale.x
+                        }}
+                    >
+                        <Stage ref={handleStage} width={size.w} height={size.h} {...{ scale }}>
+                            <Layer imageSmoothingEnabled={false}>
+                                {tilesetCanvas && <Image image={tilesetCanvas} {...{ onMouseDown }} />}
+                                <Rect
+                                    x={position.x}
+                                    y={position.y}
+                                    width={tileset.tilewidth}
+                                    height={tileset.tileheight}
+                                    // shadowBlur={5}
+                                    strokeWidth={2 / scale.x}
+                                    stroke="#96cdff"
+                                    fill="rgba(150,200,255,0.4)"
+                                />
+                            </Layer>
+                        </Stage>
+                    </div>
+                </StyledTilesetImageContainer>
+            </Card>
             <StyledBottomContainer>
                 <StyledSliderContainer>
                     {scale && (

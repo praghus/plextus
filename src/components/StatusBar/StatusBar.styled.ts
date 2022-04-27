@@ -12,8 +12,8 @@ export const StyledStatusBar = styled.div`
     padding: 0;
     font-size: 12px;
     height: ${STATUS_BAR_HEIGHT}px;
-    color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary || '#666'};
-    background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default || '#151515'};
+    color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary};
+    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#222' : '#fff')};
 `
 
 export const StyledCol = styled.div`
@@ -25,11 +25,11 @@ export const StyledCol = styled.div`
     }
 `
 
-export const StyledButton = styled(Button)({
+export const StyledButton = styled(Button)(({ theme }: IMuiTheme) => ({
     backgroundColor: 'transparent',
-    color: '#666',
+    color: theme?.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.6)',
     fontSize: 12,
     padding: '0 5px',
     textTransform: 'lowercase',
     whiteSpace: 'nowrap'
-})
+}))
