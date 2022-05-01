@@ -96,7 +96,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const drawTile = (gid: number | null, i: number): void => {
+    const drawTile = (gid: number | null, i: number) => {
         if (ctx && layer.width) {
             const x = (i % layer.width) * grid.width
             const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
@@ -111,7 +111,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const renderSelectedTile = (pos: Konva.Vector2d): void => {
+    const renderSelectedTile = (pos: Konva.Vector2d) => {
         if (ctx && bufferCtx && bufferImage && selected.tileId) {
             const { x, y } = getTilePos(selected.tileId, tileset)
             bufferCtx.drawImage(
@@ -131,7 +131,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const redraw = (): void => {
+    const redraw = () => {
         if (ctx && isArray(layer.data)) {
             ctx.clearRect(0, 0, width, height)
             layer.data.map(drawTile)
@@ -139,7 +139,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d): void => {
+    const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d) => {
         if (ctx && bufferCtx && bufferImage) {
             if (layer.image) {
                 actionLine(pos1, pos2, selected, bufferCtx, keyDown)
@@ -165,7 +165,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const clearBuffer = (tile?: SelectedTile): void => {
+    const clearBuffer = (tile?: SelectedTile) => {
         if (bufferImage && bufferCtx) {
             bufferCtx.clearRect(0, 0, bufferImage.width, bufferImage.height)
             if (tile && tile.gid) {
@@ -177,7 +177,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const renderBufferToImage = (tile?: SelectedTile): void => {
+    const renderBufferToImage = (tile?: SelectedTile) => {
         if (ctx && bufferImage) {
             if (tile && bufferCtx && tilesetContext) {
                 ctx.clearRect(tile.x * tilewidth, tile.y * tileheight, tilewidth, tileheight)
@@ -195,7 +195,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const updateLayer = (x: number, y: number, gid: number | null, update = false): void => {
+    const updateLayer = (x: number, y: number, gid: number | null, update = false) => {
         if (layer.width) {
             const pos = x + ((layer.width * tilewidth) / grid.width) * y
             if (data && data[pos] !== gid) {

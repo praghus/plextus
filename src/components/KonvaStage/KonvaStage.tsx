@@ -44,6 +44,8 @@ import { TransparentBackground } from '../TransparentBackground'
 import { TileInfoLabel } from '../TileInfoLabel'
 import { styles } from './KonvaStage.styled'
 
+Konva.pixelRatio = 1
+
 interface Props {
     tilesetCanvas: HTMLCanvasElement
 }
