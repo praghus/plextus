@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import {
-    Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     FormControlLabel,
+    Stack,
     Switch,
     TextField
 } from '@mui/material'
@@ -34,26 +34,28 @@ const LayerPropertiesDialog: React.FunctionComponent<Props> = ({ layer, onSave, 
             <DialogTitle>{t('i18_layer_properties')}</DialogTitle>
             <DialogContent>
                 {model && (
-                    <Box
-                        component="form"
-                        sx={{
-                            '& > :not(style)': { m: 1, width: '400px' }
-                        }}
-                        noValidate
-                        autoComplete="off"
-                    >
-                        <TextField
-                            value={model.name}
-                            id="name"
-                            label={t('i18_name') as string}
-                            size="small"
-                            variant="standard"
-                            onChange={e => {
-                                const name = e.target.value
-                                setModel({ ...model, name })
-                            }}
-                        />
-                        <Box>
+                    <>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                            spacing={2}
+                            sx={{ marginBottom: 3 }}
+                        >
+                            <TextField
+                                value={model.name}
+                                id="name"
+                                label={t('i18_name') as string}
+                                size="small"
+                                variant="standard"
+                                onChange={e => {
+                                    const name = e.target.value
+                                    setModel({ ...model, name })
+                                }}
+                                sx={{ width: '100%' }}
+                            />
+                        </Stack>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                             <TextField
                                 type="number"
                                 value={model.offset.x}
@@ -97,8 +99,8 @@ const LayerPropertiesDialog: React.FunctionComponent<Props> = ({ layer, onSave, 
                                 }}
                                 sx={{ marginLeft: '15px', width: '120px' }}
                             />
-                        </Box>
-                    </Box>
+                        </Stack>
+                    </>
                 )}
             </DialogContent>
             <DialogActions>

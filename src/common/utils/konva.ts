@@ -96,7 +96,6 @@ export function actionLine(
         }
         drawPixel(thispoint.x, thispoint.y)
     }
-
     drawPixel(Math.round(endPos.x), Math.round(endPos.y))
 }
 
@@ -141,14 +140,12 @@ export function fillColor(
         const newPos = pixelStack.pop() as number[]
         x = newPos[0]
         y = newPos[1]
-
         pixelPos = (y * bufferImage.width + x) * 4
 
         while (y >= 0 && matchStartColor(pixelPos)) {
             y--
             pixelPos -= bufferImage.width * 4
         }
-
         pixelPos += bufferImage.width * 4
         reachLeft = false
         reachRight = false
@@ -156,7 +153,6 @@ export function fillColor(
 
         while (y < bufferImage.height && matchStartColor(pixelPos)) {
             colorPixel(pixelPos)
-
             if (x > 0) {
                 if (matchStartColor(pixelPos - 4)) {
                     if (!reachLeft) {
@@ -167,7 +163,6 @@ export function fillColor(
                     reachLeft = false
                 }
             }
-
             if (x < bufferImage.width - 1) {
                 if (matchStartColor(pixelPos + 4)) {
                     if (!reachRight) {
@@ -181,13 +176,10 @@ export function fillColor(
             y++
             pixelPos += bufferImage.width * 4
         }
-
         if (pixelStack.length) {
             floodFill()
         }
     }
-
     floodFill()
-
     ctx.putImageData(colorLayer, 0, 0)
 }

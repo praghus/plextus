@@ -48,6 +48,7 @@ export const StyledButtonContainer = styled.div`
 export const StyledSliderContainer = styled.div`
     width: 230px;
     display: flex;
+    padding-left: 4px;
     padding-top: 6px;
     padding-right: 10px;
 `

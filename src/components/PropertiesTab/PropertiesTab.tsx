@@ -44,7 +44,7 @@ const PropertiesTab: React.FunctionComponent = () => {
                     <Grid item xs>
                         <Slider
                             min={1}
-                            max={4}
+                            max={grid.width}
                             marks
                             value={typeof toolSize === 'number' ? toolSize : 0}
                             onChange={(_, value) => setToolSize(value as number)}

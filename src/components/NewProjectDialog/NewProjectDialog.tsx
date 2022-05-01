@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
 import {
-    Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     InputAdornment,
+    Stack,
     TextField,
     Typography
 } from '@mui/material'
@@ -51,18 +51,55 @@ const NewProjectDialog: React.FunctionComponent = () => {
     return (
         <Dialog open={isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">{t('i18_new_project')}</DialogTitle>
-            <DialogContent>
-                <Box
-                    component="form"
-                    sx={{
-                        '& > :not(style)': { m: 1, width: '25ch' }
-                    }}
-                    noValidate
-                    autoComplete="off"
+            <DialogContent sx={{ maxWidth: '500px' }}>
+                <Typography variant="subtitle1" gutterBottom>
+                    {t('i18_map')}
+                </Typography>
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
+                    sx={{ marginBottom: 1 }}
                 >
-                    <Typography variant="subtitle1" gutterBottom>
-                        {t('i18_tileset')}
-                    </Typography>
+                    <TextField
+                        type="number"
+                        value={config.w}
+                        onChange={e => {
+                            const w = parseInt(e.target.value)
+                            Number.isInteger(w) && w > 0 && setConfig({ ...config, w })
+                        }}
+                        InputProps={{
+                            endAdornment: <InputAdornment position="end">tiles</InputAdornment>,
+                            inputProps: { min: 1 }
+                        }}
+                        id="width"
+                        label="Map width"
+                        size="small"
+                        variant="outlined"
+                    />
+                    <TextField
+                        type="number"
+                        value={config.h}
+                        onChange={e => {
+                            const h = parseInt(e.target.value)
+                            Number.isInteger(h) && h > 0 && setConfig({ ...config, h })
+                        }}
+                        InputProps={{
+                            endAdornment: <InputAdornment position="end">tiles</InputAdornment>,
+                            inputProps: { min: 1 }
+                        }}
+                        id="height"
+                        label="Map height"
+                        size="small"
+                        variant="outlined"
+                    />
+                </Stack>
+
+                <Typography variant="subtitle1" gutterBottom>
+                    {t('i18_tileset')}
+                </Typography>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                     <TextField
                         type="number"
                         value={config.tilewidth}
@@ -105,42 +142,7 @@ const NewProjectDialog: React.FunctionComponent = () => {
                         size="small"
                         variant="outlined"
                     />
-                    <Typography variant="subtitle1" gutterBottom>
-                        {t('i18_map')}
-                    </Typography>
-                    <TextField
-                        type="number"
-                        value={config.w}
-                        onChange={e => {
-                            const w = parseInt(e.target.value)
-                            Number.isInteger(w) && w > 0 && setConfig({ ...config, w })
-                        }}
-                        InputProps={{
-                            endAdornment: <InputAdornment position="end">tiles</InputAdornment>,
-                            inputProps: { min: 1 }
-                        }}
-                        id="width"
-                        label="Map width"
-                        size="small"
-                        variant="outlined"
-                    />
-                    <TextField
-                        type="number"
-                        value={config.h}
-                        onChange={e => {
-                            const h = parseInt(e.target.value)
-                            Number.isInteger(h) && h > 0 && setConfig({ ...config, h })
-                        }}
-                        InputProps={{
-                            endAdornment: <InputAdornment position="end">tiles</InputAdornment>,
-                            inputProps: { min: 1 }
-                        }}
-                        id="height"
-                        label="Map height"
-                        size="small"
-                        variant="outlined"
-                    />
-                </Box>
+                </Stack>
             </DialogContent>
             <DialogActions>
                 <Typography variant="caption" display="block" sx={{ color: '#ccc', padding: '5px 20px' }}>
