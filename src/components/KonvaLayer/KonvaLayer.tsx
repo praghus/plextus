@@ -12,9 +12,9 @@ import {
     fillColor,
     pickColor
 } from '../../common/utils/konva'
-import { getImage } from '../../common/utils/image'
 import { isArray } from '../../common/utils/array'
 import { getRgbaValue } from '../../common/utils/colors'
+import { useCanvasBuffer } from '../../hooks/useCanvasBuffer'
 import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
 
 interface Props {
@@ -56,43 +56,53 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     tilesetCanvas,
     workspace
 }) => {
-    const [bufferCtx, setBufferCtx] = useState<CanvasRenderingContext2D | undefined>()
-    const [bufferImage, setBufferImage] = useState<HTMLCanvasElement>()
-    const [ctx, setCtx] = useState<CanvasRenderingContext2D | undefined>()
     const [data, setData] = useState<(number | null)[]>()
-    const [image, setImage] = useState<HTMLCanvasElement>()
     const [selectedTile, setSelectedTile] = useState<SelectedTile>({} as SelectedTile)
-    const [layerImage, setLayerImage] = useState<HTMLImageElement>()
 
     const imageRef = useRef<Konva.Image>(null)
     const lastPos = useRef<Konva.Vector2d | null>()
     const lastLinePos = useRef<Konva.Vector2d | null>()
     const hasChanged = useRef<boolean>(false)
-    const tilesetContext = tilesetCanvas.getContext('2d')
+
     const isSelected = selected.layerId === layer.id
 
     const { opacity, visible } = layer
     const { tilewidth, tileheight } = tileset
-    const [width, height] = layer.image
-        ? [layer.width, layer.height]
-        : [layer.width * tilewidth, layer.height * tileheight]
 
-    const getLayerImage = async (src: string) => {
-        const image = await getImage(src)
-        ctx?.clearRect(0, 0, width, height)
-        ctx?.drawImage(image, 0, 0)
-        stage?.batchDraw()
-        setLayerImage(image)
-    }
+    const { width, height, bufferCtx, bufferImage, clearBuffer, ctx, image, renderBufferToImage } = useCanvasBuffer(
+        layer,
+        stage,
+        tileset,
+        tilesetCanvas
+    )
 
     const getPos = (): Konva.Vector2d =>
         getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d, layer.offset)
 
-    const getBufferPos = (pointerPos: Konva.Vector2d): Konva.Vector2d => {
-        const { x, y } = getCoordsFromPos(grid, pointerPos)
-        return {
-            x: Math.floor(pointerPos.x - x * tilewidth),
-            y: Math.floor(pointerPos.y - y * tileheight)
+    const getBufferPos = (pointerPos: Konva.Vector2d): Konva.Vector2d => ({
+        x: Math.floor(pointerPos.x - selectedTile.x * tilewidth),
+        y: Math.floor(pointerPos.y - selectedTile.y * tileheight)
+    })
+
+    const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d) => {
+        if (ctx && bufferCtx && bufferImage) {
+            if (layer.image) {
+                actionLine(pos1, pos2, selected, bufferCtx, keyDown)
+                ctx.clearRect(0, 0, width, height)
+                ctx.drawImage(bufferImage, 0, 0)
+            } else {
+                actionLine(getBufferPos(pos1), getBufferPos(pos2), selected, bufferCtx, keyDown)
+                ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
+                ctx.drawImage(
+                    bufferImage,
+                    selectedTile.x * tilewidth,
+                    selectedTile.y * tileheight,
+                    tilewidth,
+                    tileheight
+                )
+            }
+            hasChanged.current = true
+            stage.batchDraw()
         }
     }
 
@@ -136,62 +146,6 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
             ctx.clearRect(0, 0, width, height)
             layer.data.map(drawTile)
             stage.batchDraw()
-        }
-    }
-
-    const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d) => {
-        if (ctx && bufferCtx && bufferImage) {
-            if (layer.image) {
-                actionLine(pos1, pos2, selected, bufferCtx, keyDown)
-                ctx.clearRect(0, 0, width, height)
-                ctx.drawImage(bufferImage, 0, 0)
-            } else {
-                const { x, y } = getCoordsFromPos(grid, pos2)
-                const inBounds = x === selectedTile.x && y === selectedTile.y
-                if (inBounds) {
-                    actionLine(getBufferPos(pos1), getBufferPos(pos2), selected, bufferCtx, keyDown)
-                    ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
-                    ctx.drawImage(
-                        bufferImage,
-                        selectedTile.x * tilewidth,
-                        selectedTile.y * tileheight,
-                        tilewidth,
-                        tileheight
-                    )
-                }
-            }
-            hasChanged.current = true
-            stage.batchDraw()
-        }
-    }
-
-    const clearBuffer = (tile?: SelectedTile) => {
-        if (bufferImage && bufferCtx) {
-            bufferCtx.clearRect(0, 0, bufferImage.width, bufferImage.height)
-            if (tile && tile.gid) {
-                const { x, y } = getTilePos(tile.gid, tileset)
-                bufferCtx.drawImage(tilesetCanvas, x, y, tilewidth, tileheight, 0, 0, tilewidth, tileheight)
-            } else if (layerImage) {
-                bufferCtx.drawImage(layerImage, 0, 0)
-            }
-        }
-    }
-
-    const renderBufferToImage = (tile?: SelectedTile) => {
-        if (ctx && bufferImage) {
-            if (tile && bufferCtx && tilesetContext) {
-                ctx.clearRect(tile.x * tilewidth, tile.y * tileheight, tilewidth, tileheight)
-                ctx.drawImage(bufferImage, tile.x * tilewidth, tile.y * tileheight, tilewidth, tileheight)
-                if (tile.gid) {
-                    const { x: tx, y: ty } = getTilePos(tile.gid, tileset)
-                    tilesetContext.clearRect(tx, ty, tilewidth, tileheight)
-                    tilesetContext.drawImage(bufferImage, tx, ty)
-                }
-            } else if (layer.image) {
-                ctx.clearRect(0, 0, width, height)
-                ctx.drawImage(bufferImage, 0, 0)
-            }
-            hasChanged.current = true
         }
     }
 
@@ -302,26 +256,26 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
 
     const onMouseMove = () => {
         const prevPos = lastPos.current as Konva.Vector2d
-        const currentPos = getPos()
+        const nextPos = getPos()
 
         if (isMouseDown) {
             switch (selected.tool) {
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
-                    if (currentPos.x !== prevPos.x || currentPos.y !== prevPos.y) {
+                    if (nextPos.x !== prevPos.x || nextPos.y !== prevPos.y) {
                         if (layer.data) {
-                            const { x, y } = getCoordsFromPos(grid, currentPos)
+                            const { x, y } = getCoordsFromPos(grid, nextPos)
                             updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                         } else if (selected.tool === TOOLS.STAMP) {
-                            renderSelectedTile(currentPos)
+                            renderSelectedTile(nextPos)
                         }
                     }
                     break
                 case TOOLS.BRIGHTNESS:
                 case TOOLS.ERASER:
                 case TOOLS.PENCIL:
-                    if (currentPos.x !== prevPos.x || currentPos.y !== prevPos.y) {
-                        drawLine(prevPos, currentPos)
+                    if (nextPos.x !== prevPos.x || nextPos.y !== prevPos.y) {
+                        drawLine(prevPos, nextPos)
                         renderBufferToImage(selectedTile)
                     }
                     break
@@ -331,14 +285,14 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                         (lastLinePos.current.x !== prevPos.x || lastLinePos.current.y !== prevPos.y)
                     ) {
                         clearBuffer(selectedTile)
-                        drawLine(lastLinePos.current, currentPos)
+                        drawLine(lastLinePos.current, nextPos)
                     }
                     break
                 default:
                     break
             }
         }
-        lastPos.current = currentPos
+        lastPos.current = nextPos
     }
 
     const onMouseUp = () => {
@@ -385,33 +339,12 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     }
 
     useEffect(() => {
-        const canvasElement = document.createElement('canvas')
-        const canvasContext = canvasElement.getContext('2d') as CanvasRenderingContext2D
-        const canvasBufferElement = document.createElement('canvas')
-        const canvasBufferContext = canvasBufferElement.getContext('2d') as CanvasRenderingContext2D
-
-        canvasElement.width = width
-        canvasElement.height = height
-        canvasBufferElement.width = layer.image ? width : tilewidth
-        canvasBufferElement.height = layer.image ? height : tileheight
-
-        setImage(canvasElement)
-        setCtx(canvasContext)
-        setBufferImage(canvasBufferElement)
-        setBufferCtx(canvasBufferContext)
-    }, [width, height, tilewidth, tileheight])
-
-    useEffect(() => {
         setData(layer.data)
     }, [layer.data])
 
     useEffect(() => {
         redraw()
     }, [ctx, layer.data, tilesetCanvas])
-
-    useEffect(() => {
-        ctx && layer.image && getLayerImage(layer.image)
-    }, [ctx, layer.image])
 
     return (
         <Image
