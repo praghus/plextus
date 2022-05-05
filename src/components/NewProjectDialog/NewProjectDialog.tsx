@@ -34,19 +34,17 @@ const NewProjectDialog: React.FunctionComponent = () => {
     })
 
     const dispatch = useDispatch()
-    const onCreateNewProject = (config: ProjectConfig) => dispatch(createNewProject(config))
+
     const onClose = () => dispatch(changeAppIsNewProjectDialogOpen(false))
-
-    const onSave = useCallback(() => {
-        onCreateNewProject(config)
-        onClose()
-    }, [])
-
-    const handleClose = useCallback((e: React.SyntheticEvent<Element, Event>, reason: string): void => {
+    const handleClose = (e: React.SyntheticEvent<Element, Event>, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }
-    }, [])
+    }
+    const onSave = () => {
+        dispatch(createNewProject(config))
+        onClose()
+    }
 
     return (
         <Dialog open={isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
