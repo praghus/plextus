@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 import { useDispatch } from 'react-redux'
 import { uploadImage } from '../../common/utils/image'
 import { changeAppImportedImage } from '../../store/app/actions'
@@ -10,13 +10,13 @@ interface Props {
 const ImageUpload: React.FunctionComponent<Props> = ({ children }) => {
     const dispatch = useDispatch()
     const onChangeImportedImage = (image: string) => dispatch(changeAppImportedImage(image))
-    const onChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files && e.target.files[0]
         if (file) {
             const { blob } = await uploadImage(file)
             onChangeImportedImage(window.URL.createObjectURL(blob))
         }
-    }, [])
+    }
 
     return (
         <>
