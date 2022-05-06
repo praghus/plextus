@@ -2,12 +2,14 @@ import Konva from 'konva'
 import { useState, useEffect } from 'react'
 
 import { getImage } from '../common/utils/image'
+import { getCoordsFromPos } from '../common/utils/konva'
 import { getTilePos } from '../store/editor/utils'
-import { Layer, Tileset } from '../store/editor/types'
+import { Grid, Layer, Tileset } from '../store/editor/types'
 
 type SelectedTile = { gid: number; x: number; y: number }
 
 export const useCanvasBuffer = (
+    grid: Grid,
     layer: Layer,
     stage: Konva.Stage,
     tileset: Tileset,
@@ -45,7 +47,7 @@ export const useCanvasBuffer = (
         }
     }
 
-    const renderBufferToImage = (tile?: SelectedTile) => {
+    const renderFromBuffer = (tile?: SelectedTile) => {
         if (ctx && bufferImage) {
             const tilesetContext = tilesetCanvas.getContext('2d')
             if (tile && bufferCtx && tilesetContext) {
@@ -60,6 +62,33 @@ export const useCanvasBuffer = (
                 ctx.clearRect(0, 0, width, height)
                 ctx.drawImage(bufferImage, 0, 0)
             }
+            stage?.batchDraw()
+        }
+    }
+
+    const renderTileToBuffer = (tileId: number, pos: Konva.Vector2d) => {
+        if (bufferCtx && tileId) {
+            const { x, y } = getTilePos(tileId, tileset)
+            bufferCtx.drawImage(
+                tilesetCanvas,
+                x,
+                y,
+                tilewidth,
+                tileheight,
+                Math.ceil(-1 + pos.x / grid.width) * grid.width,
+                Math.ceil(-1 + pos.y / grid.height) * grid.height,
+                tilewidth,
+                tileheight
+            )
+            renderFromBuffer()
+        }
+    }
+
+    const getBufferPos = (pointerPos: Konva.Vector2d, tile?: SelectedTile): Konva.Vector2d => {
+        const { x, y } = tile || getCoordsFromPos(grid, pointerPos)
+        return {
+            x: Math.floor(pointerPos.x - x * tilewidth),
+            y: Math.floor(pointerPos.y - y * tileheight)
         }
     }
 
@@ -84,5 +113,16 @@ export const useCanvasBuffer = (
         setBufferCtx(canvasBufferContext)
     }, [width, height, tilewidth, tileheight])
 
-    return { bufferCtx, bufferImage, clearBuffer, ctx, height, image, renderBufferToImage, width }
+    return {
+        bufferCtx,
+        bufferImage,
+        clearBuffer,
+        ctx,
+        getBufferPos,
+        height,
+        image,
+        renderFromBuffer,
+        renderTileToBuffer,
+        width
+    }
 }

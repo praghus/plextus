@@ -1,24 +1,27 @@
 import Konva from 'konva'
+
 import { LEFT_BAR_WIDTH, STATUS_BAR_HEIGHT, TOOLS } from '../../common/constants'
 import { Canvas, Grid, Selected, Workspace } from '../../store/editor/types'
 import { brightenDarken, getRgbaValue } from './colors'
 
-const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
+export const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
 
-export function getCoordsFromPos(grid: Grid, pos: Konva.Vector2d): Konva.Vector2d {
-    return { x: Math.ceil(pos.x / grid.width) - 1, y: Math.ceil(pos.y / grid.height) - 1 }
-}
+export const getCoordsFromPos = (grid: Grid, pos: Konva.Vector2d): Konva.Vector2d => ({
+    x: Math.ceil(pos.x / grid.width) - 1,
+    y: Math.ceil(pos.y / grid.height) - 1
+})
 
-export function getPointerRelativePos(
+export const getPointerRelativePos = (
     workspace: Workspace,
     pos: Konva.Vector2d,
     offset?: Konva.Vector2d
-): Konva.Vector2d {
-    return {
-        x: (pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale,
-        y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
-    }
-}
+): Konva.Vector2d => ({
+    x: (pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale,
+    y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
+})
+
+export const pickColor = (ctx: CanvasRenderingContext2D, pos: Konva.Vector2d): number[] =>
+    Object.values(ctx.getImageData(pos.x, pos.y, 1, 1).data)
 
 export function centerStage(
     stage: Konva.Stage,
@@ -39,10 +42,6 @@ export function centerStage(
     stage.batchDraw()
 
     cb(x, y, scale)
-}
-
-export function pickColor(ctx: CanvasRenderingContext2D, x: number, y: number): number[] {
-    return Object.values(ctx.getImageData(x, y, 1, 1).data)
 }
 
 export function actionDraw(
