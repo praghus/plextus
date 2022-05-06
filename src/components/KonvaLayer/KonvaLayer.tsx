@@ -57,32 +57,30 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     workspace
 }) => {
     const [data, setData] = useState<(number | null)[]>()
-    const [selectedTile, setSelectedTile] = useState<SelectedTile>({} as SelectedTile)
+    const [selectedTile, setSelectedTile] = useState<SelectedTile>()
 
     const imageRef = useRef<Konva.Image>(null)
-    const lastPos = useRef<Konva.Vector2d | null>()
-    const lastLinePos = useRef<Konva.Vector2d | null>()
-    const hasChanged = useRef<boolean>(false)
-
+    const lastPos = useRef<Konva.Vector2d>()
+    const lastLinePos = useRef<Konva.Vector2d>()
     const isSelected = selected.layerId === layer.id
 
     const { opacity, visible } = layer
     const { tilewidth, tileheight } = tileset
 
-    const { width, height, bufferCtx, bufferImage, clearBuffer, ctx, image, renderBufferToImage } = useCanvasBuffer(
-        layer,
-        stage,
-        tileset,
-        tilesetCanvas
-    )
+    const {
+        ctx,
+        image,
+        width,
+        height,
+        bufferCtx,
+        bufferImage,
+        clearBuffer,
+        getBufferPos,
+        renderFromBuffer,
+        renderTileToBuffer
+    } = useCanvasBuffer(grid, layer, stage, tileset, tilesetCanvas)
 
-    const getPos = (): Konva.Vector2d =>
-        getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d, layer.offset)
-
-    const getBufferPos = (pointerPos: Konva.Vector2d): Konva.Vector2d => ({
-        x: Math.floor(pointerPos.x - selectedTile.x * tilewidth),
-        y: Math.floor(pointerPos.y - selectedTile.y * tileheight)
-    })
+    const getPos = () => getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d, layer.offset)
 
     const drawLine = (pos1: Konva.Vector2d, pos2: Konva.Vector2d) => {
         if (ctx && bufferCtx && bufferImage) {
@@ -90,8 +88,14 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 actionLine(pos1, pos2, selected, bufferCtx, keyDown)
                 ctx.clearRect(0, 0, width, height)
                 ctx.drawImage(bufferImage, 0, 0)
-            } else {
-                actionLine(getBufferPos(pos1), getBufferPos(pos2), selected, bufferCtx, keyDown)
+            } else if (selectedTile) {
+                actionLine(
+                    getBufferPos(pos1, selectedTile),
+                    getBufferPos(pos2, selectedTile),
+                    selected,
+                    bufferCtx,
+                    keyDown
+                )
                 ctx.clearRect(selectedTile.x * tilewidth, selectedTile.y * tileheight, tilewidth, tileheight)
                 ctx.drawImage(
                     bufferImage,
@@ -101,50 +105,6 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                     tileheight
                 )
             }
-            hasChanged.current = true
-            stage.batchDraw()
-        }
-    }
-
-    const drawTile = (gid: number | null, i: number) => {
-        if (ctx && layer.width) {
-            const x = (i % layer.width) * grid.width
-            const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
-            ctx.clearRect(x, y, tilewidth, tileheight)
-            if (gid) {
-                const { x: posX, y: posY } = getTilePos(gid, tileset)
-                ctx.drawImage(tilesetCanvas, posX, posY, tilewidth, tileheight, x, y, tilewidth, tileheight)
-            } else if (isSelected) {
-                ctx.fillStyle = 'rgba(0,0,0,0.2)'
-                ctx.fillRect(x, y, tilewidth, tileheight)
-            }
-        }
-    }
-
-    const renderSelectedTile = (pos: Konva.Vector2d) => {
-        if (ctx && bufferCtx && bufferImage && selected.tileId) {
-            const { x, y } = getTilePos(selected.tileId, tileset)
-            bufferCtx.drawImage(
-                tilesetCanvas,
-                x,
-                y,
-                tilewidth,
-                tileheight,
-                Math.ceil(-1 + pos.x / grid.width) * grid.width,
-                Math.ceil(-1 + pos.y / grid.height) * grid.height,
-                tilewidth,
-                tileheight
-            )
-            renderBufferToImage()
-            hasChanged.current = true
-            stage.batchDraw()
-        }
-    }
-
-    const redraw = () => {
-        if (ctx && isArray(layer.data)) {
-            ctx.clearRect(0, 0, width, height)
-            layer.data.map(drawTile)
             stage.batchDraw()
         }
     }
@@ -156,13 +116,12 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 const tempData = [...data]
                 tempData[pos] = gid
                 setData(tempData)
-                stage.batchDraw()
-                hasChanged.current = true
                 if (update) {
                     onChangeLayerData(layer.id, tempData)
                 }
             }
             drawTile(gid, pos)
+            stage.batchDraw()
         }
     }
 
@@ -186,20 +145,34 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         if (data && selected.tileId) {
             const tempData = data.map(tile => (tile === gid ? selected.tileId : tile))
             setData(tempData)
-            redraw()
-            hasChanged.current = true
+        }
+    }
+
+    const drawTile = (gid: number | null, i: number) => {
+        if (ctx && layer.width) {
+            const x = (i % layer.width) * grid.width
+            const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
+            ctx.clearRect(x, y, tilewidth, tileheight)
+            if (gid) {
+                const { x: posX, y: posY } = getTilePos(gid, tileset)
+                ctx.drawImage(tilesetCanvas, posX, posY, tilewidth, tileheight, x, y, tilewidth, tileheight)
+            } else if (isSelected) {
+                ctx.fillStyle = 'rgba(0,0,0,0.2)'
+                ctx.fillRect(x, y, tilewidth, tileheight)
+            }
         }
     }
 
     const onMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (ctx && visible && isSelected && layer.width) {
-            lastPos.current = getPos()
-            const { x, y } = getCoordsFromPos(grid, lastPos.current)
+            const currentPos = getPos()
+            console.info(currentPos)
+            const { x, y } = getCoordsFromPos(grid, currentPos)
             const selectedTile: SelectedTile | undefined = layer.data
                 ? { gid: layer.data[x + ((layer.width * tilewidth) / grid.width) * y], x, y }
                 : undefined
 
-            const pos = selectedTile ? getBufferPos(lastPos.current) : lastPos.current
+            const pos = selectedTile ? getBufferPos(currentPos) : currentPos
 
             clearBuffer(selectedTile)
 
@@ -216,39 +189,39 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                             ? cloneTile(x, y)
                             : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     } else if (selected.tool === TOOLS.STAMP) {
-                        renderSelectedTile(lastPos.current)
+                        renderTileToBuffer(selected.tileId, currentPos)
                     }
                     break
-                case TOOLS.BRIGHTNESS:
                 case TOOLS.PENCIL:
                 case TOOLS.ERASER:
                     if (e.evt.button === 2) {
-                        onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
+                        onChangePrimaryColor(pickColor(ctx, currentPos))
                     } else if (bufferCtx) {
                         actionDraw(pos, selected, bufferCtx, keyDown)
-                        renderBufferToImage(selectedTile)
+                        renderFromBuffer(selectedTile)
                     }
                     break
                 case TOOLS.PICKER:
-                    onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
+                    onChangePrimaryColor(pickColor(ctx, currentPos))
                     break
                 case TOOLS.FILL:
                     if (e.evt.button === 2) {
-                        onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
+                        onChangePrimaryColor(pickColor(ctx, currentPos))
                     } else if (bufferCtx && bufferImage) {
                         fillColor(pos, selected.color, bufferImage, bufferCtx)
-                        renderBufferToImage(selectedTile)
+                        renderFromBuffer(selectedTile)
                     }
                     break
                 case TOOLS.LINE:
                     if (e.evt.button === 2) {
-                        onChangePrimaryColor(pickColor(ctx, lastPos.current.x, lastPos.current.y))
+                        onChangePrimaryColor(pickColor(ctx, currentPos))
                     }
                     lastLinePos.current = lastPos.current
                     break
                 default:
                     break
             }
+            lastPos.current = currentPos
             selectedTile && setSelectedTile(selectedTile)
         }
         e.evt.preventDefault()
@@ -267,7 +240,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                             const { x, y } = getCoordsFromPos(grid, nextPos)
                             updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                         } else if (selected.tool === TOOLS.STAMP) {
-                            renderSelectedTile(nextPos)
+                            renderTileToBuffer(selected.tileId, nextPos)
                         }
                     }
                     break
@@ -276,7 +249,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 case TOOLS.PENCIL:
                     if (nextPos.x !== prevPos.x || nextPos.y !== prevPos.y) {
                         drawLine(prevPos, nextPos)
-                        renderBufferToImage(selectedTile)
+                        renderFromBuffer(selectedTile)
                     }
                     break
                 case TOOLS.LINE:
@@ -296,39 +269,39 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     }
 
     const onMouseUp = () => {
-        if (hasChanged.current) {
-            if (layer.image && image) {
-                renderBufferToImage()
-                image.toBlob(blob => blob && onChangeLayerImage(layer.id, blob), 'image/png')
-            } else {
-                switch (selected.tool) {
-                    case TOOLS.DELETE:
-                    case TOOLS.REPLACE:
-                    case TOOLS.STAMP:
-                        data && onChangeLayerData(layer.id, data)
-                        break
-                    case TOOLS.BRIGHTNESS:
-                    case TOOLS.ERASER:
-                    case TOOLS.LINE:
-                    case TOOLS.PENCIL:
-                    case TOOLS.FILL:
-                        // create a new tile when it was drawn on empty slot
-                        if (!selectedTile.gid && bufferCtx) {
-                            const gid = tileset.tilecount + 1
-                            createTile(bufferCtx.getImageData(0, 0, tilewidth, tileheight))
-                            updateLayer(selectedTile.x, selectedTile.y, gid, true)
-                            renderBufferToImage({ ...selectedTile, gid })
-                            toast.success(`New tile #${gid} created`)
-                        } else {
-                            renderBufferToImage(selectedTile)
-                            tilesetCanvas.toBlob(blob => blob && onSaveTilesetImage(blob), 'image/png')
-                        }
-                        break
-                    default:
-                        break
-                }
+        // if (hasChanged.current) {
+        if (layer.image && image) {
+            renderFromBuffer()
+            image.toBlob(blob => blob && onChangeLayerImage(layer.id, blob), 'image/png')
+        } else {
+            switch (selected.tool) {
+                case TOOLS.DELETE:
+                case TOOLS.REPLACE:
+                case TOOLS.STAMP:
+                    data && onChangeLayerData(layer.id, data)
+                    break
+                case TOOLS.BRIGHTNESS:
+                case TOOLS.ERASER:
+                case TOOLS.LINE:
+                case TOOLS.PENCIL:
+                case TOOLS.FILL:
+                    // create a new tile when it was drawn on empty slot
+                    if (selectedTile && !selectedTile.gid && bufferCtx) {
+                        const gid = tileset.tilecount + 1
+                        createTile(bufferCtx.getImageData(0, 0, tilewidth, tileheight))
+                        updateLayer(selectedTile.x, selectedTile.y, gid, true)
+                        renderFromBuffer({ ...selectedTile, gid })
+                        toast.success(`New tile #${gid} created`)
+                    } else {
+                        renderFromBuffer(selectedTile)
+                        tilesetCanvas.toBlob(blob => blob && onSaveTilesetImage(blob), 'image/png')
+                    }
+                    break
+                default:
+                    break
             }
-            hasChanged.current = false
+            // }
+            // hasChanged.current = false
         }
     }
 
@@ -343,7 +316,11 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     }, [layer.data])
 
     useEffect(() => {
-        redraw()
+        if (ctx && isArray(layer.data)) {
+            ctx.clearRect(0, 0, width, height)
+            layer.data.map(drawTile)
+            stage.batchDraw()
+        }
     }, [ctx, layer.data, tilesetCanvas])
 
     return (

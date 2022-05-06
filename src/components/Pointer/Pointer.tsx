@@ -65,6 +65,13 @@ const Pointer: React.FunctionComponent<Props> = ({
                     stroke: '#ff8080',
                     width
                 })
+            } else if (selected.tool === TOOLS.PICKER) {
+                overlay.setAttrs({
+                    fill: 'rgba(0,0,0,0)',
+                    height: 1,
+                    stroke: 'rgba(255,255,255,0.8)',
+                    width: 1
+                })
             } else {
                 const toolSize = [TOOLS.BRIGHTNESS, TOOLS.LINE, TOOLS.PENCIL, TOOLS.ERASER].includes(selected.tool)
                     ? selected.toolSize

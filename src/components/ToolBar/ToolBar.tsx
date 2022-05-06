@@ -19,7 +19,7 @@ import {
     FileDownload as FileDownloadIcon,
     Save as SaveIcon,
     InsertDriveFile as InsertDriveFileIcon,
-    PhotoSizeSelectSmall as PhotoSizeSelectSmallIcon,
+    // PhotoSizeSelectSmall as PhotoSizeSelectSmallIcon,
     Menu as MenuIcon,
     PanTool as PanToolIcon,
     ControlCamera as ControlCameraIcon
@@ -98,7 +98,6 @@ const ToolBar: React.FunctionComponent = () => {
                 }}
                 onClose={() => setConfirmationDialogOpen(false)}
             />
-
             <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
                 <MenuItem
                     onClick={() => {
@@ -122,7 +121,6 @@ const ToolBar: React.FunctionComponent = () => {
                     </ListItemIcon>
                     {t('i18_close_project')}
                 </MenuItem>
-
                 <ImageUpload>
                     <MenuItem onClick={handleClose}>
                         <ListItemIcon>
@@ -168,7 +166,6 @@ const ToolBar: React.FunctionComponent = () => {
                     {t('i18_save')}
                 </MenuItem>
             </Menu>
-
             <StyledMenuContainer>
                 <Paper
                     elevation={10}
@@ -204,13 +201,11 @@ const ToolBar: React.FunctionComponent = () => {
                         {renderToolButton(TOOLS.PICKER, ColorizeIcon)}
                         {renderToolButton(TOOLS.FILL, FormatColorFillIcon)}
                         {renderToolButton(TOOLS.BRIGHTNESS, BrightnessMediumIcon)}
-
                         {renderToolButton(TOOLS.STAMP, StampIcon)}
                         {renderToolButton(TOOLS.REPLACE, TileReplaceIcon)}
                         {renderToolButton(TOOLS.DELETE, CancelPresentationIcon)}
-
                         {renderToolButton(TOOLS.OFFSET, ControlCameraIcon)}
-                        {renderToolButton(TOOLS.SELECT, PhotoSizeSelectSmallIcon)}
+                        {/* {renderToolButton(TOOLS.SELECT, PhotoSizeSelectSmallIcon)} */}
                         {renderToolButton(TOOLS.CROP, CropIcon)}
                     </StyledToggleButtonGroup>
                     <Divider orientation="horizontal" />
