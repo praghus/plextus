@@ -3,19 +3,14 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { debounce } from 'lodash'
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
-import { FormControl, IconButton, MenuItem, Select } from '@mui/material'
+import { FormControl, IconButton, MenuItem, Select, Stack, Typography } from '@mui/material'
 
 import { PALETTES } from '../../common/constants'
 import { changePalette, changePrimaryColor, changeSelectedPalette } from '../../store/editor/actions'
 import { selectPalette, selectSelected } from '../../store/editor/selectors'
+import { rgbaToHex } from '../../common/utils/colors'
 import { ColorBox } from '../ColorBox'
-import {
-    StyledBottomContainer,
-    StyledButtonContainer,
-    StyledColorPicker,
-    StyledColorsContainer,
-    StyledPalette
-} from './Palette.styled'
+import { StyledButtonContainer, StyledColorPicker, StyledColorsContainer, StyledPalette } from './Palette.styled'
 
 const DEFAULT = 'DEFAULT'
 
@@ -57,7 +52,6 @@ const Palette: React.FunctionComponent = () => {
 
     return (
         <>
-            <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
             <StyledPalette>
                 <FormControl sx={{ padding: '5px', width: '100%' }}>
                     <Select
@@ -91,7 +85,11 @@ const Palette: React.FunctionComponent = () => {
                     ))}
                 </StyledColorsContainer>
             </StyledPalette>
-            <StyledBottomContainer>
+
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: '100%' }}>
+                <Typography variant="overline" sx={{ marginLeft: 1 }}>
+                    {rgbaToHex(selected.color)}
+                </Typography>
                 {selected.palette === DEFAULT && (
                     <StyledButtonContainer>
                         <IconButton disabled={selectedIndex > -1} size="small" onClick={onAddColor}>
@@ -102,7 +100,9 @@ const Palette: React.FunctionComponent = () => {
                         </IconButton>
                     </StyledButtonContainer>
                 )}
-            </StyledBottomContainer>
+            </Stack>
+
+            <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
         </>
     )
 }

@@ -2,23 +2,21 @@ import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { useTheme } from '@mui/material/styles'
 import { useDispatch, useSelector } from 'react-redux'
-import { Slider, Stack, Tooltip } from '@mui/material'
+import { Stack, Tooltip } from '@mui/material'
 import {
+    Add as AddIcon,
     AspectRatio as AspectRatioIcon,
     GridOn as GridOnIcon,
     GridOff as GridOffIcon,
-    ZoomIn as ZoomInIcon,
-    ZoomOut as ZoomOutIcon
+    Remove as RemoveIcon
 } from '@mui/icons-material'
 
 import { changePosition, changeScale, toggleShowGrid } from '../../store/editor/actions'
-import { SCALE_MIN, SCALE_MAX, SCALE_BY } from '../../common/constants'
 import { selectCanvas, selectGrid, selectWorkspace } from '../../store/editor/selectors'
 import { centerStage } from '../../common/utils/konva'
-import { ThemeSwitch } from '../ThemeSwitch'
 import { StyledStatusBar, StyledCol, StyledButton } from './StatusBar.styled'
 
-const marks = [{ value: 0 }, { value: 1.0 }, { value: 5.0 }, { value: 10.0 }, { value: 20.0 }]
+const marks = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 50]
 
 interface Props {
     stage: Konva.Stage
@@ -32,7 +30,7 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
 
     const { scale } = workspace
 
-    const [value, setValue] = useState(scale)
+    const [zoom, setZoom] = useState(scale)
 
     const dispatch = useDispatch()
     const onChangePosition = (x: number, y: number) => dispatch(changePosition(x, y))
@@ -48,17 +46,17 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
     }, [stage, canvas, workspace])
 
     const onZoom = useCallback(
-        (value: number) => {
+        (zoom: number) => {
             const sx = workspace.width / 2
             const sy = workspace.height / 2
             const oldScale = stage.scaleX()
             const newPos = {
-                x: sx - ((sx - stage.x()) / oldScale) * value,
-                y: sy - ((sy - stage.y()) / oldScale) * value
+                x: sx - ((sx - stage.x()) / oldScale) * zoom,
+                y: sy - ((sy - stage.y()) / oldScale) * zoom
             }
-            stage.scale({ x: value, y: value })
+            stage.scale({ x: zoom, y: zoom })
             stage.position(newPos)
-            setValue(value)
+            setZoom(zoom)
         },
         [stage, workspace]
     )
@@ -69,37 +67,36 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
     }
 
     const onZoomIn = () => {
-        if (scale < SCALE_MAX) {
-            onZoom(stage.scaleX() * SCALE_BY)
-            onZoomCommitted()
-        }
+        const z = marks.find(s => s > scale) || marks.at(-1) || 1
+        onZoom(z)
+        onZoomCommitted()
     }
 
     const onZoomOut = () => {
-        if (scale > SCALE_MIN) {
-            onZoom(stage.scaleX() / SCALE_BY)
-            onZoomCommitted()
-        }
+        const z = marks.reduce((acc, c) => (c < scale ? c : acc))
+        onZoom(z)
+        onZoomCommitted()
     }
 
     const iconColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
 
     useEffect(() => {
-        scale && setValue(scale)
+        scale && setZoom(scale)
     }, [scale])
 
     return (
         <StyledStatusBar>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                <ThemeSwitch tiny />
-                <StyledCol>
-                    <Tooltip title="Toggle grid" placement="top">
-                        <StyledButton onClick={() => onToggleShowGrid(!grid.visible)}>
-                            {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width}x{grid.height}]:{' '}
-                            {grid.visible ? `On` : `Off`}
-                        </StyledButton>
-                    </Tooltip>
-                </StyledCol>
+            <Stack
+                spacing={1}
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ paddingLeft: 1, paddingRight: 1, width: '100%' }}
+            >
+                <RemoveIcon htmlColor={iconColor} onClick={onZoomOut} />
+                <div>{`${Math.round(zoom * 100)}%`}</div>
+                <AddIcon htmlColor={iconColor} onClick={onZoomIn} />
+
                 <StyledCol>
                     <Tooltip title="Center and fit to view size" placement="top">
                         <StyledButton onClick={onCenter}>
@@ -111,27 +108,14 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
                         </StyledButton>
                     </Tooltip>
                 </StyledCol>
-            </Stack>
-            <Stack
-                spacing={1}
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ marginLeft: 'auto', paddingRight: 1, width: '50%' }}
-            >
-                <ZoomOutIcon htmlColor={iconColor} onClick={onZoomOut} />
-                <Slider
-                    {...{ marks, value }}
-                    size="small"
-                    step={1}
-                    min={SCALE_MIN}
-                    max={SCALE_MAX}
-                    onChange={(_, value) => onZoom(value as number)}
-                    onChangeCommitted={onZoomCommitted}
-                    valueLabelDisplay="auto"
-                    valueLabelFormat={(scale: number) => `${Math.round(100 * scale)}%`}
-                />
-                <ZoomInIcon htmlColor={iconColor} onClick={onZoomIn} />
+                <StyledCol>
+                    <Tooltip title="Toggle grid" placement="top">
+                        <StyledButton onClick={() => onToggleShowGrid(!grid.visible)}>
+                            {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width}x{grid.height}]:{' '}
+                            {grid.visible ? `On` : `Off`}
+                        </StyledButton>
+                    </Tooltip>
+                </StyledCol>
             </Stack>
         </StyledStatusBar>
     )

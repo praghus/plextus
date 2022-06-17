@@ -23,6 +23,7 @@ export const EDITOR_CHANGE_SELECTED_TILE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANG
 export const EDITOR_CHANGE_PALETTE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_PALETTE`
 export const EDITOR_CHANGE_POSITION = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_POSITION`
 export const EDITOR_CHANGE_PRIMARY_COLOR = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_PRIMARY_COLOR`
+export const EDITOR_CHANGE_PROJECT_NAME = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_PROJECT_NAME`
 export const EDITOR_CHANGE_SCALE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_SCALE`
 export const EDITOR_CHANGE_TOOL = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_TOOL`
 export const EDITOR_CHANGE_TOOL_SIZE = `${EDITOR_RESOURCE_NAME}/EDITOR_CHANGE_TOOL_SIZE`
@@ -53,13 +54,14 @@ const layerId = uuidv4()
 export const INITIAL_STATE = {
     canvas: null as Canvas | null,
     grid: {
-        color: [0, 0, 0, 255],
+        color: null as null | [],
         height: 16,
         pitch: 10,
         visible: true,
         width: 16
     } as Grid,
     layers: [] as DeflatedLayer[] | [],
+    name: 'Empty project',
     palette: DEFAULT_PALLETE,
     selected: {
         area: null as Rectangle | null,

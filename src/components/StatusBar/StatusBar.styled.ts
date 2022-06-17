@@ -1,19 +1,25 @@
 import styled from '@emotion/styled'
 import { Button } from '@mui/material'
 
-import { STATUS_BAR_HEIGHT } from '../../common/constants'
 import { IMuiTheme } from '../../common/types'
 
 export const StyledStatusBar = styled.div`
     display: flex;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    bottom: 10px;
+    border-radius: 4px;
+    z-index: 100;
     flex-direction: row;
     flex-wrap: wrap;
-    width: 100%;
     padding: 0;
     font-size: 12px;
-    height: ${STATUS_BAR_HEIGHT}px;
+    height: 40px;
+    backdrop-filter: blur(5px);
     color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary};
-    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#222' : '#fff')};
+    background-color: ${({ theme }: IMuiTheme) =>
+        theme?.palette.mode === 'dark' ? 'rgba(34,34,34,0.85)' : 'rgba(255,255,255,0.85)'};
 `
 
 export const StyledCol = styled.div`

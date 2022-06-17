@@ -96,7 +96,9 @@ const ImportPreview: React.FunctionComponent<Props> = ({ image, config }) => {
                     <Layer imageSmoothingEnabled={false}>
                         <TransparentBackground {...{ height, theme, width }} scale={1 / scale.x} />
                         <Rect fillPatternRepeat="no-repeat" ref={handlePreview} />
-                        {mode !== IMPORT_MODES.NEW_IMAGE && <GridLines {...{ grid, height, width }} scale={scale.x} />}
+                        {mode !== IMPORT_MODES.NEW_IMAGE && (
+                            <GridLines {...{ grid, height, theme, width }} scale={scale.x} />
+                        )}
                     </Layer>
                 </StyledStage>
             </StyledPreviewContainer>

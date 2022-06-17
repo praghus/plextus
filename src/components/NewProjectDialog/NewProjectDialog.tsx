@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
@@ -28,6 +28,7 @@ const NewProjectDialog: React.FunctionComponent = () => {
     const [config, setConfig] = useState<ProjectConfig>({
         columns: tileset.columns,
         h: 160 / tileset.tileheight,
+        name: 'New project',
         tileheight: tileset.tileheight,
         tilewidth: tileset.tilewidth,
         w: 160 / tileset.tilewidth
@@ -50,6 +51,16 @@ const NewProjectDialog: React.FunctionComponent = () => {
         <Dialog open={isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">{t('i18_new_project')}</DialogTitle>
             <DialogContent sx={{ maxWidth: '500px' }}>
+                <TextField
+                    sx={{ marginBottom: '20px' }}
+                    fullWidth={true}
+                    value={config.name}
+                    onChange={e => setConfig({ ...config, name: e.target.value })}
+                    id="name"
+                    label={t('i18_project_name')}
+                    size="small"
+                    variant="standard"
+                />
                 <Typography variant="subtitle1" gutterBottom>
                     {t('i18_map')}
                 </Typography>

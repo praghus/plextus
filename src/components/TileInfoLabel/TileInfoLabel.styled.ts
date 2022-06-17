@@ -1,16 +1,17 @@
 import styled from '@emotion/styled'
 
-import { RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/constants'
 import { IMuiTheme } from '../../common/types'
 
 export const StyledLabel = styled.div`
     position: absolute;
-    right: ${RIGHT_BAR_WIDTH + 10}px;
-    bottom: ${STATUS_BAR_HEIGHT + 10}px;
-    padding: 4px 8px;
+    right: 10px;
+    bottom: 10px;
+    z-index: 100;
+    padding: 10px 15px;
     border-radius: 6px;
     font-size: 12px;
-    opacity: 0.9;
+    backdrop-filter: blur(5px);
     color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary};
-    background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
+    background-color: ${({ theme }: IMuiTheme) =>
+        theme?.palette.mode === 'dark' ? 'rgba(34,34,34,0.85)' : 'rgba(255,255,255,0.85)'};
 `

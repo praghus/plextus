@@ -57,7 +57,7 @@ const ImportDialog: React.FunctionComponent = () => {
         colorsCount: 256,
         columns: tileset.columns,
         mode: IMPORT_MODES.NEW_PROJECT,
-        name: 'Imported layer',
+        name: '',
         offset: { x: 0, y: 0 },
         reducedColors: false,
         resolution: { h: canvas?.height ?? 0, w: canvas?.width ?? 0 },
@@ -90,11 +90,11 @@ const ImportDialog: React.FunctionComponent = () => {
         async function onLoadImage(src: string) {
             const i = await getImage(src)
             setImage(i)
-            setConfig({ ...config, resolution: { h: i.height, w: i.width } })
+            setConfig({ ...config, name: importedImage?.filename || '', resolution: { h: i.height, w: i.width } })
         }
         if (importedImage) {
             setIsProcessing(false)
-            onLoadImage(importedImage)
+            onLoadImage(importedImage.image)
         }
     }, [importedImage])
 
@@ -154,7 +154,7 @@ const ImportDialog: React.FunctionComponent = () => {
                             value={name}
                             onChange={e => setConfigProp('name', e.target.value)}
                             id="name"
-                            label={t('i18_layer_name')}
+                            label={t(mode === IMPORT_MODES.NEW_PROJECT ? 'i18_project_name' : 'i18_layer_name')}
                             size="small"
                             variant="standard"
                         />

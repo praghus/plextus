@@ -7,11 +7,12 @@ import { changeAppIsNewProjectDialogOpen } from '../../store/app/actions'
 import { loadStateFromFile } from '../../store/editor/actions'
 import { clear } from '../../store/history/actions'
 import { selectCanvas } from '../../store/editor/selectors'
+import { PlextusLogo } from '../Icons'
 import { ImageUpload } from '../ImageUpload'
-import { PlextusLogo } from '../PlextusLogo'
 import { ThemeSwitch } from '../ThemeSwitch'
 import { ProjectFile } from '../../store/editor/types'
 import { StyledDialogContent, StyledDialogActions } from './WelcomeDialog.styled'
+
 import demoProject from '../../assets/projects/demo-project.json'
 
 const WelcomeDialog: React.FunctionComponent = () => {

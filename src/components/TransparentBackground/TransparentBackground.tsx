@@ -20,8 +20,8 @@ interface Props {
 const TransparentBackground: React.FunctionComponent<Props> = ({ width, height, scale, theme }) => (
     <Rect
         {...{ height, width }}
-        shadowBlur={1}
-        shadowOpacity={0.6}
+        // shadowBlur={2}
+        // shadowOpacity={0.6}
         fillPatternImage={theme.palette.mode === 'dark' ? BG_IMAGE_DARK : BG_IMAGE_LIGHT}
         fillPatternScaleX={scale || 1}
         fillPatternScaleY={scale || 1}

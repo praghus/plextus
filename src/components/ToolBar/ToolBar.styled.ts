@@ -2,15 +2,13 @@ import styled from '@emotion/styled'
 import { Theme } from '@mui/material/styles'
 import { ToggleButtonGroup } from '@mui/material'
 
-export const StyledMenuContainer = styled.div`
+export const StyledToolBarContainer = styled.div`
     position: absolute;
-    top: 20px;
+    top: 50%;
     left: 10px;
     z-index: 100;
-`
-
-export const StyledColorPicker = styled.div`
-    padding: 2px 3px;
+    width: 46px;
+    transform: translate(0, -50%);
 `
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }: { theme?: Theme }) => ({
@@ -25,7 +23,8 @@ export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }: { t
             borderRadius: (theme && theme.shape.borderRadius) || 0
         },
         border: 0,
+        height: '40px',
         margin: '3px',
-        width: '36px'
+        width: '40px'
     }
 }))

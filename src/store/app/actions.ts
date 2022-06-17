@@ -1,3 +1,4 @@
+import { IUploadedImage } from '../../common/types'
 import {
     APP_CHANGE_LAST_UPDATE_TIME,
     APP_CHANGE_IMPORTED_IMAGE,
@@ -24,7 +25,7 @@ export const changeAppIsNewProjectDialogOpen = (isNewProjectDialogOpen: boolean)
         type: APP_CHANGE_IS_NEW_PROJECT_DIALOG_OPEN
     } as const)
 
-export const changeAppImportedImage = (image?: string) =>
+export const changeAppImportedImage = (image?: IUploadedImage) =>
     ({
         payload: { image },
         type: APP_CHANGE_IMPORTED_IMAGE

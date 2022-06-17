@@ -3,8 +3,8 @@ import styled from '@emotion/styled'
 import { IMuiTheme } from '../../common/types'
 
 export const StyledTilesetImageContainer = styled.div`
+    height: 320px;
     overflow: auto;
-    height: calc(45vh);
     background-image: linear-gradient(
             45deg,
             ${({ theme }: IMuiTheme) => theme?.palette.action.hover} 25%,

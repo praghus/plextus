@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
 import { getImage } from '../common/utils/image'
 import { THEMES } from '../common/constants'
@@ -19,19 +20,28 @@ import logger from '../common/utils/logger'
 import {
     ImportDialog,
     KonvaStage,
-    LayersList,
     LoadingIndicator,
+    MainMenu,
     NewProjectDialog,
     TabContainer,
+    ThemeSwitch,
     ToolBar,
     WelcomeDialog
 } from '../components'
-import { StyledWrapper, StyledContainer, StyledMiddleContainer, StyledRightContainer } from './App.styled'
+import {
+    StyledWrapper,
+    StyledContainer,
+    StyledMiddleContainer,
+    StyledRightContainer,
+    StyledThemeSwitchContainer
+} from './App.styled'
 
 const App: React.FunctionComponent = () => {
     useInjectReducer({ key: APP_RESOURCE_NAME, reducer: appReducer })
     useInjectReducer({ key: EDITOR_RESOURCE_NAME, reducer: editorReducer })
     useInjectSaga({ key: EDITOR_RESOURCE_NAME, saga: editorSaga })
+
+    const theme = useTheme()
 
     const canvas = useSelector(selectCanvas)
     const isLoading = useSelector(selectIsLoading)
@@ -74,19 +84,26 @@ const App: React.FunctionComponent = () => {
 
     return (
         <StyledWrapper>
-            <ToastContainer position="bottom-left" theme="dark" autoClose={2000} />
             <WelcomeDialog />
             <ImportDialog />
             <NewProjectDialog />
-            <StyledContainer>
-                <LoadingIndicator loading={isLoading} />
-                <ToolBar />
-                <StyledMiddleContainer>{canvas && <KonvaStage {...{ tilesetCanvas }} />}</StyledMiddleContainer>
-                <StyledRightContainer>
-                    <TabContainer {...{ tilesetCanvas }} />
-                    <LayersList />
-                </StyledRightContainer>
-            </StyledContainer>
+            {canvas && (
+                <StyledContainer>
+                    <LoadingIndicator loading={isLoading} />
+                    <MainMenu />
+                    <ToolBar />
+                    <StyledThemeSwitchContainer>
+                        <ThemeSwitch tiny />
+                    </StyledThemeSwitchContainer>
+                    <StyledMiddleContainer>
+                        <KonvaStage {...{ tilesetCanvas }} />
+                    </StyledMiddleContainer>
+                    <StyledRightContainer>
+                        <TabContainer {...{ tilesetCanvas }} />
+                    </StyledRightContainer>
+                </StyledContainer>
+            )}
+            <ToastContainer position="bottom-left" theme={theme.palette.mode} autoClose={2000} />
         </StyledWrapper>
     )
 }

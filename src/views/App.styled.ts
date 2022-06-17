@@ -1,6 +1,5 @@
 import styled from '@emotion/styled'
 import { IMuiTheme } from '../common/types'
-import { RIGHT_BAR_WIDTH } from '../common/constants'
 
 export const StyledWrapper = styled.div`
     flex-direction: column;
@@ -20,22 +19,35 @@ export const StyledContainer = styled.div`
 export const StyledMiddleContainer = styled.div`
     display: flex;
     flex-direction: column;
-    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#111' : '#bbb')};
+    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#3b3b3b' : '#e0e0e0')};
     width: 100%;
     height: 100%;
 `
 
 export const StyledRightContainer = styled.div`
-    width: ${RIGHT_BAR_WIDTH}px;
-    min-width: ${RIGHT_BAR_WIDTH}px;
-    max-width: ${RIGHT_BAR_WIDTH}px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 340px;
+    min-width: 340px;
+    max-width: 340px;
     display: flex;
     flex-direction: column;
     padding: 5px;
-    height: 100%;
-    background-color: ${({ theme }: IMuiTheme) => theme?.palette.action.disabledBackground};
+    border-radius: 4px;
+    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#2b2b2b' : '#fff')};
     border-top: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider};
     border-left: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider};
+    box-shadow: 1px 1px 3px
+        ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.3)')};
     color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary};
     font-size: small;
+    transition: right 1s ease;
+`
+
+export const StyledThemeSwitchContainer = styled.div`
+    position: absolute;
+    bottom: 5px;
+    left: 3px;
+    z-index: 100;
 `

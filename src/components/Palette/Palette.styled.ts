@@ -7,19 +7,14 @@ export const StyledColorPicker = styled(RgbaColorPicker)`
 `
 
 export const StyledColorsContainer = styled.div`
-    max-height: 120px;
+    max-height: 300px;
     margin: 4px;
+    padding-bottom: 2px;
     overflow: auto;
 `
 
 export const StyledPalette = styled.div`
-    margin-bottom: 10px;
     line-height: 0;
-`
-
-export const StyledBottomContainer = styled.div`
-    display: flex;
-    justify-content: flex-end;
 `
 
 export const StyledButtonContainer = styled.div`

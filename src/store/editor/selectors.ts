@@ -12,6 +12,7 @@ export const selectLayers = createSelector(selectEditor, ({ layers }) =>
     layers.map((layer: DeflatedLayer) => (layer.data ? { ...layer, data: parseLayerData(layer.data) } : layer) as Layer)
 )
 export const selectPalette = createSelector(selectEditor, ({ palette }) => palette || DEFAULT_PALLETE)
+export const selectProjectName = createSelector(selectEditor, ({ name }) => name)
 export const selectSelected = createSelector(selectEditor, ({ selected }) => selected)
 export const selectTileset = createSelector(selectEditor, ({ tileset }) => tileset)
 export const selectTilesetImage = createSelector(selectEditor, ({ tileset }) => tileset.image)
