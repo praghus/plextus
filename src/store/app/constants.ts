@@ -1,4 +1,5 @@
 import { THEMES } from '../../common/constants'
+import { IUploadedImage } from '../../common/types'
 
 export const APP_RESOURCE_NAME = 'app'
 export const APP_STORAGE_KEY = 'plextusStorage'
@@ -13,7 +14,7 @@ export const APP_CHANGE_THEME = `${APP_RESOURCE_NAME}/APP_SWITCH_THEME`
 
 export const INITIAL_STATE = {
     error: null,
-    importedImage: undefined,
+    importedImage: undefined as undefined | IUploadedImage,
     isLoading: true,
     isNewProjectDialogOpen: false,
     lastUpdateTime: performance.now(),

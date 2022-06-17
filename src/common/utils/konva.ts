@@ -1,6 +1,6 @@
 import Konva from 'konva'
 
-import { LEFT_BAR_WIDTH, STATUS_BAR_HEIGHT, TOOLS } from '../../common/constants'
+import { TOOLS } from '../../common/constants'
 import { Canvas, Grid, Selected, Workspace } from '../../store/editor/types'
 import { brightenDarken, getRgbaValue } from './colors'
 
@@ -16,8 +16,8 @@ export const getPointerRelativePos = (
     pos: Konva.Vector2d,
     offset?: Konva.Vector2d
 ): Konva.Vector2d => ({
-    x: (pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale,
-    y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
+    x: Math.floor((pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale),
+    y: Math.floor((pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale)
 })
 
 export const pickColor = (ctx: CanvasRenderingContext2D, pos: Konva.Vector2d): number[] =>
@@ -29,13 +29,12 @@ export function centerStage(
     workspace: Workspace,
     cb: (x: number, y: number, scale: number) => void
 ): void {
-    const leftPadding = LEFT_BAR_WIDTH + 50
-    const topPadding = STATUS_BAR_HEIGHT + 50
+    const padding = 100
     const dimension = canvas.height >= canvas.width ? 'height' : 'width'
     const scale =
-        (dimension === 'width' ? workspace.width - leftPadding : workspace.height - topPadding) / canvas[dimension]
-    const x = (workspace.width + leftPadding / 2 - canvas.width * scale) / 2
-    const y = (workspace.height + topPadding / 2 - STATUS_BAR_HEIGHT - canvas.height * scale) / 2
+        (dimension === 'width' ? workspace.width - padding * 2 : workspace.height - padding * 2) / canvas[dimension]
+    const x = (workspace.width - canvas.width * scale) / 2
+    const y = (workspace.height - canvas.height * scale) / 2
 
     stage.position({ x, y })
     stage.scale({ x: scale, y: scale })
@@ -61,7 +60,7 @@ export function actionDraw(
             ctx.fillStyle = getRgbaValue(selected.color)
             tool === TOOLS.ERASER
                 ? ctx.clearRect(pos.x, pos.y, toolSize, toolSize)
-                : ctx.fillRect(pos.x, pos.y, toolSize, toolSize)
+                : ctx.fillRect(Math.floor(pos.x), Math.floor(pos.y), toolSize, toolSize)
             break
     }
 }

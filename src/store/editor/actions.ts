@@ -1,4 +1,3 @@
-import { StringTMap } from 'common/types'
 import { AnyAction } from 'redux'
 import {
     Canvas,
@@ -11,7 +10,6 @@ import {
     LayerImportConfig,
     ProjectFile
 } from './types'
-import { RIGHT_BAR_WIDTH, STATUS_BAR_HEIGHT } from '../../common/constants'
 import {
     EDITOR_CHANGE_CANVAS,
     EDITOR_CHANGE_CANVAS_BACKGROUND,
@@ -29,6 +27,7 @@ import {
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
+    EDITOR_CHANGE_PROJECT_NAME,
     EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_SELECTED_AREA,
     EDITOR_CHANGE_SELECTED_LAYER,
@@ -56,8 +55,7 @@ import {
     EDITOR_LOAD_STATE_FROM_FILE
 } from './constants'
 
-export const adjustWorkspaceSize = (): AnyAction =>
-    changeWorkspaceSize(window.innerWidth - RIGHT_BAR_WIDTH, window.innerHeight - STATUS_BAR_HEIGHT)
+export const adjustWorkspaceSize = (): AnyAction => changeWorkspaceSize(window.innerWidth, window.innerHeight)
 
 export const clearProject = () =>
     ({
@@ -127,6 +125,12 @@ export const changePrimaryColor = (color: number[]) =>
     ({
         payload: { color },
         type: EDITOR_CHANGE_PRIMARY_COLOR
+    } as const)
+
+export const changeProjectName = (name: string) =>
+    ({
+        payload: { name },
+        type: EDITOR_CHANGE_PROJECT_NAME
     } as const)
 
 export const changeScale = (scale: number) =>
@@ -242,7 +246,7 @@ export const cropSuccess = (layers: DeflatedLayer[], canvas: Canvas) =>
         type: EDITOR_CROP_SUCCESS
     } as const)
 
-export const historyAction = <T>(payload: StringTMap<T>) =>
+export const historyAction = <T>(payload: Record<string, T>) =>
     ({
         payload,
         type: EDITOR_HISTORY_ACTION

@@ -11,6 +11,7 @@ import {
     EDITOR_CHANGE_PALETTE,
     EDITOR_CHANGE_POSITION,
     EDITOR_CHANGE_PRIMARY_COLOR,
+    EDITOR_CHANGE_PROJECT_NAME,
     EDITOR_CHANGE_SELECTED_AREA,
     EDITOR_CHANGE_SELECTED_LAYER,
     EDITOR_CHANGE_SELECTED_TILE,
@@ -82,6 +83,11 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
             return {
                 ...state,
                 selected: { ...state.selected, color: action.payload.color }
+            }
+        case EDITOR_CHANGE_PROJECT_NAME:
+            return {
+                ...state,
+                name: action.payload.name
             }
         case EDITOR_CHANGE_SELECTED_AREA:
             return {

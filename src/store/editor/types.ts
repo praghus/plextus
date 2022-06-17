@@ -55,6 +55,7 @@ export type Rectangle = {
 export type ProjectConfig = {
     w: number
     h: number
+    name: string
     columns: number
     tilewidth: number
     tileheight: number

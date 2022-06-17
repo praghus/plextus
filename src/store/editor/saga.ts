@@ -7,6 +7,7 @@ import { importLayer, generateReducedPalette, reduceColors } from '../../common/
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
 import { canvasToBlob } from '../../common/utils/data'
+import { IUploadedImage } from '../../common/types'
 import { IMPORT_MODES, TOOLS } from '../../common/constants'
 import { selectImportedImage } from '../app/selectors'
 import { changeAppImportedImage, changeAppIsLoading } from '../app/actions'
@@ -37,7 +38,8 @@ import {
     changeTileset,
     saveChanges,
     changeTilesetImage,
-    changePalette
+    changePalette,
+    changeProjectName
 } from './actions'
 import { clear } from '../history/actions'
 import { APP_STORAGE_KEY } from '../app/constants'
@@ -63,7 +65,6 @@ import {
 import { DeflatedLayer, Grid, Layer, Canvas, Selected, Tileset } from './types'
 import { createEmptyLayer, createImageLayer, getStateToSave } from './utils'
 import { SagaIterator } from 'redux-saga'
-import { StringTMap } from 'common/types'
 
 export function* clearProject(): SagaIterator<void> {
     try {
@@ -87,7 +88,7 @@ export function* changeLayersSaga(action: AnyAction): SagaIterator<void> {
     }
 }
 
-function* changeLayerProp(layerId: string, value: StringTMap<number | string | boolean>): SagaIterator<void> {
+function* changeLayerProp(layerId: string, value: Record<string, number | string | boolean>): SagaIterator<void> {
     try {
         const layers: DeflatedLayer[] = yield select(selectRawLayers)
         const changedLayers = layers.map(layer => (layer.id === layerId ? { ...layer, ...value } : layer))
@@ -230,13 +231,14 @@ export function* createNewProject(action: AnyAction): SagaIterator<void> {
     const { config } = action.payload
     try {
         const workspace = yield select(selectWorkspace)
-        const { w, h, columns, tilewidth, tileheight } = config
+        const { w, h, columns, tilewidth, tileheight, name } = config
         const width = w * tilewidth
         const height = h * tileheight
         const newScale = height >= width ? workspace.height / height : workspace.width / width
         const layer = createEmptyLayer('Layer 1', w, h)
 
         yield put(changeScale(newScale))
+        yield put(changeProjectName(name))
         yield put(changePosition((workspace.width - width * newScale) / 2, (workspace.height - height * newScale) / 2))
         yield put(changeCanvasSize(width, height))
         yield put(changeGridSize(tilewidth, tileheight))
@@ -264,9 +266,9 @@ export function* createImageLayerFromFile(action: AnyAction): SagaIterator<void>
     const { config } = action.payload
     try {
         yield put(changeAppIsLoading(true))
-        const importedImage: string = yield select(selectImportedImage)
+        const importedImage: IUploadedImage = yield select(selectImportedImage)
         const layers: Layer[] = yield select(selectLayers)
-        const layer = createImageLayer(config.name, importedImage, config.resolution.w, config.resolution.h)
+        const layer = createImageLayer(config.name, importedImage.image, config.resolution.w, config.resolution.h)
         yield put(changeLayers([...layers, { ...layer }]))
         yield put(changeSelectedLayer(layer.id))
         yield put(changeAppImportedImage())
@@ -295,6 +297,7 @@ export function* createTileLayerFromFile(action: AnyAction): SagaIterator<void> 
         if (mode === IMPORT_MODES.NEW_PROJECT) {
             yield put(changePosition(0, 0))
             yield put(changeCanvasSize(w, h))
+            yield put(changeProjectName(name))
             yield put(changeGridSize(tilewidth, tileheight))
             yield put(changeLayers([{ ...layer, name }]))
             yield put(

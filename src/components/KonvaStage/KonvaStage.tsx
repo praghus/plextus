@@ -240,6 +240,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                                         onSaveTilesetImage,
                                         selected,
                                         stage,
+                                        theme,
                                         tileset,
                                         tilesetCanvas,
                                         workspace
@@ -264,7 +265,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                                     : canvas.height
                             }
                             scale={workspace.scale}
-                            {...{ grid }}
+                            {...{ grid, theme }}
                         />
                         {isPointerVisible && (
                             <Pointer

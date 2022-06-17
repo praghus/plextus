@@ -23,10 +23,10 @@ export const StyledSliderContainer = styled.div`
 `
 
 export const StyledLayersList = styled(List)`
-    height: 100%;
+    max-height: 320px;
     overflow: auto;
     position: relative;
-    width: '100%';
+    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#151515' : '#f5f5f5')};
 
     ::-webkit-scrollbar {
         width: 0.7em;

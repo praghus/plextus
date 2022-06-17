@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
-    Card,
     IconButton,
     ListItem,
     ListItemIcon,
@@ -151,77 +150,77 @@ const LayersList: React.FunctionComponent = () => {
                 onSave={onUpdateLayer}
                 onClose={() => setPropertiesDialogOpen(false)}
             />
-            <Card sx={{ borderRadius: 0, height: '100%' }}>
-                <StyledLayersList>
-                    {reversedList.map((layer: Layer) => (
-                        <ListItem
-                            dense
-                            button
-                            key={layer.id}
-                            selected={layer.id === selected.layerId}
-                            onClick={() => {
-                                const l = getLayerById(layers, layer.id)
-                                if (l) {
-                                    setOpacity(l.opacity)
-                                    onChangeSelectedLayer(l.id)
-                                }
-                            }}
-                            onDoubleClick={() => {
-                                setEditingLayer(layer)
-                            }}
-                        >
-                            <ListItemIcon>
-                                <IconButton
-                                    edge="start"
-                                    onClick={() => {
-                                        setPropertiesDialogOpen(true)
-                                    }}
-                                >
-                                    {layer.image ? <ImageIcon fontSize="small" /> : <AppsIcon fontSize="small" />}
-                                </IconButton>
-                            </ListItemIcon>
-                            {layer.id === editingLayer?.id ? (
-                                <TextField
-                                    autoFocus
-                                    fullWidth={true}
-                                    size="small"
-                                    type="text"
-                                    variant="standard"
-                                    value={editingLayer.name}
-                                    onBlur={onRenameLayer}
-                                    onChange={e => {
-                                        setEditingLayer({ ...editingLayer, name: e.target.value })
-                                    }}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') {
-                                            onRenameLayer()
-                                        }
-                                        if (e.key === 'Escape') {
-                                            setEditingLayer(null)
-                                        }
-                                    }}
-                                />
-                            ) : (
-                                <ListItemText id={`checkbox-list-label-${layer.id}`} primary={layer.name} />
-                            )}
-                            <ListItemSecondaryAction>
-                                <IconButton
-                                    edge="end"
-                                    onClick={() => {
-                                        onChangeLayerVisible(layer.id, !layer.visible)
-                                    }}
-                                >
-                                    {layer.visible ? (
-                                        <VisibilityIcon fontSize="small" />
-                                    ) : (
-                                        <VisibilityOffIcon fontSize="small" />
-                                    )}
-                                </IconButton>
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    ))}
-                </StyledLayersList>
-            </Card>
+
+            <StyledLayersList>
+                {reversedList.map((layer: Layer) => (
+                    <ListItem
+                        dense
+                        button
+                        key={layer.id}
+                        selected={layer.id === selected.layerId}
+                        onClick={() => {
+                            const l = getLayerById(layers, layer.id)
+                            if (l) {
+                                setOpacity(l.opacity)
+                                onChangeSelectedLayer(l.id)
+                            }
+                        }}
+                        onDoubleClick={() => {
+                            setEditingLayer(layer)
+                        }}
+                    >
+                        <ListItemIcon>
+                            <IconButton
+                                edge="start"
+                                onClick={() => {
+                                    setPropertiesDialogOpen(true)
+                                }}
+                            >
+                                {layer.image ? <ImageIcon fontSize="small" /> : <AppsIcon fontSize="small" />}
+                            </IconButton>
+                        </ListItemIcon>
+                        {layer.id === editingLayer?.id ? (
+                            <TextField
+                                autoFocus
+                                fullWidth={true}
+                                size="small"
+                                type="text"
+                                variant="standard"
+                                value={editingLayer.name}
+                                onBlur={onRenameLayer}
+                                onChange={e => {
+                                    setEditingLayer({ ...editingLayer, name: e.target.value })
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                        onRenameLayer()
+                                    }
+                                    if (e.key === 'Escape') {
+                                        setEditingLayer(null)
+                                    }
+                                }}
+                            />
+                        ) : (
+                            <ListItemText id={`checkbox-list-label-${layer.id}`} primary={layer.name} />
+                        )}
+                        <ListItemSecondaryAction>
+                            <IconButton
+                                edge="end"
+                                onClick={() => {
+                                    onChangeLayerVisible(layer.id, !layer.visible)
+                                }}
+                            >
+                                {layer.visible ? (
+                                    <VisibilityIcon fontSize="small" />
+                                ) : (
+                                    <VisibilityOffIcon fontSize="small" />
+                                )}
+                            </IconButton>
+                        </ListItemSecondaryAction>
+                    </ListItem>
+                ))}
+            </StyledLayersList>
+
             <StyledBottomContainer>
                 <StyledSliderContainer>
                     <Slider

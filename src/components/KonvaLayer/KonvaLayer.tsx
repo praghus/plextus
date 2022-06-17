@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from 'react'
 import Konva from 'konva'
 import { Image } from 'react-konva'
 import { toast } from 'react-toastify'
+import { Theme } from '@mui/material/styles'
+
 import { TOOLS } from '../../common/constants'
 import { createTileFromImageData, getTilePos } from '../../store/editor/utils'
 import {
@@ -13,7 +15,6 @@ import {
     pickColor
 } from '../../common/utils/konva'
 import { isArray } from '../../common/utils/array'
-import { getRgbaValue } from '../../common/utils/colors'
 import { useCanvasBuffer } from '../../hooks/useCanvasBuffer'
 import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
 
@@ -33,6 +34,7 @@ interface Props {
     stage: Konva.Stage
     tileset: Tileset
     tilesetCanvas: HTMLCanvasElement
+    theme: Theme
     workspace: Workspace
 }
 
@@ -54,6 +56,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     stage,
     tileset,
     tilesetCanvas,
+    theme,
     workspace
 }) => {
     const [data, setData] = useState<(number | null)[]>()
@@ -329,8 +332,8 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
             ref={imageRef}
             listening={isSelected && visible}
             opacity={opacity / 255}
-            stroke={getRgbaValue(grid.color)}
-            strokeWidth={1 / workspace.scale}
+            stroke={theme.palette.mode === 'dark' ? '#90caf9' : '#1976d2'}
+            strokeWidth={2 / workspace.scale}
             strokeEnabled={selected.tool === TOOLS.OFFSET}
             draggable={isSelected && visible && selected.tool === TOOLS.OFFSET}
             x={layer.offset.x || 0}
