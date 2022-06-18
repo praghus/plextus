@@ -41,7 +41,7 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
     const [scale, setScale] = useState<Vec2>({ x: 1, y: 1 })
     const [position, setPosition] = useState<Vec2>({ x: 0, y: 0 })
-    const [size, setSize] = useState<Dim>({ h: 500, w: 330 })
+    const [size, setSize] = useState<Dim>({ h: 500, w: 300 })
 
     const dispatch = useDispatch()
     const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
@@ -140,7 +140,6 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         }
     }
 
-    // todo: cunsider useCallback here
     const onDeleteTile = (tileId: number) => {
         if (tilesetContext) {
             const newTileCount = tilecount > 1 ? tilecount - 1 : 1
@@ -224,7 +223,6 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                                     y={position.y}
                                     width={tileset.tilewidth}
                                     height={tileset.tileheight}
-                                    // shadowBlur={5}
                                     strokeWidth={2 / scale.x}
                                     stroke="#96cdff"
                                     fill="rgba(150,200,255,0.4)"

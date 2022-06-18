@@ -28,9 +28,7 @@ export const StyledRightContainer = styled.div`
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 340px;
-    min-width: 340px;
-    max-width: 340px;
+    width: 310px;
     display: flex;
     flex-direction: column;
     padding: 5px;

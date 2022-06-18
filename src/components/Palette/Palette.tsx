@@ -53,7 +53,7 @@ const Palette: React.FunctionComponent = () => {
     return (
         <>
             <StyledPalette>
-                <FormControl sx={{ padding: '5px', width: '100%' }}>
+                <FormControl sx={{ padding: '6px', width: '100%' }}>
                     <Select
                         size="small"
                         value={selected.palette}
@@ -85,8 +85,14 @@ const Palette: React.FunctionComponent = () => {
                     ))}
                 </StyledColorsContainer>
             </StyledPalette>
-
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: '100%' }}>
+            <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
+            <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ padding: '8px', width: '100%' }}
+            >
+                <ColorBox rgba={selected.color} />
                 <Typography variant="overline" sx={{ marginLeft: 1 }}>
                     {rgbaToHex(selected.color)}
                 </Typography>
@@ -101,8 +107,6 @@ const Palette: React.FunctionComponent = () => {
                     </StyledButtonContainer>
                 )}
             </Stack>
-
-            <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
         </>
     )
 }

@@ -27,12 +27,12 @@ const PropertiesTab: React.FunctionComponent = () => {
     const onChangeToolSize = (size: number) => dispatch(changeToolSize(size))
 
     const onChangeCanvasBackground = useCallback(
-        debounce((color: number[] | null) => dispatch(changeCanvasBackground(color)), 500),
+        debounce((color: number[] | null) => dispatch(changeCanvasBackground(color)), 300),
         []
     )
 
     const onChangeGridColor = useCallback(
-        debounce((color: number[]) => dispatch(changeGridColor(color)), 500),
+        debounce((color: number[]) => dispatch(changeGridColor(color)), 300),
         []
     )
 
@@ -87,7 +87,7 @@ const PropertiesTab: React.FunctionComponent = () => {
                                 onChangeGridColor(rgb)
                             }}
                         />
-                        Grid color
+                        Grid
                     </StyledPropContainer>
                 </Grid>
                 <Grid item xs={7}>
@@ -100,7 +100,7 @@ const PropertiesTab: React.FunctionComponent = () => {
                                 onChangeCanvasBackground(alpha > 0 ? rgb : null)
                             }}
                         />
-                        Background color
+                        Background
                     </StyledPropContainer>
                 </Grid>
             </Grid>
