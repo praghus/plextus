@@ -49,6 +49,10 @@ module.exports = {
                 {
                     from: resolve(__dirname, '../../node_modules/wasm-imagemagick/dist/magick.js'),
                     to: '.'
+                },
+                {
+                    from: resolve(__dirname, '../../src/assets/favicons'),
+                    to: '.'
                 }
             ]
         })

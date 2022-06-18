@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Konva from 'konva'
 import { jsx } from '@emotion/react'
 import { useTheme } from '@mui/material/styles'
@@ -10,7 +10,7 @@ import { Stage, Layer, Rect } from 'react-konva'
 import { undo, redo } from '../../store/history/actions'
 import { Rectangle, Tileset } from '../../store/editor/types'
 import { SCALE_BY, TOOLS } from '../../common/constants'
-import { centerStage } from '../../common/utils/konva'
+import { centerStage, getDistance, getCenter } from '../../common/utils/konva'
 import { getRgbaValue } from '../../common/utils/colors'
 import {
     selectCanvas,
@@ -46,6 +46,7 @@ import { styles } from './KonvaStage.styled'
 
 Konva.pixelRatio = 1
 
+const isMobile = window.matchMedia('(pointer:coarse)').matches
 interface Props {
     tilesetCanvas: HTMLCanvasElement
 }
@@ -60,6 +61,9 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
 
     const backgroundColor = canvas.background && getRgbaValue(canvas.background)
     const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
+
+    const lastCenter = useRef<Vec2>()
+    const lastDist = useRef(0)
 
     const [stage, setStage] = useState<Konva.Stage>()
     const [isMouseDown, setIsMouseDown] = useState<boolean>(false)
@@ -96,12 +100,12 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const onMouseMove = () => stage && setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
 
     const onChangePosition = useCallback(
-        debounce((x, y) => dispatch(changePosition(x, y)), 300),
+        debounce((x, y) => dispatch(changePosition(x, y)), 500),
         []
     )
 
     const onChangeScale = useCallback(
-        debounce(scale => dispatch(changeScale(scale)), 300),
+        debounce(scale => dispatch(changeScale(scale)), 500),
         []
     )
 
@@ -152,6 +156,71 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         },
         [stage]
     )
+
+    const onTouchMove = useCallback(
+        (e: Konva.KonvaEventObject<TouchEvent>) => {
+            e.evt.preventDefault()
+            if (stage) {
+                const touch1 = e.evt.touches[0]
+                const touch2 = e.evt.touches[1]
+
+                if (touch1 && touch2) {
+                    if (stage.isDragging()) {
+                        stage.stopDrag()
+                    }
+
+                    const p1 = { x: touch1.clientX, y: touch1.clientY }
+                    const p2 = { x: touch2.clientX, y: touch2.clientY }
+
+                    if (!lastCenter.current) {
+                        lastCenter.current = getCenter(p1, p2)
+                        return
+                    }
+
+                    const newCenter = getCenter(p1, p2)
+                    const dist = getDistance(p1, p2)
+
+                    if (!lastDist.current) {
+                        lastDist.current = dist
+                    }
+
+                    const pointTo = {
+                        x: (newCenter.x - stage.x()) / stage.scaleX(),
+                        y: (newCenter.y - stage.y()) / stage.scaleX()
+                    }
+
+                    const scale = stage.scaleX() * (dist / lastDist.current)
+                    const dx = newCenter.x - lastCenter.current.x
+                    const dy = newCenter.y - lastCenter.current.y
+
+                    const newPos = {
+                        x: newCenter.x - pointTo.x * scale + dx,
+                        y: newCenter.y - pointTo.y * scale + dy
+                    }
+
+                    stage.position(newPos)
+                    stage.scaleX(scale)
+                    stage.scaleY(scale)
+                    stage.batchDraw()
+
+                    onScale(scale)
+                    onChangePosition(newPos.x, newPos.y)
+
+                    lastDist.current = dist
+                    lastCenter.current = newCenter
+                }
+            }
+        },
+        [stage]
+    )
+
+    const onTouchEnd = () => {
+        lastDist.current = 0
+        lastCenter.current = undefined
+        setIsMouseDown(false)
+    }
+
+    const draggable = !isMobile && (selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP)
 
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)
@@ -206,13 +275,13 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                     ref={handleStage}
                     width={workspace.width}
                     height={workspace.height}
-                    draggable={selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP}
                     onContextMenu={e => e.evt.preventDefault()}
+                    onTouchStart={() => setIsMouseDown(true)}
                     onMouseDown={() => setIsMouseDown(true)}
                     onMouseUp={() => setIsMouseDown(false)}
                     onMouseOver={() => setIsMouseOver(true)}
                     onMouseOut={() => setIsMouseOver(false)}
-                    {...{ onDragEnd, onMouseMove, onWheel }}
+                    {...{ draggable, onDragEnd, onMouseMove, onTouchEnd, onTouchMove, onWheel }}
                 >
                     <Layer imageSmoothingEnabled={false}>
                         <TransparentBackground

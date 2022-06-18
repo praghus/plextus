@@ -6,6 +6,13 @@ import { brightenDarken, getRgbaValue } from './colors'
 
 export const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
 
+export const getDistance = (p1: Vec2, p2: Vec2) => Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
+
+export const getCenter = (p1: Vec2, p2: Vec2): Vec2 => ({
+    x: (p1.x + p2.x) / 2,
+    y: (p1.y + p2.y) / 2
+})
+
 export const getCoordsFromPos = (grid: Grid, pos: Konva.Vector2d): Konva.Vector2d => ({
     x: Math.ceil(pos.x / grid.width) - 1,
     y: Math.ceil(pos.y / grid.height) - 1

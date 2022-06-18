@@ -59,7 +59,7 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         setStage(node)
     }, [])
 
-    const onMouseDown = useCallback(() => {
+    const onSelectTile = useCallback(() => {
         if (stage && scale) {
             const localPos = getPointerRelativePos(
                 {
@@ -215,9 +215,17 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                             width: imageDimensions.w * scale.x
                         }}
                     >
-                        <Stage ref={handleStage} width={size.w} height={size.h} {...{ scale }}>
+                        <Stage
+                            ref={handleStage}
+                            width={size.w}
+                            height={size.h}
+                            onMouseDown={onSelectTile}
+                            onTouchStart={onSelectTile}
+                            onTouchMove={onSelectTile}
+                            {...{ scale }}
+                        >
                             <Layer imageSmoothingEnabled={false}>
-                                {tilesetCanvas && <Image image={tilesetCanvas} {...{ onMouseDown }} />}
+                                {tilesetCanvas && <Image image={tilesetCanvas} />}
                                 <Rect
                                     x={position.x}
                                     y={position.y}
