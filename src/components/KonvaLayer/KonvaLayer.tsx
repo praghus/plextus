@@ -166,7 +166,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const onMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const onStartDrawing = (secondBtnPressed = false) => {
         if (ctx && visible && isSelected && layer.width) {
             const currentPos = getPos()
             const { x, y } = getCoordsFromPos(grid, currentPos)
@@ -184,7 +184,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                     break
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
-                    if (e.evt.button === 2) {
+                    if (secondBtnPressed) {
                         selectedTile ? onChangeSelectedTile(selectedTile.gid) : cloneTile(pos.x, pos.y)
                     } else if (selectedTile) {
                         keyDown?.code === 'AltLeft'
@@ -196,7 +196,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                     break
                 case TOOLS.PENCIL:
                 case TOOLS.ERASER:
-                    if (e.evt.button === 2) {
+                    if (secondBtnPressed) {
                         onChangePrimaryColor(pickColor(ctx, currentPos))
                     } else if (bufferCtx) {
                         actionDraw(pos, selected, bufferCtx, keyDown)
@@ -207,7 +207,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                     onChangePrimaryColor(pickColor(ctx, currentPos))
                     break
                 case TOOLS.FILL:
-                    if (e.evt.button === 2) {
+                    if (secondBtnPressed) {
                         onChangePrimaryColor(pickColor(ctx, currentPos))
                     } else if (bufferCtx && bufferImage) {
                         fillColor(pos, selected.color, bufferImage, bufferCtx)
@@ -215,7 +215,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                     }
                     break
                 case TOOLS.LINE:
-                    if (e.evt.button === 2) {
+                    if (secondBtnPressed) {
                         onChangePrimaryColor(pickColor(ctx, currentPos))
                     }
                     lastLinePos.current = lastPos.current
@@ -226,10 +226,9 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
             lastPos.current = currentPos
             selectedTile && setSelectedTile(selectedTile)
         }
-        e.evt.preventDefault()
     }
 
-    const onMouseMove = () => {
+    const onDrawing = () => {
         const prevPos = lastPos.current as Konva.Vector2d
         const nextPos = getPos()
 
@@ -270,8 +269,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         lastPos.current = nextPos
     }
 
-    const onMouseUp = () => {
-        // if (hasChanged.current) {
+    const onEndDrawing = () => {
         if (layer.image && image) {
             renderFromBuffer()
             image.toBlob(blob => blob && onChangeLayerImage(layer.id, blob), 'image/png')
@@ -302,8 +300,6 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 default:
                     break
             }
-            // }
-            // hasChanged.current = false
         }
     }
 
@@ -335,15 +331,18 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
             strokeWidth={2 / workspace.scale}
             strokeEnabled={selected.tool === TOOLS.OFFSET}
             draggable={isSelected && visible && selected.tool === TOOLS.OFFSET}
+            onTouchStart={() => onStartDrawing(false)}
+            onMouseDown={e => onStartDrawing(e.evt.button === 2)}
+            onTouchMove={onDrawing}
+            onMouseMove={onDrawing}
+            onTouchEnd={onEndDrawing}
+            onMouseUp={onEndDrawing}
             x={layer.offset.x || 0}
             y={layer.offset.y || 0}
             {...{
                 height,
                 image,
                 onDragEnd,
-                onMouseDown,
-                onMouseMove,
-                onMouseUp,
                 visible,
                 width
             }}

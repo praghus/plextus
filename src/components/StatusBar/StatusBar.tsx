@@ -100,7 +100,7 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
                 <StyledCol>
                     <Tooltip title="Center and fit to view size" placement="top">
                         <StyledButton onClick={onCenter}>
-                            <AspectRatioIcon onClick={onCenter} />
+                            <AspectRatioIcon />
                             {canvas &&
                                 `${canvas.width}x${canvas.height}px [${canvas.width / grid.width}x${
                                     canvas.height / grid.height
