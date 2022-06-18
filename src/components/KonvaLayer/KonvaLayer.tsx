@@ -169,7 +169,6 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     const onMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (ctx && visible && isSelected && layer.width) {
             const currentPos = getPos()
-            console.info(currentPos)
             const { x, y } = getCoordsFromPos(grid, currentPos)
             const selectedTile: SelectedTile | undefined = layer.data
                 ? { gid: layer.data[x + ((layer.width * tilewidth) / grid.width) * y], x, y }

@@ -19,7 +19,6 @@ interface Props {
 const GridLines = forwardRef<Konva.Group | null, Props>(
     ({ grid, width, height, scale, dash, x, y, theme }: Props, ref) => {
         const stroke = grid.color ? getRgbaValue(grid.color) : (theme.palette.mode === 'dark' && '#fff') || '#000'
-        console.info(stroke)
         const mesh = useMemo(() => {
             const lines: ReactElement[] = []
             const getWidth = (i: number) => (grid.pitch && i % grid.pitch === 0 ? 0.5 / scale : 0.2 / scale)

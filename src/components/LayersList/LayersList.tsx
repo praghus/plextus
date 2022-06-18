@@ -6,7 +6,6 @@ import {
     ListItem,
     ListItemIcon,
     ListItemSecondaryAction,
-    ListItemText,
     Menu,
     MenuItem,
     Slider,
@@ -44,7 +43,8 @@ import {
     StyledBottomContainer,
     StyledButtonContainer,
     StyledSliderContainer,
-    StyledLayersList
+    StyledLayersList,
+    StyledListItemText
 } from './LayersList.styled'
 
 const LayersList: React.FunctionComponent = () => {
@@ -169,7 +169,7 @@ const LayersList: React.FunctionComponent = () => {
                             setEditingLayer(layer)
                         }}
                     >
-                        <ListItemIcon>
+                        <ListItemIcon sx={{ minWidth: '30px' }}>
                             <IconButton
                                 edge="start"
                                 onClick={() => {
@@ -201,7 +201,7 @@ const LayersList: React.FunctionComponent = () => {
                                 }}
                             />
                         ) : (
-                            <ListItemText id={`checkbox-list-label-${layer.id}`} primary={layer.name} />
+                            <StyledListItemText id={`checkbox-list-label-${layer.id}`} primary={layer.name} />
                         )}
                         <ListItemSecondaryAction>
                             <IconButton

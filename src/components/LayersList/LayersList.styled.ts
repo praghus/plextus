@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import { List } from '@mui/material'
+import { List, ListItemText } from '@mui/material'
 
 import { IMuiTheme } from '../../common/types'
 
@@ -42,4 +42,10 @@ export const StyledLayersList = styled(List)`
         background-color: ${({ theme }: IMuiTheme) => theme?.palette.action.disabled};
         outline: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.action.disabled};
     }
+`
+
+export const StyledListItemText = styled(ListItemText)`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 `
