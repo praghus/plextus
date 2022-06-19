@@ -6,10 +6,12 @@ import { Divider, Button, ListItemIcon, Menu, MenuItem, IconButton, Stack, TextF
 
 import {
     DisabledByDefault as DisabledByDefaultIcon,
+    SaveAlt as SaveAltIcon,
     Undo as UndoIcon,
     Redo as RedoIcon,
     AddPhotoAlternate as AddPhotoAlternateIcon,
-    FileDownload as FileDownloadIcon,
+    ExitToApp as ExitToAppIcon,
+    FileOpen as FileOpenIcon,
     Save as SaveIcon,
     InsertDriveFile as InsertDriveFileIcon
 } from '@mui/icons-material'
@@ -18,11 +20,12 @@ import { exportToTmx } from '../../common/utils/tmx'
 import { selectHistory } from '../../store/history/selectors'
 import { selectCanvas, selectLayers, selectProjectName, selectTileset } from '../../store/editor/selectors'
 import { changeAppIsNewProjectDialogOpen } from '../../store/app/actions'
-import { changeProjectName, clearProject, saveChanges } from '../../store/editor/actions'
+import { changeProjectName, clearProject, saveChanges, saveChangesToFile } from '../../store/editor/actions'
 import { undo, redo } from '../../store/history/actions'
 import { PlextusLogo } from '../Icons'
 import { ConfirmationDialog } from '../ConfirmationDialog'
 import { ImageUpload } from '../ImageUpload'
+import { ProjectUpload } from '../ProjectUpload'
 import { StyledMenuContainer, StyledProjectName } from './MainMenu.styled'
 
 const MainMenu: React.FunctionComponent = () => {
@@ -43,6 +46,7 @@ const MainMenu: React.FunctionComponent = () => {
     const handleClose = () => setAnchorEl(null)
     const handleClick = (e: React.MouseEvent) => setAnchorEl(e.currentTarget as HTMLAnchorElement)
     const onSaveChanges = () => dispatch(saveChanges())
+    const onSaveChangesToFile = () => dispatch(saveChangesToFile())
     const onShowNewProjectDialog = () => dispatch(changeAppIsNewProjectDialogOpen(true))
     const onChangeProjectName = (name: string) => dispatch(changeProjectName(name))
     const onUndo = () => dispatch(undo())
@@ -68,6 +72,7 @@ const MainMenu: React.FunctionComponent = () => {
                 }}
                 onClose={() => setConfirmationDialogOpen(false)}
             />
+
             <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
                 <MenuItem
                     onClick={() => {
@@ -80,6 +85,14 @@ const MainMenu: React.FunctionComponent = () => {
                     </ListItemIcon>
                     {t('i18_new_project')}
                 </MenuItem>
+                <ProjectUpload>
+                    <MenuItem onClick={handleClose}>
+                        <ListItemIcon>
+                            <FileOpenIcon fontSize="small" />
+                        </ListItemIcon>
+                        {t('i18_open_project')}
+                    </MenuItem>
+                </ProjectUpload>
                 <MenuItem
                     onClick={() => {
                         handleClose()
@@ -91,6 +104,9 @@ const MainMenu: React.FunctionComponent = () => {
                     </ListItemIcon>
                     {t('i18_close_project')}
                 </MenuItem>
+
+                <Divider orientation="horizontal" />
+
                 <ImageUpload>
                     <MenuItem onClick={handleClose}>
                         <ListItemIcon>
@@ -106,24 +122,24 @@ const MainMenu: React.FunctionComponent = () => {
                     }}
                 >
                     <ListItemIcon>
-                        <FileDownloadIcon fontSize="small" />
+                        <ExitToAppIcon fontSize="small" />
                     </ListItemIcon>
                     {t('i18_export_map')}
                 </MenuItem>
+
                 <Divider orientation="horizontal" />
-                <MenuItem onClick={onUndo} disabled={history.undo.length === 0}>
+
+                <MenuItem
+                    onClick={() => {
+                        handleClose()
+                        onSaveChangesToFile()
+                    }}
+                >
                     <ListItemIcon>
-                        <UndoIcon fontSize="small" />
+                        <SaveAltIcon fontSize="small" />
                     </ListItemIcon>
-                    {t('i18_undo')}
+                    {t('i18_save_to_file')}
                 </MenuItem>
-                <MenuItem onClick={onRedo} disabled={history.redo.length === 0}>
-                    <ListItemIcon>
-                        <RedoIcon fontSize="small" />
-                    </ListItemIcon>
-                    {t('i18_redo')}
-                </MenuItem>
-                <Divider orientation="horizontal" />
                 <MenuItem
                     onClick={() => {
                         handleClose()

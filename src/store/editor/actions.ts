@@ -46,6 +46,7 @@ import {
     EDITOR_REMOVE_TILE_SUCCESS,
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SAVE_CHANGES,
+    EDITOR_SAVE_CHANGES_TO_FILE,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID,
@@ -273,6 +274,11 @@ export const removeTileSuccess = (layers: DeflatedLayer[], tileset: Tileset) =>
 export const saveChanges = () =>
     ({
         type: EDITOR_SAVE_CHANGES
+    } as const)
+
+export const saveChangesToFile = () =>
+    ({
+        type: EDITOR_SAVE_CHANGES_TO_FILE
     } as const)
 
 export const toggleShowGrid = (visible: boolean) =>

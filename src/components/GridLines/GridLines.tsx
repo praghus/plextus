@@ -21,7 +21,7 @@ const GridLines = forwardRef<Konva.Group | null, Props>(
         const stroke = grid.color ? getRgbaValue(grid.color) : (theme.palette.mode === 'dark' && '#fff') || '#000'
         const mesh = useMemo(() => {
             const lines: ReactElement[] = []
-            const getWidth = (i: number) => (grid.pitch && i % grid.pitch === 0 ? 0.5 / scale : 0.2 / scale)
+            const getWidth = (i: number) => (grid.pitch && i % grid.pitch === 0 ? 0.6 / scale : 0.2 / scale)
             const line = (key: string, points: number[], strokeWidth: number): ReactElement => (
                 <Line
                     dash={dash && grid.width * scale > 8 ? [2 / scale, 2 / scale] : undefined}
