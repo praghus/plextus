@@ -1,6 +1,6 @@
 import pako from 'pako'
 
-export function arrayBufferToBase64(buffer: number) {
+export function arrayBufferToBase64(buffer: Uint8Array) {
     let binary = ''
     const bytes = [].slice.call(new Uint8Array(buffer))
     bytes.forEach(b => (binary += String.fromCharCode(b)))

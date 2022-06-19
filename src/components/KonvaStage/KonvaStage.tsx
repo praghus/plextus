@@ -12,6 +12,7 @@ import { Rectangle, Tileset } from '../../store/editor/types'
 import { SCALE_BY, TOOLS } from '../../common/constants'
 import { centerStage, getDistance, getCenter } from '../../common/utils/konva'
 import { getRgbaValue } from '../../common/utils/colors'
+import { isMobile } from '../../common/utils/mobile'
 import {
     selectCanvas,
     selectGrid,
@@ -46,7 +47,6 @@ import { styles } from './KonvaStage.styled'
 
 Konva.pixelRatio = 1
 
-const isMobile = window.matchMedia('(pointer:coarse)').matches
 interface Props {
     tilesetCanvas: HTMLCanvasElement
 }
@@ -71,6 +71,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const [pointerPosition, setPointerPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
     const [keyDown, setKeyDown] = useState<KeyboardEvent | null>(null)
 
+    const draggable = !isMobile && (selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP)
     const isPointerVisible = useMemo(
         () =>
             isMouseOver &&
@@ -138,8 +139,8 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const onWheel = useCallback(
         (e: Konva.KonvaEventObject<WheelEvent>) => {
             if (stage) {
-                const { altKey, deltaX, deltaY } = e.evt
-                if (altKey) {
+                const { altKey, metaKey, deltaX, deltaY } = e.evt
+                if (altKey || metaKey) {
                     const newScale = deltaY > 0 ? stage.scaleX() / SCALE_BY : stage.scaleX() * SCALE_BY
                     onScale(newScale)
                 } else {
@@ -219,8 +220,6 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         lastCenter.current = undefined
         setIsMouseDown(false)
     }
-
-    const draggable = !isMobile && (selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP)
 
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)

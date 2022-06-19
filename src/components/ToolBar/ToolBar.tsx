@@ -10,6 +10,7 @@ import {
     CancelPresentation as CancelPresentationIcon,
     FormatColorFill as FormatColorFillIcon,
     PanTool as PanToolIcon,
+    // PhotoSizeSelectSmall as PhotoSizeSelectSmallIcon,
     ControlCamera as ControlCameraIcon
 } from '@mui/icons-material'
 
@@ -47,7 +48,6 @@ const ToolBar: React.FunctionComponent = () => {
                 <StyledToggleButtonGroup
                     exclusive
                     value={selected.tool}
-                    size="small"
                     orientation="vertical"
                     onChange={(_, value) => onChangeTool(value as string)}
                 >

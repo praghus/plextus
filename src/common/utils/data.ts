@@ -33,3 +33,11 @@ export async function canvasToBlob(canvas: HTMLCanvasElement, type = 'image/png'
         }, type)
     })
 }
+
+export function downloadProjectFile(fileName: string, content: string, type = 'application/json'): void {
+    const downloadLink = document.createElement('a')
+    const file = new Blob([content], { type })
+    downloadLink.href = URL.createObjectURL(file)
+    downloadLink.download = fileName
+    downloadLink.click()
+}

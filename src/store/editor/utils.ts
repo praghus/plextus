@@ -5,7 +5,10 @@ import { getCacheItem } from '../../common/utils/storage'
 import { canvasToBlob, dataURLToObjectURL, getDataFromObjectURL } from '../../common/utils/data'
 import { APP_STORAGE_KEY } from '../app/constants'
 import { EDITOR_RESOURCE_NAME } from './constants'
-import { Layer, Tileset } from './types'
+import { DeflatedLayer, Layer, Tileset } from './types'
+import { store } from '../store'
+
+type RootState = ReturnType<typeof store.getState>
 
 export const getLayerById = (layers: Layer[], id: string) => layers.find(layer => layer.id === id)
 
@@ -84,13 +87,13 @@ export const getTilesetDimensions = (tileset: Tileset) => ({
     w: tileset.columns * tileset.tilewidth
 })
 
-export const getStateToSave = async state => {
+export const getStateToSave = async (state: RootState) => {
     const editorState = state[EDITOR_RESOURCE_NAME]
     return {
         [EDITOR_RESOURCE_NAME]: {
             ...editorState,
             layers: await Promise.all(
-                editorState.layers.map(async layer =>
+                editorState.layers.map(async (layer: Layer) =>
                     layer.image ? { ...layer, image: await getDataFromObjectURL(layer.image) } : layer
                 )
             ),
@@ -105,14 +108,14 @@ export const getStateToSave = async state => {
 export const loadStateFromStore = async () => {
     const stateBlob = await getCacheItem(APP_STORAGE_KEY)
     if (stateBlob) {
-        const state = await request.json(window.URL.createObjectURL(stateBlob))
+        const state = (await request.json(window.URL.createObjectURL(stateBlob))) as RootState
         const editorState = state && state[EDITOR_RESOURCE_NAME]
 
         return {
             [EDITOR_RESOURCE_NAME]: {
                 ...editorState,
                 layers: await Promise.all(
-                    editorState.layers.map(async layer =>
+                    editorState.layers.map(async (layer: DeflatedLayer) =>
                         layer.image ? { ...layer, image: await dataURLToObjectURL(layer.image) } : layer
                     )
                 ),

@@ -6,7 +6,7 @@ import logger from '../../common/utils/logger'
 import { importLayer, generateReducedPalette, reduceColors } from '../../common/utils/image'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
-import { canvasToBlob } from '../../common/utils/data'
+import { canvasToBlob, downloadProjectFile } from '../../common/utils/data'
 import { IUploadedImage } from '../../common/types'
 import { IMPORT_MODES, TOOLS } from '../../common/constants'
 import { selectImportedImage } from '../app/selectors'
@@ -57,6 +57,7 @@ import {
     EDITOR_REMOVE_LAYER,
     EDITOR_REMOVE_TILE,
     EDITOR_SAVE_CHANGES,
+    EDITOR_SAVE_CHANGES_TO_FILE,
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_CREATE_TILE_LAYER_FROM_FILE,
     INITIAL_STATE,
@@ -210,8 +211,19 @@ export function* saveChangesSaga(): SagaIterator<void> {
         const state = yield select(state => state)
         const toSave = yield call(() => getStateToSave(state))
         yield call(() => setCacheBlob(APP_STORAGE_KEY, JSON.stringify(toSave), 'application/json'))
-        toast.success(i18n.t('i18_map_saved') as string)
+        toast.success(i18n.t('i18_project_saved') as string)
         logger.info('Saving to store')
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* saveChangesToFileSaga(): SagaIterator<void> {
+    try {
+        const state = yield select(state => state)
+        const { editor } = yield call(() => getStateToSave(state))
+        downloadProjectFile(`${(editor.name || 'project').toLowerCase()}.plextus`, JSON.stringify(editor))
+        logger.info('Saving to file')
     } catch (err) {
         logger.error(err)
     }
@@ -349,6 +361,7 @@ export default function* editorSaga(): Generator {
         yield takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
         yield takeLatest(EDITOR_REMOVE_TILE, removeTile),
         yield takeLatest(EDITOR_SAVE_CHANGES, saveChangesSaga),
+        yield takeLatest(EDITOR_SAVE_CHANGES_TO_FILE, saveChangesToFileSaga),
         yield takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage),
         yield takeLatest(EDITOR_CREATE_NEW_PROJECT, createNewProject),
         yield takeLatest(EDITOR_CREATE_TILE_LAYER_FROM_FILE, createTileLayerFromFile),
