@@ -3,7 +3,7 @@ import Konva from 'konva'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Image, Layer, Rect, Stage } from 'react-konva'
-import { Add as AddIcon, DeleteForever as DeleteForeverIcon, SaveAlt as SaveAltIcon } from '@mui/icons-material'
+import { AddBox as AddBoxIcon, DeleteForever as DeleteForeverIcon, SaveAlt as SaveAltIcon } from '@mui/icons-material'
 import { Card, IconButton, Slider, Tooltip } from '@mui/material'
 
 import { getTilesetDimensions, createEmptyTile, getTilePos } from '../../store/editor/utils'
@@ -11,7 +11,7 @@ import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } fro
 import { selectGrid, selectSelected, selectTileset } from '../../store/editor/selectors'
 import { getCoordsFromPos, getPointerRelativePos } from '../../common/utils/konva'
 import { downloadImage } from '../../common/utils/image'
-import { SCALE_STEP } from '../../common/constants'
+import { useZoomEvents } from '../../hooks/useZoomEvents'
 import { Workspace, Tileset as TilesetType } from '../../store/editor/types'
 import { ConfirmationDialog } from '../ConfirmationDialog'
 import {
@@ -36,15 +36,15 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
 
     const { columns, tilecount, tilewidth, tileheight } = tileset
 
-    const [container, setContainer] = useState<HTMLDivElement>()
     const [stage, setStage] = useState<Konva.Stage>()
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-    const [scale, setScale] = useState<Vec2>({ x: 1, y: 1 })
-    const [position, setPosition] = useState<Vec2>({ x: 0, y: 0 })
-    const [size, setSize] = useState<Dim>({ h: 500, w: 300 })
+    const [scale, setScale] = useState<Konva.Vector2d>({ x: 1, y: 1 })
+    const [position, setPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
+    const [tilePosition, setTilePosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
+    const [size, setSize] = useState<Dim>({ h: 320, w: 299 })
 
     const dispatch = useDispatch()
-    const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
+    const onChangeSelectedTile = useCallback((tileId: number) => dispatch(changeSelectedTile(tileId)), [dispatch])
     const onChangeTileset = (tileset: TilesetType) => dispatch(changeTileset(tileset))
     const onRemoveTile = (tileId: number, tileset: TilesetType) => dispatch(removeTile(tileId, tileset))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
@@ -52,12 +52,33 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const onCancelRemoveLayer = () => setConfirmationDialogOpen(false)
 
     const handleContainer = useCallback((node: HTMLDivElement) => {
-        setContainer(node)
+        if (node) {
+            setSize({
+                h: node.offsetHeight,
+                w: node.offsetWidth
+            })
+        }
     }, [])
 
     const handleStage = useCallback((node: Konva.Stage) => {
         setStage(node)
     }, [])
+
+    const dragBoundFunc = useCallback(
+        (pos: Konva.Vector2d) => {
+            return {
+                x:
+                    size.w > tilesetCanvas.width * scale.x
+                        ? 0
+                        : Math.max(size.w - tilesetCanvas.width * scale.x, Math.min(pos.x, 0)),
+                y:
+                    size.h > tilesetCanvas.height * scale.y
+                        ? 0
+                        : Math.max(size.h - tilesetCanvas.height * scale.y, Math.min(pos.y, 0))
+            }
+        },
+        [size, scale, tilesetCanvas.width, tilesetCanvas.height]
+    )
 
     const onSelectTile = useCallback(() => {
         if (stage && scale) {
@@ -75,69 +96,13 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                 onChangeSelectedTile(tileId)
             }
         }
-    }, [grid, stage, scale, columns, tilecount])
-
-    const repositionStage = useCallback(
-        (left: number, top: number): void => {
-            if (stage && scale && container) {
-                const boundsX = imageDimensions.w * scale.x - size.w
-                const boundsY = imageDimensions.h * scale.y - size.h
-                const dx = left <= boundsX ? left : boundsX
-                const dy = top <= boundsY ? top : boundsY
-
-                stage.container().style.transform = `translate(${dx}px, ${dy}px)`
-                stage.x(-dx)
-                stage.y(-dy)
-                stage.batchDraw()
-
-                container.scrollLeft = left
-                container.scrollTop = top
-            }
-        },
-        [imageDimensions, container, scale, size, stage]
-    )
-
-    const onResize = useCallback(() => {
-        if (container) {
-            setSize({
-                h: container.offsetHeight,
-                w: container.offsetWidth
-            })
-        }
-    }, [container])
-
-    const onScroll = useCallback(
-        (e: React.UIEvent<HTMLElement>): void => {
-            const element = e.currentTarget as HTMLInputElement
-            element && repositionStage(element.scrollLeft, element.scrollTop)
-            e.preventDefault()
-        },
-        [repositionStage]
-    )
-
-    const onScale = useCallback(
-        (newScale: number): void => {
-            if (container && stage) {
-                container.scrollTop = 0
-                container.scrollLeft = 0
-                repositionStage(0, 0)
-                setScale({ x: newScale, y: newScale })
-            }
-        },
-        [container, scale, stage]
-    )
+    }, [stage, scale, grid, columns, tilecount, onChangeSelectedTile])
 
     const onAddTile = async () => {
         const { blob, newTileId } = await createEmptyTile(tileset, tilesetCanvas)
         onSaveTilesetImage(blob)
         onChangeTileset({ ...tileset, tilecount: newTileId })
         onChangeSelectedTile(newTileId)
-        if (stage) {
-            repositionStage(
-                ((newTileId - 1) % columns) * tilewidth * scale.x,
-                Math.ceil(newTileId / columns - 1) * tileheight * scale.y
-            )
-        }
     }
 
     const onDeleteTile = (tileId: number) => {
@@ -174,29 +139,27 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                     onChangeSelectedTile(tileId - 1)
                 }
             })
-            stage?.batchDraw()
         }
         setConfirmationDialogOpen(false)
     }
 
-    useEffect(() => {
-        onResize()
-        window.addEventListener('resize', onResize)
-        return () => {
-            window.removeEventListener('resize', onResize)
-        }
-    }, [onResize])
+    const { onScale, onTouchEnd, onDragEnd, onTouchMove, onWheel } = useZoomEvents(
+        stage,
+        setPosition,
+        setScale,
+        dragBoundFunc
+    )
 
     useEffect(() => {
         const x = ((selected.tileId - 1) % columns) * tilewidth
         const y = Math.ceil(selected.tileId / columns - 1) * tileheight
-        setPosition({ x, y })
+        setTilePosition({ x, y })
     }, [selected.tileId, columns, tilewidth, tileheight])
 
     useEffect(() => {
-        const newScale = (size.w - 10) / imageDimensions.w
+        const newScale = size.w / imageDimensions.w
         setScale({ x: newScale, y: newScale })
-    }, [imageDimensions.w])
+    }, [imageDimensions.w, size.w])
 
     return (
         <>
@@ -208,36 +171,31 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                 onClose={onCancelRemoveLayer}
             />
             <Card sx={{ borderRadius: 0 }}>
-                <StyledTilesetImageContainer ref={handleContainer} {...{ onScroll }}>
-                    <div
-                        style={{
-                            height: imageDimensions.h * scale.y,
-                            width: imageDimensions.w * scale.x
-                        }}
+                <StyledTilesetImageContainer ref={handleContainer}>
+                    <Stage
+                        ref={handleStage}
+                        x={position.x}
+                        y={position.y}
+                        width={size.w}
+                        height={size.h}
+                        draggable
+                        onClick={onSelectTile}
+                        onTouchStart={onSelectTile}
+                        {...{ dragBoundFunc, onDragEnd, onTouchEnd, onTouchMove, onWheel, scale }}
                     >
-                        <Stage
-                            ref={handleStage}
-                            width={size.w}
-                            height={size.h}
-                            onMouseDown={onSelectTile}
-                            onTouchStart={onSelectTile}
-                            onTouchMove={onSelectTile}
-                            {...{ scale }}
-                        >
-                            <Layer imageSmoothingEnabled={false}>
-                                {tilesetCanvas && <Image image={tilesetCanvas} />}
-                                <Rect
-                                    x={position.x}
-                                    y={position.y}
-                                    width={tileset.tilewidth}
-                                    height={tileset.tileheight}
-                                    strokeWidth={2 / scale.x}
-                                    stroke="#96cdff"
-                                    fill="rgba(150,200,255,0.4)"
-                                />
-                            </Layer>
-                        </Stage>
-                    </div>
+                        <Layer imageSmoothingEnabled={false}>
+                            {tilesetCanvas && <Image image={tilesetCanvas} />}
+                            <Rect
+                                x={tilePosition.x}
+                                y={tilePosition.y}
+                                width={tileset.tilewidth}
+                                height={tileset.tileheight}
+                                strokeWidth={2 / scale.x}
+                                stroke="#96cdff"
+                                fill="rgba(150,200,255,0.4)"
+                            />
+                        </Layer>
+                    </Stage>
                 </StyledTilesetImageContainer>
             </Card>
             <StyledBottomContainer>
@@ -245,9 +203,9 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                     {scale && (
                         <Slider
                             size="small"
-                            step={SCALE_STEP}
+                            step={0.1}
                             min={0.5}
-                            max={10}
+                            max={10.0}
                             value={scale.x}
                             onChange={(_, value) => onScale(value as number)}
                         />
@@ -256,7 +214,7 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                 <StyledButtonContainer>
                     <Tooltip title="Add new tile" placement="bottom-end">
                         <IconButton size="small" onClick={onAddTile}>
-                            <AddIcon fontSize="small" />
+                            <AddBoxIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete selected tile" placement="bottom-end">
@@ -277,3 +235,8 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
 Tileset.displayName = 'Tileset'
 
 export default Tileset
+
+// repositionStage(
+//     ((newTileId - 1) % columns) * tilewidth * scale.x,
+//     Math.ceil(newTileId / columns - 1) * tileheight * scale.y
+// )

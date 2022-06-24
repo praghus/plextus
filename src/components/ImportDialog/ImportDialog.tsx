@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { debounce } from 'lodash'
 import {
     Box,
     Button,
@@ -25,9 +24,10 @@ import { changeAppImportedImage } from '../../store/app/actions'
 import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../../store/editor/actions'
 import { selectImportedImage } from '../../store/app/selectors'
 import { selectCanvas, selectTileset } from '../../store/editor/selectors'
-import { getImage } from '../../common/utils/image'
+import { getImage, reduceColors } from '../../common/utils/image'
 import { LayerImportConfig } from '../../store/editor/types'
 import { ImportPreview } from '../ImportPreview'
+import { dataURLToBlob } from '../../common/utils/data'
 
 const ImportDialog: React.FunctionComponent = () => {
     const canvas = useSelector(selectCanvas)
@@ -38,39 +38,36 @@ const ImportDialog: React.FunctionComponent = () => {
 
     const dispatch = useDispatch()
     const onClose = () => dispatch(changeAppImportedImage())
-    const onCreateNewImageLayerFromFile = useCallback(
-        debounce((config: LayerImportConfig) => dispatch(createNewImageLayerFromFile(config)), 300),
-        []
-    )
-    const onCreateNewTileLayerFromFile = useCallback(
-        debounce(
-            (image: CanvasImageSource, config: LayerImportConfig) =>
-                dispatch(createNewTileLayerFromFile(image, config)),
-            300
-        ),
-        []
-    )
-
     const [isProcessing, setIsProcessing] = useState(false)
     const [image, setImage] = useState<CanvasImageSource>()
-    const [config, setConfig] = useState<LayerImportConfig>({
-        colorsCount: 256,
-        columns: tileset.columns,
-        mode: IMPORT_MODES.NEW_PROJECT,
-        name: '',
-        offset: { x: 0, y: 0 },
-        reducedColors: false,
-        resolution: { h: canvas?.height ?? 0, w: canvas?.width ?? 0 },
-        tileSize: { h: tileset.tileheight, w: tileset.tilewidth }
-    })
+    const [imageUrl, setImageUrl] = useState<string>()
+    const [columns, setColumns] = useState(tileset?.columns || 10)
+    const [colorsCount, setColorsCount] = useState(255)
+    const [mode, setMode] = useState(IMPORT_MODES.NEW_PROJECT)
+    const [name, setName] = useState('')
+    const [offset, setOffset] = useState<Vec2>({ x: 0, y: 0 })
+    const [reducedColors, setReducedColors] = useState(false)
+    const [resolution, setResolution] = useState<Dim>({ h: canvas?.height ?? 0, w: canvas?.width ?? 0 })
+    const [tileSize, setTileSize] = useState<Dim>({ h: tileset.tileheight, w: tileset.tilewidth })
 
-    const { columns, colorsCount, mode, name, offset, reducedColors, resolution, tileSize } = config
+    const config: LayerImportConfig = {
+        colorsCount,
+        columns,
+        image,
+        imageUrl,
+        mode,
+        name,
+        offset,
+        reducedColors,
+        resolution,
+        tileSize
+    }
 
-    const setConfigProp = (
-        key: string,
-        value: boolean | number | string | { x?: number; y?: number; w?: number; h?: number }
-    ): void => {
-        setConfig({ ...config, [key]: value })
+    const onSave = () => {
+        setIsProcessing(true)
+        dispatch(
+            mode === IMPORT_MODES.NEW_IMAGE ? createNewImageLayerFromFile(config) : createNewTileLayerFromFile(config)
+        )
     }
 
     const handleClose = (e: React.SyntheticEvent<Element, Event>, reason: string): void => {
@@ -79,18 +76,12 @@ const ImportDialog: React.FunctionComponent = () => {
         }
     }
 
-    const onSave = () => {
-        setIsProcessing(true)
-        config.mode === IMPORT_MODES.NEW_IMAGE
-            ? onCreateNewImageLayerFromFile(config)
-            : image && onCreateNewTileLayerFromFile(image, config)
-    }
-
     useEffect(() => {
         async function onLoadImage(src: string) {
             const i = await getImage(src)
             setImage(i)
-            setConfig({ ...config, name: importedImage?.filename || '', resolution: { h: i.height, w: i.width } })
+            setName(importedImage?.filename || '')
+            setResolution({ h: i.height, w: i.width })
         }
         if (importedImage) {
             setIsProcessing(false)
@@ -99,17 +90,28 @@ const ImportDialog: React.FunctionComponent = () => {
     }, [importedImage])
 
     useEffect(() => {
+        async function reduceImageColors(img: string) {
+            const i = await dataURLToBlob(img)
+            const blob = await reduceColors(i, colorsCount)
+            const url = window.URL.createObjectURL(blob)
+            const reducedImage = await getImage(url)
+            setImage(reducedImage)
+            setImageUrl(url)
+        }
+        if (importedImage?.image) {
+            reduceImageColors(importedImage.image)
+        }
+    }, [colorsCount, importedImage])
+
+    useEffect(() => {
         if (mode !== IMPORT_MODES.NEW_PROJECT) {
-            setConfig({
-                ...config,
-                columns: tileset.columns,
-                tileSize: { h: tileset.tileheight, w: tileset.tilewidth }
-            })
+            setColumns(tileset.columns)
+            setTileSize({ h: tileset.tileheight, w: tileset.tilewidth })
             if (mode === IMPORT_MODES.NEW_IMAGE) {
-                setConfigProp('offset', { x: 0, y: 0 })
+                setOffset({ x: 0, y: 0 })
             }
         }
-    }, [mode])
+    }, [mode, tileset.columns, tileset.tileheight, tileset.tilewidth])
 
     return (
         <Dialog open={!!importedImage} onClose={handleClose}>
@@ -128,7 +130,7 @@ const ImportDialog: React.FunctionComponent = () => {
                                     aria-label="position"
                                     name="position"
                                     value={mode}
-                                    onChange={e => setConfigProp('mode', e.target.value as IMPORT_MODES)}
+                                    onChange={e => setMode(e.target.value as IMPORT_MODES)}
                                 >
                                     <FormControlLabel
                                         value={IMPORT_MODES.NEW_PROJECT}
@@ -148,19 +150,16 @@ const ImportDialog: React.FunctionComponent = () => {
                                 </RadioGroup>
                             </FormControl>
                         )}
-
                         <TextField
                             fullWidth={true}
                             value={name}
-                            onChange={e => setConfigProp('name', e.target.value)}
+                            onChange={e => setName(e.target.value)}
                             id="name"
                             label={t(mode === IMPORT_MODES.NEW_PROJECT ? 'i18_project_name' : 'i18_layer_name')}
                             size="small"
                             variant="standard"
                         />
-
                         {image && <ImportPreview {...{ config, image }} />}
-
                         <Grid container spacing={1}>
                             {mode === IMPORT_MODES.NEW_PROJECT && (
                                 <>
@@ -170,9 +169,7 @@ const ImportDialog: React.FunctionComponent = () => {
                                             value={tileSize.w}
                                             onChange={e => {
                                                 const w = parseInt(e.target.value)
-                                                Number.isInteger(w) &&
-                                                    w > 0 &&
-                                                    setConfigProp('tileSize', { ...tileSize, w })
+                                                Number.isInteger(w) && w > 0 && setTileSize({ ...tileSize, w })
                                             }}
                                             InputProps={{
                                                 inputProps: { min: 1 }
@@ -189,9 +186,7 @@ const ImportDialog: React.FunctionComponent = () => {
                                             value={tileSize.h}
                                             onChange={e => {
                                                 const h = parseInt(e.target.value)
-                                                Number.isInteger(h) &&
-                                                    h > 0 &&
-                                                    setConfigProp('tileSize', { ...tileSize, h })
+                                                Number.isInteger(h) && h > 0 && setTileSize({ ...tileSize, h })
                                             }}
                                             InputProps={{
                                                 inputProps: { min: 1 }
@@ -208,7 +203,7 @@ const ImportDialog: React.FunctionComponent = () => {
                                             value={columns}
                                             onChange={e => {
                                                 const c = parseInt(e.target.value)
-                                                Number.isInteger(c) && c > 0 && setConfigProp('columns', c)
+                                                Number.isInteger(c) && c > 0 && setColumns(c)
                                             }}
                                             InputProps={{
                                                 endAdornment: (
@@ -230,9 +225,7 @@ const ImportDialog: React.FunctionComponent = () => {
                                         <TextField
                                             type="number"
                                             value={offset.x}
-                                            onChange={e =>
-                                                setConfigProp('offset', { ...offset, x: parseInt(e.target.value) })
-                                            }
+                                            onChange={e => setOffset({ ...offset, x: parseInt(e.target.value) })}
                                             id="offsetX"
                                             label={t('i18_offset_x')}
                                             size="small"
@@ -243,9 +236,7 @@ const ImportDialog: React.FunctionComponent = () => {
                                         <TextField
                                             type="number"
                                             value={offset.y}
-                                            onChange={e =>
-                                                setConfigProp('offset', { ...offset, y: parseInt(e.target.value) })
-                                            }
+                                            onChange={e => setOffset({ ...offset, y: parseInt(e.target.value) })}
                                             id="offsetY"
                                             label={t('i18_offset_y')}
                                             size="small"
@@ -254,41 +245,39 @@ const ImportDialog: React.FunctionComponent = () => {
                                     </Grid>
                                 </>
                             )}
-                            {mode === IMPORT_MODES.NEW_PROJECT && (
-                                <>
-                                    <Grid item xs={8} mt={2}>
-                                        <FormControlLabel
-                                            label={t('i18_use_reduced_palette') as string}
-                                            control={
-                                                <Switch
-                                                    checked={reducedColors}
-                                                    name="reduced"
-                                                    onChange={e => setConfigProp('reducedColors', e.target.checked)}
-                                                />
-                                            }
-                                            sx={{ marginLeft: '10px', marginRight: 'auto' }}
+                        </Grid>
+                        <Grid container spacing={1}>
+                            <Grid item xs={8} mt={2}>
+                                <FormControlLabel
+                                    label={t('i18_use_reduced_palette') as string}
+                                    control={
+                                        <Switch
+                                            checked={reducedColors}
+                                            name="reduced"
+                                            onChange={e => setReducedColors(e.target.checked)}
                                         />
-                                    </Grid>
-                                    <Grid item xs={4} mt={2}>
-                                        <TextField
-                                            type="number"
-                                            disabled={!config.reducedColors}
-                                            value={colorsCount}
-                                            onChange={e => {
-                                                const c = parseInt(e.target.value)
-                                                Number.isInteger(c) && c > 1 && setConfigProp('colorsCount', c)
-                                            }}
-                                            InputProps={{
-                                                inputProps: { min: 2 }
-                                            }}
-                                            id="width"
-                                            label={t('i18_colors')}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                </>
-                            )}
+                                    }
+                                    sx={{ marginLeft: '10px', marginRight: 'auto' }}
+                                />
+                            </Grid>
+                            <Grid item xs={4} mt={2}>
+                                <TextField
+                                    type="number"
+                                    disabled={!config.reducedColors}
+                                    value={colorsCount}
+                                    onChange={e => {
+                                        const c = parseInt(e.target.value)
+                                        Number.isInteger(c) && c > 1 && setColorsCount(c)
+                                    }}
+                                    InputProps={{
+                                        inputProps: { min: 2 }
+                                    }}
+                                    id="width"
+                                    label={t('i18_colors')}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Grid>
                         </Grid>
                     </Box>
                 </DialogContent>

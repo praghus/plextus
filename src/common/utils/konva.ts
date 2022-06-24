@@ -1,6 +1,6 @@
 import Konva from 'konva'
 
-import { TOOLS } from '../../common/constants'
+import { TOOLS } from '../../common/tools'
 import { Canvas, Grid, Selected, Workspace } from '../../store/editor/types'
 import { brightenDarken, getRgbaValue } from './colors'
 
@@ -33,21 +33,21 @@ export const pickColor = (ctx: CanvasRenderingContext2D, pos: Konva.Vector2d): n
 export function centerStage(
     stage: Konva.Stage,
     canvas: Canvas,
-    workspace: Workspace,
-    cb: (x: number, y: number, scale: number) => void
+    cb: (pos: Konva.Vector2d, scale: Konva.Vector2d) => void
 ): void {
     const padding = 100
     const dimension = canvas.height >= canvas.width ? 'height' : 'width'
-    const scale =
-        (dimension === 'width' ? workspace.width - padding * 2 : workspace.height - padding * 2) / canvas[dimension]
-    const x = (workspace.width - canvas.width * scale) / 2
-    const y = (workspace.height - canvas.height * scale) / 2
+    const width = window.innerWidth
+    const height = window.innerHeight
+    const scale = (dimension === 'width' ? width - padding * 2 : height - padding * 2) / canvas[dimension]
+    const x = (width - canvas.width * scale) / 2
+    const y = (height - canvas.height * scale) / 2
 
     stage.position({ x, y })
     stage.scale({ x: scale, y: scale })
     stage.batchDraw()
 
-    cb(x, y, scale)
+    cb(stage.position(), stage.scale())
 }
 
 export function actionDraw(

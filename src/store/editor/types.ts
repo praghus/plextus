@@ -62,6 +62,8 @@ export type ProjectConfig = {
 }
 
 export type LayerImportConfig = {
+    image?: CanvasImageSource
+    imageUrl?: string
     mode: IMPORT_MODES
     name: string
     offset: Vec2
@@ -78,6 +80,5 @@ export type ProjectFile = {
     layers: DeflatedLayer[]
     palette: Pallete
     tileset: Tileset
-    workspace: Workspace
     selected: Selected
 }

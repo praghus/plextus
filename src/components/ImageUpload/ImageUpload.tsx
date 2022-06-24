@@ -9,14 +9,13 @@ interface Props {
 
 const ImageUpload: React.FunctionComponent<Props> = ({ children }) => {
     const dispatch = useDispatch()
-    const onChangeImportedImage = (filename: string, image: string) =>
-        dispatch(changeAppImportedImage({ filename, image }))
-    const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files && e.target.files[0]
-        if (file) {
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        async function upload(file: File) {
             const { blob } = await uploadImage(file)
-            onChangeImportedImage(file.name, window.URL.createObjectURL(blob))
+            dispatch(changeAppImportedImage({ filename: file.name, image: window.URL.createObjectURL(blob) }))
         }
+        const file = e.target.files && e.target.files[0]
+        if (file) upload(file)
     }
 
     return (

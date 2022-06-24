@@ -3,13 +3,12 @@ import { call, put, select, takeLatest } from 'redux-saga/effects'
 import { toast } from 'react-toastify'
 import i18n from '../../common/translations/i18n'
 import logger from '../../common/utils/logger'
-import { importLayer, generateReducedPalette, reduceColors } from '../../common/utils/image'
+import { importLayer, generateReducedPalette } from '../../common/utils/image'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
 import { canvasToBlob, downloadProjectFile } from '../../common/utils/data'
-import { IUploadedImage } from '../../common/types'
-import { IMPORT_MODES, TOOLS } from '../../common/constants'
-import { selectImportedImage } from '../app/selectors'
+import { IMPORT_MODES } from '../../common/constants'
+import { TOOLS } from '../../common/tools'
 import { changeAppImportedImage, changeAppIsLoading } from '../app/actions'
 import {
     selectCanvas,
@@ -31,15 +30,18 @@ import {
     changeTool,
     changePosition,
     changeCanvasSize,
+    changeGridColor,
     changeGridSize,
     changeScale,
     changeSelectedLayer,
     changeSelectedTile,
     changeTileset,
     saveChanges,
+    loadStateFromFile,
     changeTilesetImage,
     changePalette,
-    changeProjectName
+    changeProjectName,
+    adjustWorkspaceSize
 } from './actions'
 import { clear } from '../history/actions'
 import { APP_STORAGE_KEY } from '../app/constants'
@@ -61,7 +63,8 @@ import {
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_CREATE_TILE_LAYER_FROM_FILE,
     INITIAL_STATE,
-    EDITOR_CREATE_IMAGE_LAYER_FROM_FILE
+    EDITOR_CREATE_IMAGE_LAYER_FROM_FILE,
+    EDITOR_OPEN_PROJECT_FILE
 } from './constants'
 import { DeflatedLayer, Grid, Layer, Canvas, Selected, Tileset } from './types'
 import { createEmptyLayer, createImageLayer, getStateToSave } from './utils'
@@ -72,6 +75,18 @@ export function* clearProject(): SagaIterator<void> {
         // historyData.forEach(URL.revokeObjectURL)
         clearCache()
         yield put(resetToDefaults())
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* openProject(action: AnyAction): SagaIterator<void> {
+    const { data } = action.payload
+    try {
+        clearCache()
+        yield put(resetToDefaults())
+        yield put(loadStateFromFile(data))
+        yield put(adjustWorkspaceSize())
     } catch (err) {
         logger.error(err)
     }
@@ -221,8 +236,12 @@ export function* saveChangesSaga(): SagaIterator<void> {
 export function* saveChangesToFileSaga(): SagaIterator<void> {
     try {
         const state = yield select(state => state)
-        const { editor } = yield call(() => getStateToSave(state))
-        downloadProjectFile(`${(editor.name || 'project').toLowerCase()}.plextus`, JSON.stringify(editor))
+        const editorState = yield call(() => getStateToSave(state))
+        const toSave = { ...editorState.editor }
+        delete toSave.workspace
+        yield call(() =>
+            downloadProjectFile(`${(toSave.name || 'project').toLowerCase()}.plextus`, JSON.stringify(toSave))
+        )
         logger.info('Saving to file')
     } catch (err) {
         logger.error(err)
@@ -254,6 +273,7 @@ export function* createNewProject(action: AnyAction): SagaIterator<void> {
         yield put(changePosition((workspace.width - width * newScale) / 2, (workspace.height - height * newScale) / 2))
         yield put(changeCanvasSize(width, height))
         yield put(changeGridSize(tilewidth, tileheight))
+        yield put(changeGridColor(null))
         yield put(changeLayers([layer]))
         yield put(changeSelectedLayer(layer.id))
         yield put(changeSelectedTile(1))
@@ -278,9 +298,8 @@ export function* createImageLayerFromFile(action: AnyAction): SagaIterator<void>
     const { config } = action.payload
     try {
         yield put(changeAppIsLoading(true))
-        const importedImage: IUploadedImage = yield select(selectImportedImage)
         const layers: Layer[] = yield select(selectLayers)
-        const layer = createImageLayer(config.name, importedImage.image, config.resolution.w, config.resolution.h)
+        const layer = createImageLayer(config.name, config.imageUrl, config.resolution.w, config.resolution.h)
         yield put(changeLayers([...layers, { ...layer }]))
         yield put(changeSelectedLayer(layer.id))
         yield put(changeAppImportedImage())
@@ -291,16 +310,15 @@ export function* createImageLayerFromFile(action: AnyAction): SagaIterator<void>
 }
 
 export function* createTileLayerFromFile(action: AnyAction): SagaIterator<void> {
-    const { image, config } = action.payload
+    const { config } = action.payload
     try {
         yield put(changeAppIsLoading(true))
-        yield put(changeAppImportedImage())
 
         const layers: Layer[] = yield select(selectLayers)
         const tileset: Tileset = yield select(selectTileset)
 
-        const { layer, tilesetCanvas, tilecount } = yield call(importLayer, image, config, tileset)
-        const { columns, colorsCount, mode, name, tileSize, reducedColors } = config
+        const { layer, tilesetCanvas, tilecount } = yield call(importLayer, config.image, config, tileset)
+        const { columns, mode, name, tileSize } = config
         const { w: tilewidth, h: tileheight } = tileSize
 
         const w = layer.width * tilewidth
@@ -331,10 +349,7 @@ export function* createTileLayerFromFile(action: AnyAction): SagaIterator<void> 
             )
         }
 
-        const tilesetImage = reducedColors
-            ? yield call(reduceColors, tilesetCanvas, colorsCount)
-            : yield call(canvasToBlob, tilesetCanvas)
-
+        const tilesetImage = yield call(canvasToBlob, tilesetCanvas)
         const palette = yield call(generateReducedPalette, tilesetImage)
 
         yield put(changePalette(palette))
@@ -343,6 +358,7 @@ export function* createTileLayerFromFile(action: AnyAction): SagaIterator<void> 
         yield put(saveChanges())
         yield put(clear())
         yield put(changeAppIsLoading(false))
+        yield put(changeAppImportedImage())
     } catch (err) {
         logger.error(err)
     }
@@ -358,6 +374,7 @@ export default function* editorSaga(): Generator {
         yield takeLatest(EDITOR_CHANGE_LAYER_OPACITY, changeLayerOpacity),
         yield takeLatest(EDITOR_CHANGE_LAYER_VISIBLE, changeLayerVisible),
         yield takeLatest(EDITOR_CROP, cropArea),
+        yield takeLatest(EDITOR_OPEN_PROJECT_FILE, openProject),
         yield takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
         yield takeLatest(EDITOR_REMOVE_TILE, removeTile),
         yield takeLatest(EDITOR_SAVE_CHANGES, saveChangesSaga),

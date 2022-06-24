@@ -19,6 +19,7 @@ export function createEmptyImage(width: number, height: number): Promise<Blob> {
     return new Promise((resolve, reject) => {
         const canvasElement = document.createElement('canvas')
         const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
+        canvasElement.width = width
         canvasElement.height = height
         ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
         canvasElement.toBlob((blob: Blob | null) => (blob ? resolve(blob) : reject()), 'image/png')
@@ -36,7 +37,7 @@ export function downloadImage(canvas: HTMLCanvasElement): void {
 
 export function uploadImage(
     file: Blob
-): Promise<{ image: HTMLImageElement; blob: Blob; width: number; height: number }> {
+): Promise<{ image: HTMLImageElement; blob: Blob; canvas: HTMLCanvasElement; width: number; height: number }> {
     return new Promise((resolve, reject) => {
         const canvasElement = document.createElement('canvas')
         const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
@@ -54,7 +55,7 @@ export function uploadImage(
                     ctx.drawImage(image, 0, 0)
 
                     const blob = await canvasToBlob(canvasElement)
-                    resolve({ blob, height: image.height, image, width: image.width })
+                    resolve({ blob, canvas: canvasElement, height: image.height, image, width: image.width })
                 }
             } else reject()
         }
@@ -162,11 +163,9 @@ export async function importLayer(image: CanvasImageSource, config: LayerImportC
     } else throw new Error('No image data for processing!')
 }
 
-export async function reduceColors(canvas: HTMLCanvasElement, colorsCount: 256): Promise<Blob> {
-    const blob = await canvasToBlob(canvas)
+export async function reduceColors(blob: Blob, colorsCount = 256): Promise<Blob> {
     const fetchedSourceImage = await new Response(blob).arrayBuffer()
     const sourceBytes = new Uint8Array(fetchedSourceImage)
-
     const { outputFiles, exitCode } = await execute({
         commands: [`convert ${TILESET_FILENAME} +dither -alpha off -colors ${colorsCount} remap.png`],
         inputFiles: [{ content: sourceBytes, name: TILESET_FILENAME }]

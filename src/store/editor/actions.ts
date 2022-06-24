@@ -41,6 +41,7 @@ import {
     EDITOR_CROP,
     EDITOR_CROP_SUCCESS,
     EDITOR_HISTORY_ACTION,
+    EDITOR_OPEN_PROJECT_FILE,
     EDITOR_REMOVE_LAYER,
     EDITOR_REMOVE_TILE,
     EDITOR_REMOVE_TILE_SUCCESS,
@@ -80,7 +81,7 @@ export const changeCanvasSize = (width: number | null, height: number | null) =>
         type: EDITOR_CHANGE_CANVAS
     } as const)
 
-export const changeGridColor = (color: number[]) =>
+export const changeGridColor = (color: null | number[]) =>
     ({
         payload: { color },
         type: EDITOR_CHANGE_GRID_COLOR
@@ -299,9 +300,9 @@ export const createNewImageLayerFromFile = (config: LayerImportConfig) =>
         type: EDITOR_CREATE_IMAGE_LAYER_FROM_FILE
     } as const)
 
-export const createNewTileLayerFromFile = (image: CanvasImageSource, config: LayerImportConfig) =>
+export const createNewTileLayerFromFile = (config: LayerImportConfig) =>
     ({
-        payload: { config, image },
+        payload: { config },
         type: EDITOR_CREATE_TILE_LAYER_FROM_FILE
     } as const)
 
@@ -309,4 +310,10 @@ export const loadStateFromFile = (data: ProjectFile) =>
     ({
         payload: { data },
         type: EDITOR_LOAD_STATE_FROM_FILE
+    } as const)
+
+export const openProject = (data: ProjectFile) =>
+    ({
+        payload: { data },
+        type: EDITOR_OPEN_PROJECT_FILE
     } as const)

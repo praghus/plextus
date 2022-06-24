@@ -3,18 +3,14 @@ import Konva from 'konva'
 import Slider from '@mui/material/Slider'
 import { useTheme } from '@mui/material/styles'
 import { Layer, Rect } from 'react-konva'
-import { LayerImportConfig } from 'store/editor/types'
-import {
-    IMPORT_PREVIEW_WIDTH,
-    IMPORT_PREVIEW_HEIGHT,
-    SCALE_MIN,
-    SCALE_MAX,
-    SCALE_STEP,
-    IMPORT_MODES
-} from '../../common/constants'
+
+import { useZoomEvents } from '../../hooks/useZoomEvents'
+import { LayerImportConfig } from '../../store/editor/types'
+import { IMPORT_PREVIEW_WIDTH, IMPORT_PREVIEW_HEIGHT, IMPORT_MODES } from '../../common/constants'
 import { TransparentBackground } from '../TransparentBackground'
-import { StyledStage, StyledPreviewContainer } from './ImportPreview.styled'
 import { GridLines } from '../GridLines'
+
+import { StyledStage, StyledPreviewContainer } from './ImportPreview.styled'
 
 interface Props {
     image: CanvasImageSource
@@ -42,6 +38,24 @@ const ImportPreview: React.FunctionComponent<Props> = ({ image, config }) => {
         setPreview(node)
     }, [])
 
+    const dragBoundFunc = useCallback(
+        (pos: Konva.Vector2d) => {
+            return {
+                x:
+                    IMPORT_PREVIEW_WIDTH > width * scale.x
+                        ? 0
+                        : Math.max(IMPORT_PREVIEW_WIDTH - width * scale.x, Math.min(pos.x, 0)),
+                y:
+                    IMPORT_PREVIEW_HEIGHT > height * scale.y
+                        ? 0
+                        : Math.max(IMPORT_PREVIEW_HEIGHT - height * scale.y, Math.min(pos.y, 0))
+            }
+        },
+        [scale, width, height]
+    )
+
+    const { onScale, onTouchEnd, onTouchMove, onWheel } = useZoomEvents(stage, setPosition, setScale, dragBoundFunc)
+
     const grid = useMemo(
         () => ({
             color: [255, 255, 255],
@@ -50,23 +64,6 @@ const ImportPreview: React.FunctionComponent<Props> = ({ image, config }) => {
             width: tileSize.w
         }),
         [tileSize]
-    )
-
-    const onScale = useCallback(
-        (newScale: number): void => {
-            if (stage) {
-                const x = IMPORT_PREVIEW_WIDTH / 2
-                const y = IMPORT_PREVIEW_HEIGHT / 2
-                const oldScale = stage.scaleX()
-                const newPos = {
-                    x: x - ((x - stage.x()) / oldScale) * newScale,
-                    y: y - ((y - stage.y()) / oldScale) * newScale
-                }
-                setPosition(newPos)
-                setScale({ x: newScale, y: newScale })
-            }
-        },
-        [stage]
     )
 
     useEffect(() => {
@@ -87,7 +84,7 @@ const ImportPreview: React.FunctionComponent<Props> = ({ image, config }) => {
         <>
             <StyledPreviewContainer>
                 <StyledStage
-                    {...{ scale }}
+                    {...{ dragBoundFunc, onTouchEnd, onTouchMove, onWheel, scale }}
                     ref={handleStage}
                     width={IMPORT_PREVIEW_WIDTH}
                     height={IMPORT_PREVIEW_HEIGHT}
@@ -106,9 +103,10 @@ const ImportPreview: React.FunctionComponent<Props> = ({ image, config }) => {
                 sx={{ marginBottom: '10px' }}
                 size="small"
                 value={scale.x}
-                step={SCALE_STEP}
-                min={SCALE_MIN}
-                max={SCALE_MAX}
+                step={0.1}
+                min={0.25}
+                max={20}
+                marks={[{ value: 1 }]}
                 onChange={(_, value) => onScale(value as number)}
             />
         </>

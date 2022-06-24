@@ -114,7 +114,6 @@ module.exports = {
         'prefer-rest-params': 0,
         quotes: [1, 'single'],
         radix: 0,
-        'react-hooks/exhaustive-deps': 0,
         'react-redux/prefer-separate-component-file': 0,
         'react/default-props-match-prop-types': 0,
         'react/destructuring-assignment': 0,
