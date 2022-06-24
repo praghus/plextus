@@ -4,7 +4,7 @@ import { IMuiTheme } from '../../common/types'
 
 export const StyledTilesetImageContainer = styled.div`
     height: 320px;
-    overflow: auto;
+    overflow: hidden;
     background-image: linear-gradient(
             45deg,
             ${({ theme }: IMuiTheme) => theme?.palette.action.hover} 25%,
@@ -16,21 +16,6 @@ export const StyledTilesetImageContainer = styled.div`
     background-size: 8px 8px;
     background-position: 0 0, 4px 0, 4px -4px, 0px 4px;
     background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
-
-    ::-webkit-scrollbar {
-        width: 0.7em;
-        height: 0.7em;
-    }
-    ::-webkit-scrollbar-corner {
-        background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#111' : '#bbb')};
-    }
-    ::-webkit-scrollbar-track {
-        background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#111' : '#bbb')};
-    }
-    ::-webkit-scrollbar-thumb {
-        background-color: ${({ theme }: IMuiTheme) => theme?.palette.action.disabled};
-        outline: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.action.disabled};
-    }
 `
 
 export const StyledBottomContainer = styled.div`

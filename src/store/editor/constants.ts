@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 
-import { PALETTES, DEFAULT_TILESET_IMAGE, TOOLS } from '../../common/constants'
+import { TOOLS } from '../../common/tools'
+import { PALETTES, DEFAULT_TILESET_IMAGE } from '../../common/constants'
 import { Canvas, DeflatedLayer, Grid, Rectangle } from './types'
 
 export const EDITOR_RESOURCE_NAME = 'editor'
@@ -35,6 +36,7 @@ export const EDITOR_CLEAR_PROJECT = `${EDITOR_RESOURCE_NAME}/EDITOR_CLEAR_PROJEC
 export const EDITOR_CROP = `${EDITOR_RESOURCE_NAME}/EDITOR_CROP`
 export const EDITOR_CROP_SUCCESS = `${EDITOR_RESOURCE_NAME}/EDITOR_CROP_SUCCESS`
 export const EDITOR_HISTORY_ACTION = `${EDITOR_RESOURCE_NAME}/EDITOR_HISTORY_ACTION`
+export const EDITOR_OPEN_PROJECT_FILE = `${EDITOR_RESOURCE_NAME}/EDITOR_OPEN_PROJECT_FILE`
 export const EDITOR_REMOVE_LAYER = `${EDITOR_RESOURCE_NAME}/EDITOR_REMOVE_LAYER`
 export const EDITOR_REMOVE_TILE = `${EDITOR_RESOURCE_NAME}/EDITOR_REMOVE_TILE`
 export const EDITOR_REMOVE_TILE_SUCCESS = `${EDITOR_RESOURCE_NAME}/EDITOR_REMOVE_TILE_SUCCESS`

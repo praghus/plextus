@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Konva from 'konva'
 import { jsx } from '@emotion/react'
 import { useTheme } from '@mui/material/styles'
@@ -7,16 +7,16 @@ import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
 
+import { IS_MOBILE } from '../../common/constants'
 import { undo, redo } from '../../store/history/actions'
 import { Rectangle, Tileset } from '../../store/editor/types'
-import { SCALE_BY, TOOLS } from '../../common/constants'
-import { centerStage, getDistance, getCenter } from '../../common/utils/konva'
+import { TOOLS } from '../../common/tools'
+import { centerStage } from '../../common/utils/konva'
 import { getRgbaValue } from '../../common/utils/colors'
-import { isMobile } from '../../common/utils/mobile'
 import {
     selectCanvas,
     selectGrid,
-    selectLayers,
+    selectRawLayers,
     selectSelected,
     selectTileset,
     selectWorkspace
@@ -35,6 +35,7 @@ import {
     changeTilesetImage,
     crop
 } from '../../store/editor/actions'
+import { useZoomEvents } from '../../hooks/useZoomEvents'
 import { CropTool } from '../CropTool'
 import { GridLines } from '../GridLines'
 import { KonvaLayer } from '../KonvaLayer'
@@ -55,15 +56,12 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const selected = useSelector(selectSelected)
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
-    const layers = useSelector(selectLayers)
+    const layers = useSelector(selectRawLayers)
     const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
 
     const backgroundColor = canvas.background && getRgbaValue(canvas.background)
     const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
-
-    const lastCenter = useRef<Vec2>()
-    const lastDist = useRef(0)
 
     const [stage, setStage] = useState<Konva.Stage>()
     const [isMouseDown, setIsMouseDown] = useState<boolean>(false)
@@ -71,7 +69,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const [pointerPosition, setPointerPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
     const [keyDown, setKeyDown] = useState<KeyboardEvent | null>(null)
 
-    const draggable = !isMobile && (selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP)
+    const draggable = !IS_MOBILE && (selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP)
     const isPointerVisible = useMemo(
         () =>
             isMouseOver &&
@@ -83,7 +81,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const theme = useTheme()
     const dispatch = useDispatch()
 
-    const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
+    const onAdjustWorkspaceSize = useCallback(() => dispatch(adjustWorkspaceSize()), [dispatch])
     const onChangeSelectedArea = (rect: Rectangle) => dispatch(changeSelectedArea(rect))
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
     const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
@@ -92,134 +90,36 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
-    const onUndo = () => dispatch(undo())
-    const onRedo = () => dispatch(redo())
-    const onCrop = () => dispatch(crop())
     const onKeyUp = () => setKeyDown(null)
     const onKeyDown = (keyDown: KeyboardEvent) => setKeyDown(keyDown)
-    const onDragEnd = () => stage && onChangePosition(stage.x(), stage.y())
+    const onDragEnd = () => stage && onChangePosition(stage.position())
     const onMouseMove = () => stage && setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
 
-    const onChangePosition = useCallback(
-        debounce((x, y) => dispatch(changePosition(x, y)), 500),
-        []
+    const onChangePosition = useMemo(
+        () => debounce((pos: Konva.Vector2d) => dispatch(changePosition(pos.x, pos.y)), 300),
+        [dispatch]
     )
 
-    const onChangeScale = useCallback(
-        debounce(scale => dispatch(changeScale(scale)), 500),
-        []
+    const onChangeScale = useMemo(
+        () => debounce((scale: Konva.Vector2d) => dispatch(changeScale(scale.x)), 300),
+        [dispatch]
+    )
+
+    const onCenter = useCallback(
+        () =>
+            stage &&
+            centerStage(stage, canvas, (pos, scale) => {
+                onChangePosition(pos)
+                onChangeScale(scale)
+            }),
+        [canvas, onChangePosition, onChangeScale, stage]
     )
 
     const handleStage = useCallback((node: Konva.Stage) => {
         setStage(node)
     }, [])
 
-    const onScale = useCallback(
-        (newScale: number) => {
-            if (stage) {
-                const pointer = stage.getPointerPosition()
-                if (pointer) {
-                    const { x, y } = pointer
-                    const oldScale = stage.scaleX()
-                    const newPos = {
-                        x: x - ((x - stage.x()) / oldScale) * newScale,
-                        y: y - ((y - stage.y()) / oldScale) * newScale
-                    }
-                    onChangeScale(newScale)
-                    onChangePosition(newPos.x, newPos.y)
-                    stage.scale({ x: newScale, y: newScale })
-                    stage.position(newPos)
-                    stage.batchDraw()
-                }
-            }
-        },
-        [stage]
-    )
-
-    const onWheel = useCallback(
-        (e: Konva.KonvaEventObject<WheelEvent>) => {
-            if (stage) {
-                const { altKey, metaKey, deltaX, deltaY } = e.evt
-                if (altKey || metaKey) {
-                    const newScale = deltaY > 0 ? stage.scaleX() / SCALE_BY : stage.scaleX() * SCALE_BY
-                    onScale(newScale)
-                } else {
-                    const newPos = {
-                        x: stage.x() - deltaX,
-                        y: stage.y() - deltaY
-                    }
-                    stage.position(newPos)
-                    onChangePosition(newPos.x, newPos.y)
-                }
-                stage.batchDraw()
-            }
-            e.evt.preventDefault()
-        },
-        [stage]
-    )
-
-    const onTouchMove = useCallback(
-        (e: Konva.KonvaEventObject<TouchEvent>) => {
-            e.evt.preventDefault()
-            if (stage) {
-                const touch1 = e.evt.touches[0]
-                const touch2 = e.evt.touches[1]
-
-                if (touch1 && touch2) {
-                    if (stage.isDragging()) {
-                        stage.stopDrag()
-                    }
-
-                    const p1 = { x: touch1.clientX, y: touch1.clientY }
-                    const p2 = { x: touch2.clientX, y: touch2.clientY }
-
-                    if (!lastCenter.current) {
-                        lastCenter.current = getCenter(p1, p2)
-                        return
-                    }
-
-                    const newCenter = getCenter(p1, p2)
-                    const dist = getDistance(p1, p2)
-
-                    if (!lastDist.current) {
-                        lastDist.current = dist
-                    }
-
-                    const pointTo = {
-                        x: (newCenter.x - stage.x()) / stage.scaleX(),
-                        y: (newCenter.y - stage.y()) / stage.scaleX()
-                    }
-
-                    const scale = stage.scaleX() * (dist / lastDist.current)
-                    const dx = newCenter.x - lastCenter.current.x
-                    const dy = newCenter.y - lastCenter.current.y
-
-                    const newPos = {
-                        x: newCenter.x - pointTo.x * scale + dx,
-                        y: newCenter.y - pointTo.y * scale + dy
-                    }
-
-                    stage.position(newPos)
-                    stage.scaleX(scale)
-                    stage.scaleY(scale)
-                    stage.batchDraw()
-
-                    onScale(scale)
-                    onChangePosition(newPos.x, newPos.y)
-
-                    lastDist.current = dist
-                    lastCenter.current = newCenter
-                }
-            }
-        },
-        [stage]
-    )
-
-    const onTouchEnd = () => {
-        lastDist.current = 0
-        lastCenter.current = undefined
-        setIsMouseDown(false)
-    }
+    const { onTouchEnd, onTouchMove, onWheel } = useZoomEvents(stage, onChangePosition, onChangeScale)
 
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)
@@ -231,41 +131,26 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     }, [])
 
     useEffect(() => {
-        const { scale, x, y } = workspace
-        if (stage) {
-            if (x && y) {
-                stage.position({ x, y })
-                stage.scale({ x: scale, y: scale })
-                stage.batchDraw()
-            } else {
-                centerStage(stage, canvas, workspace, (x, y, scale) => {
-                    onChangePosition(x, y)
-                    onChangeScale(scale)
-                })
-            }
-        }
+        onCenter()
         onAdjustWorkspaceSize()
-    }, [stage, canvas])
+    }, [workspace.width, workspace.height, onCenter, onAdjustWorkspaceSize])
 
     useEffect(() => {
-        if (stage && selected.tool == TOOLS.CROP) {
-            centerStage(stage, canvas, workspace, (x, y, scale) => {
-                onChangePosition(x, y)
-                onChangeScale(scale)
-            })
+        if (selected.tool === TOOLS.CROP) {
+            onCenter()
         }
-    }, [stage, selected.tool])
+    }, [selected.tool, onCenter])
 
     useEffect(() => {
         if (keyDown) {
             if (keyDown.code === 'KeyZ' && (keyDown.ctrlKey || keyDown.metaKey)) {
-                keyDown.shiftKey ? onRedo() : onUndo()
+                dispatch(keyDown.shiftKey ? redo() : undo())
             }
             if (keyDown.code === 'Enter' && selected.tool === TOOLS.CROP) {
-                onCrop()
+                dispatch(crop())
             }
         }
-    }, [keyDown])
+    }, [dispatch, keyDown, selected.tool])
 
     return (
         <div>
@@ -280,7 +165,11 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                     onMouseUp={() => setIsMouseDown(false)}
                     onMouseOver={() => setIsMouseOver(true)}
                     onMouseOut={() => setIsMouseOver(false)}
-                    {...{ draggable, onDragEnd, onMouseMove, onTouchEnd, onTouchMove, onWheel }}
+                    onTouchEnd={() => {
+                        onTouchEnd()
+                        setIsMouseDown(false)
+                    }}
+                    {...{ draggable, onDragEnd, onMouseMove, onTouchMove, onWheel }}
                 >
                     <Layer imageSmoothingEnabled={false}>
                         <TransparentBackground
@@ -317,24 +206,26 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                             ))}
                         {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, grid, onChangeSelectedArea }} />}
                         {selected.tool === TOOLS.SELECT && (
-                            <SelectTool {...{ canvas, grid, isMouseDown, pointerPosition, workspace }} />
+                            <SelectTool {...{ canvas, grid, isMouseDown, pointerPosition, selectedLayer, workspace }} />
                         )}
-                        <GridLines
-                            x={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.x : 0}
-                            y={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.y : 0}
-                            width={
-                                selectedLayer
-                                    ? selectedLayer.width * (selectedLayer.image ? 1 : tileset.tilewidth)
-                                    : canvas.width
-                            }
-                            height={
-                                selectedLayer
-                                    ? selectedLayer.height * (selectedLayer.image ? 1 : tileset.tileheight)
-                                    : canvas.height
-                            }
-                            scale={workspace.scale}
-                            {...{ grid, theme }}
-                        />
+                        {stage && (
+                            <GridLines
+                                x={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.x : 0}
+                                y={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.y : 0}
+                                width={
+                                    selectedLayer
+                                        ? selectedLayer.width * (selectedLayer.image ? 1 : tileset.tilewidth)
+                                        : canvas.width
+                                }
+                                height={
+                                    selectedLayer
+                                        ? selectedLayer.height * (selectedLayer.image ? 1 : tileset.tileheight)
+                                        : canvas.height
+                                }
+                                scale={stage.scaleX()}
+                                {...{ grid, theme }}
+                            />
+                        )}
                         {isPointerVisible && (
                             <Pointer
                                 {...{
@@ -351,7 +242,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                 </Stage>
                 <TileInfoLabel {...{ pointerPosition, selectedLayer }} />
             </div>
-            {stage && <StatusBar {...{ stage }} />}
+            {stage && <StatusBar {...{ onCenter, stage }} />}
         </div>
     )
 }

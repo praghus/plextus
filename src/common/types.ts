@@ -10,3 +10,9 @@ export interface IUploadedImage {
     filename: string
     image: string
 }
+
+export interface SelectedTile {
+    gid: number | null
+    x: number
+    y: number
+}

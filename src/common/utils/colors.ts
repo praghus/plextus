@@ -3,13 +3,24 @@ export function componentToHex(c: number): string {
     return hex.length === 1 ? `0${hex}` : hex
 }
 
+export function colorToRGBA(colorStr: string): number[] {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    canvas.height = 1
+    canvas.width = 1
+    ctx.fillStyle = colorStr
+    ctx.fillRect(0, 0, 1, 1)
+    const c = ctx.getImageData(0, 0, 1, 1).data
+    return [c[0], c[1], c[2], c[3]]
+}
+
 export const rgbToHex = (r: number, g: number, b: number): string =>
     `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`
 
 export const rgbaToHex = (c: number[]): string =>
     `#${componentToHex(c[0])}${componentToHex(c[1])}${componentToHex(c[2])}${c[3] >= 0 ? componentToHex(c[3]) : ''}`
 
-export const getRgbaValue = (c: number[]): string =>
+export const getRgbaValue = (c: number[] | Uint8ClampedArray): string =>
     `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${!isNaN(c[3]) ? (c[3] / 255).toPrecision(1) : 1})`
 
 export const hexToRgb = (hex: string): number[] => {
@@ -17,7 +28,6 @@ export const hexToRgb = (hex: string): number[] => {
     const r = parseInt(value.substring(0, 2), 16)
     const g = parseInt(value.substring(2, 4), 16)
     const b = parseInt(value.substring(4, 6), 16)
-
     return [r, g, b]
 }
 

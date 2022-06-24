@@ -13,16 +13,16 @@ import {
 
 import { changePosition, changeScale, toggleShowGrid } from '../../store/editor/actions'
 import { selectCanvas, selectGrid, selectWorkspace } from '../../store/editor/selectors'
-import { centerStage } from '../../common/utils/konva'
 import { StyledStatusBar, StyledCol, StyledButton } from './StatusBar.styled'
 
 const marks = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 50]
 
 interface Props {
     stage: Konva.Stage
+    onCenter: () => void
 }
 
-const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
+const StatusBar: React.FunctionComponent<Props> = ({ stage, onCenter }) => {
     const theme = useTheme()
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
@@ -33,17 +33,9 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
     const [zoom, setZoom] = useState(scale)
 
     const dispatch = useDispatch()
-    const onChangePosition = (x: number, y: number) => dispatch(changePosition(x, y))
-    const onChangeScale = (scale: number) => dispatch(changeScale(scale))
     const onToggleShowGrid = (showGrid: boolean) => dispatch(toggleShowGrid(showGrid))
-
-    const onCenter = useCallback(() => {
-        canvas &&
-            centerStage(stage, canvas, workspace, (x, y, scale) => {
-                onChangePosition(x, y)
-                onChangeScale(scale)
-            })
-    }, [stage, canvas, workspace])
+    const onChangePosition = (pos: Konva.Vector2d) => dispatch(changePosition(pos.x, pos.y))
+    const onChangeScale = (scale: Konva.Vector2d) => dispatch(changeScale(scale.x))
 
     const onZoom = useCallback(
         (zoom: number) => {
@@ -62,8 +54,8 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
     )
 
     const onZoomCommitted = () => {
-        onChangeScale(stage.scaleX())
-        onChangePosition(stage.x(), stage.y())
+        onChangeScale(stage.scale())
+        onChangePosition(stage.position())
     }
 
     const onZoomIn = () => {
@@ -93,9 +85,13 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage }) => {
                 alignItems="center"
                 sx={{ paddingLeft: 1, paddingRight: 1, width: '100%' }}
             >
-                <RemoveIcon htmlColor={iconColor} onClick={onZoomOut} />
-                <div>{`${Math.round(zoom * 100)}%`}</div>
-                <AddIcon htmlColor={iconColor} onClick={onZoomIn} />
+                {!isNaN(zoom) && (
+                    <>
+                        <RemoveIcon htmlColor={iconColor} onClick={onZoomOut} sx={{ cursor: 'pointer' }} />
+                        <div>{`${Math.round(zoom * 100)}%`}</div>
+                        <AddIcon htmlColor={iconColor} onClick={onZoomIn} sx={{ cursor: 'pointer' }} />
+                    </>
+                )}
 
                 <StyledCol>
                     <Tooltip title="Center and fit to view size" placement="top">

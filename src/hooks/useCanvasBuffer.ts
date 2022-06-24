@@ -1,16 +1,15 @@
 import Konva from 'konva'
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 
 import { getImage } from '../common/utils/image'
 import { getCoordsFromPos } from '../common/utils/konva'
+import { SelectedTile } from '../common/types'
 import { getTilePos } from '../store/editor/utils'
-import { Grid, Layer, Tileset } from '../store/editor/types'
-
-type SelectedTile = { gid: number; x: number; y: number }
+import { Grid, DeflatedLayer, Tileset } from '../store/editor/types'
 
 export const useCanvasBuffer = (
     grid: Grid,
-    layer: Layer,
+    layer: DeflatedLayer,
     stage: Konva.Stage,
     tileset: Tileset,
     tilesetCanvas: HTMLCanvasElement
@@ -23,17 +22,20 @@ export const useCanvasBuffer = (
 
     const { tilewidth, tileheight } = tileset
 
-    const [width, height] = layer.image
-        ? [layer.width, layer.height]
-        : [layer.width * tilewidth, layer.height * tileheight]
+    const [width, height, bufferWidth, bufferHeight] = layer.image
+        ? [layer.width, layer.height, layer.width, layer.height]
+        : [layer.width * tilewidth, layer.height * tileheight, tilewidth, tileheight]
 
-    const getLayerImage = async (src: string) => {
-        const image = await getImage(src)
-        ctx?.clearRect(0, 0, width, height)
-        ctx?.drawImage(image, 0, 0)
-        stage?.batchDraw()
-        setLayerImage(image)
-    }
+    const getLayerImage = useCallback(
+        async (src: string) => {
+            const image = await getImage(src)
+            ctx?.clearRect(0, 0, width, height)
+            ctx?.drawImage(image, 0, 0)
+            stage?.batchDraw()
+            setLayerImage(image)
+        },
+        [ctx, height, stage, width]
+    )
 
     const clearBuffer = (tile?: SelectedTile) => {
         if (bufferImage && bufferCtx) {
@@ -94,7 +96,7 @@ export const useCanvasBuffer = (
 
     useEffect(() => {
         ctx && layer.image && getLayerImage(layer.image)
-    }, [ctx, layer.image])
+    }, [ctx, getLayerImage, layer.image])
 
     useEffect(() => {
         const canvasElement = document.createElement('canvas')
@@ -104,14 +106,14 @@ export const useCanvasBuffer = (
 
         canvasElement.width = width
         canvasElement.height = height
-        canvasBufferElement.width = layer.image ? width : tilewidth
-        canvasBufferElement.height = layer.image ? height : tileheight
+        canvasBufferElement.width = bufferWidth
+        canvasBufferElement.height = bufferHeight
 
         setImage(canvasElement)
         setCtx(canvasContext)
         setBufferImage(canvasBufferElement)
         setBufferCtx(canvasBufferContext)
-    }, [width, height, tilewidth, tileheight])
+    }, [width, height, tilewidth, tileheight, bufferWidth, bufferHeight])
 
     return {
         bufferCtx,

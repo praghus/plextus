@@ -1,8 +1,8 @@
 export const TRANSLATIONS_EN = {
     i18_alpha: 'Alpha',
-    i18_as_a_new_layer: 'As a new layer',
+    i18_as_a_new_layer: 'As a tiled layer',
     i18_as_a_new_project: 'As a new project',
-    i18_as_an_image: 'As an image',
+    i18_as_an_image: 'As an image layer',
     i18_cancel: 'cancel',
     i18_choose_map_image: 'Choose a graphic file containing a tiled map.',
     i18_close_project: 'Close project',

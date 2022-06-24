@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { Divider, Button, ListItemIcon, Menu, MenuItem, IconButton, Stack, TextField } from '@mui/material'
+import { Divider, Button, ListItemIcon, Menu, MenuItem, IconButton, TextField } from '@mui/material'
 
 import {
     DisabledByDefault as DisabledByDefaultIcon,
@@ -26,7 +26,7 @@ import { PlextusLogo } from '../Icons'
 import { ConfirmationDialog } from '../ConfirmationDialog'
 import { ImageUpload } from '../ImageUpload'
 import { ProjectUpload } from '../ProjectUpload'
-import { StyledMenuContainer, StyledProjectName } from './MainMenu.styled'
+import { StyledMenuContainer, StyledPaper, StyledProjectName } from './MainMenu.styled'
 
 const MainMenu: React.FunctionComponent = () => {
     const canvas = useSelector(selectCanvas)
@@ -36,8 +36,7 @@ const MainMenu: React.FunctionComponent = () => {
     const history = useSelector(selectHistory)
 
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null)
-    const [editingName, setEditingName] = useState(projectName)
-    const [isEditing, setIsEditing] = useState(false)
+    const [editingName, setEditingName] = useState<string | null>(null)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
 
     const { t } = useTranslation()
@@ -52,11 +51,10 @@ const MainMenu: React.FunctionComponent = () => {
     const onUndo = () => dispatch(undo())
     const onRedo = () => dispatch(redo())
     const onCloseProject = () => dispatch(clearProject())
-
     const onRenameProject = () => {
         if (editingName) {
             onChangeProjectName(editingName)
-            setIsEditing(false)
+            setEditingName(null)
         }
     }
 
@@ -104,9 +102,7 @@ const MainMenu: React.FunctionComponent = () => {
                     </ListItemIcon>
                     {t('i18_close_project')}
                 </MenuItem>
-
                 <Divider orientation="horizontal" />
-
                 <ImageUpload>
                     <MenuItem onClick={handleClose}>
                         <ListItemIcon>
@@ -126,9 +122,7 @@ const MainMenu: React.FunctionComponent = () => {
                     </ListItemIcon>
                     {t('i18_export_map')}
                 </MenuItem>
-
                 <Divider orientation="horizontal" />
-
                 <MenuItem
                     onClick={() => {
                         handleClose()
@@ -153,23 +147,18 @@ const MainMenu: React.FunctionComponent = () => {
                 </MenuItem>
             </Menu>
 
-            <Stack direction="row" justifyContent="center" alignItems="center" sx={{ height: '46px' }}>
-                <Button
-                    onClick={handleClick}
-                    sx={{
-                        height: '35px',
-                        margin: '3px 5px'
-                    }}
-                >
-                    <PlextusLogo height={35} />
+            <StyledPaper>
+                <Button onClick={handleClick} sx={{ height: '38px', marginRight: '5px', padding: '4px 15px 0' }}>
+                    <PlextusLogo height={37} />
                 </Button>
                 <Divider orientation="vertical" flexItem />
                 <StyledProjectName
+                    {...{ editingName }}
                     onClick={() => {
-                        setIsEditing(true)
+                        setEditingName(projectName)
                     }}
                 >
-                    {isEditing ? (
+                    {typeof editingName === 'string' ? (
                         <TextField
                             autoFocus
                             fullWidth={true}
@@ -186,7 +175,7 @@ const MainMenu: React.FunctionComponent = () => {
                                     onRenameProject()
                                 }
                                 if (e.key === 'Escape') {
-                                    setIsEditing(false)
+                                    setEditingName(null)
                                 }
                             }}
                         />
@@ -194,14 +183,26 @@ const MainMenu: React.FunctionComponent = () => {
                         projectName
                     )}
                 </StyledProjectName>
-                <Divider orientation="vertical" flexItem />
-                <IconButton onClick={onUndo} disabled={history.undo.length === 0}>
-                    <UndoIcon fontSize="small" />
+                <Divider orientation="vertical" flexItem sx={{ marginRight: '5px' }} />
+                <IconButton
+                    onClick={() => {
+                        handleClose()
+                        onSaveChangesToFile()
+                    }}
+                >
+                    <SaveAltIcon />
                 </IconButton>
-                <IconButton onClick={onRedo} disabled={history.redo.length === 0}>
-                    <RedoIcon fontSize="small" />
-                </IconButton>
-            </Stack>
+            </StyledPaper>
+            {history.undo.length || history.redo.length ? (
+                <StyledPaper>
+                    <IconButton onClick={onUndo} disabled={history.undo.length === 0}>
+                        <UndoIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton onClick={onRedo} disabled={history.redo.length === 0}>
+                        <RedoIcon fontSize="small" />
+                    </IconButton>
+                </StyledPaper>
+            ) : null}
         </StyledMenuContainer>
     )
 }

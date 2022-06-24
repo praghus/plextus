@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { ColorPicker, Color, ColorValue } from 'mui-color'
@@ -26,14 +26,14 @@ const PropertiesTab: React.FunctionComponent = () => {
     const onChangeGridPitch = (pitch: number) => dispatch(changeGridPitch(pitch))
     const onChangeToolSize = (size: number) => dispatch(changeToolSize(size))
 
-    const onChangeCanvasBackground = useCallback(
-        debounce((color: number[] | null) => dispatch(changeCanvasBackground(color)), 300),
-        []
+    const onChangeCanvasBackground = useMemo(
+        () => debounce((color: number[] | null) => dispatch(changeCanvasBackground(color)), 300),
+        [dispatch]
     )
 
-    const onChangeGridColor = useCallback(
-        debounce((color: number[]) => dispatch(changeGridColor(color)), 300),
-        []
+    const onChangeGridColor = useMemo(
+        () => debounce((color: number[]) => dispatch(changeGridColor(color)), 300),
+        [dispatch]
     )
 
     return (

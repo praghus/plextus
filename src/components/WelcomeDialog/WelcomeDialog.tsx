@@ -10,8 +10,7 @@ import {
 
 import { selectIsLoading, selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../../store/app/selectors'
 import { changeAppIsNewProjectDialogOpen } from '../../store/app/actions'
-import { loadStateFromFile } from '../../store/editor/actions'
-import { clear } from '../../store/history/actions'
+import { openProject } from '../../store/editor/actions'
 import { selectCanvas } from '../../store/editor/selectors'
 import { PlextusLogo } from '../Icons'
 import { ImageUpload } from '../ImageUpload'
@@ -32,10 +31,7 @@ const WelcomeDialog: React.FunctionComponent = () => {
 
     const dispatch = useDispatch()
     const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
-    const onLoadDemoProject = () => {
-        dispatch(clear())
-        dispatch(loadStateFromFile(demoProject as ProjectFile))
-    }
+    const onLoadDemoProject = () => dispatch(openProject(demoProject as ProjectFile))
 
     return (
         <Dialog open={isOpen}>

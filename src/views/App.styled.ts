@@ -1,5 +1,16 @@
 import styled from '@emotion/styled'
+import { css } from '@emotion/react'
 import { IMuiTheme } from '../common/types'
+
+export const commonBoxShadow = ({ theme }: IMuiTheme) => css`
+    box-shadow: 0px 2px 10px ${theme?.palette.mode === 'dark' ? 'rgba(32,32,45,0.5)' : 'rgba(5,0,56,0.08)'};
+`
+
+export const commonPaperStyle = ({ theme }: IMuiTheme) => css`
+    color: ${theme?.palette.text.primary};
+    background-color: ${theme?.palette.mode === 'dark' ? '#222' : '#fff'};
+    border-radius: 4px;
+`
 
 export const StyledWrapper = styled.div`
     flex-direction: column;
@@ -22,25 +33,6 @@ export const StyledMiddleContainer = styled.div`
     background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#3b3b3b' : '#e0e0e0')};
     width: 100%;
     height: 100%;
-`
-
-export const StyledRightContainer = styled.div`
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 310px;
-    display: flex;
-    flex-direction: column;
-    padding: 5px;
-    border-radius: 4px;
-    background-color: ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#2b2b2b' : '#fff')};
-    border-top: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider};
-    border-left: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider};
-    box-shadow: 1px 1px 3px
-        ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.3)')};
-    color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary};
-    font-size: small;
-    transition: right 1s ease;
 `
 
 export const StyledThemeSwitchContainer = styled.div`

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { ToastContainer } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { useInjectReducer, useInjectSaga } from 'redux-injectors'
@@ -28,13 +28,7 @@ import {
     ToolBar,
     WelcomeDialog
 } from '../components'
-import {
-    StyledWrapper,
-    StyledContainer,
-    StyledMiddleContainer,
-    StyledRightContainer,
-    StyledThemeSwitchContainer
-} from './App.styled'
+import { StyledWrapper, StyledContainer, StyledMiddleContainer, StyledThemeSwitchContainer } from './App.styled'
 
 const App: React.FunctionComponent = () => {
     useInjectReducer({ key: APP_RESOURCE_NAME, reducer: appReducer })
@@ -51,8 +45,8 @@ const App: React.FunctionComponent = () => {
     const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
 
     const dispatch = useDispatch()
-    const onAdjustWorkspaceSize = () => dispatch(adjustWorkspaceSize())
-    const onChangeAppTheme = (theme: string) => dispatch(changeAppTheme(theme))
+    const onAdjustWorkspaceSize = useCallback(() => dispatch(adjustWorkspaceSize()), [dispatch])
+    const onChangeAppTheme = useCallback((theme: string) => dispatch(changeAppTheme(theme)), [dispatch])
 
     useEffect(() => {
         window.addEventListener('resize', onAdjustWorkspaceSize)
@@ -60,11 +54,11 @@ const App: React.FunctionComponent = () => {
         return () => {
             window.removeEventListener('resize', onAdjustWorkspaceSize)
         }
-    }, [])
+    }, [onAdjustWorkspaceSize])
 
     useEffect(() => {
         onChangeAppTheme(isDarkModeEnabled ? THEMES.DARK : THEMES.LIGHT)
-    }, [isDarkModeEnabled])
+    }, [isDarkModeEnabled, onChangeAppTheme])
 
     useLayoutEffect(() => {
         async function getTilesetImage(src: string) {
@@ -92,15 +86,13 @@ const App: React.FunctionComponent = () => {
                     <LoadingIndicator loading={isLoading} />
                     <MainMenu />
                     <ToolBar />
+                    <TabContainer {...{ tilesetCanvas }} />
                     <StyledThemeSwitchContainer>
                         <ThemeSwitch tiny />
                     </StyledThemeSwitchContainer>
                     <StyledMiddleContainer>
                         <KonvaStage {...{ tilesetCanvas }} />
                     </StyledMiddleContainer>
-                    <StyledRightContainer>
-                        <TabContainer {...{ tilesetCanvas }} />
-                    </StyledRightContainer>
                 </StyledContainer>
             )}
             <ToastContainer position="bottom-left" theme={theme.palette.mode} autoClose={2000} />

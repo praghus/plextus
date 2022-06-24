@@ -39,7 +39,7 @@ const CropTool: React.FunctionComponent<Props> = ({ canvas, grid, onChangeSelect
                 x: shape.x() / width,
                 y: shape.y() / height
             }),
-        [shape]
+        [height, onChangeSelectedArea, shape, width]
     )
 
     useEffect(() => {
@@ -52,13 +52,7 @@ const CropTool: React.FunctionComponent<Props> = ({ canvas, grid, onChangeSelect
                 layer.batchDraw()
             }
         }
-        onChangeSelectedArea({
-            height: canvas.height / height,
-            width: canvas.width / width,
-            x: 0,
-            y: 0
-        })
-    }, [shape, transformer])
+    }, [canvas.height, canvas.width, height, shape, transformer, width])
 
     return (
         <>

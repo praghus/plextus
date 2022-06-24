@@ -1,18 +1,18 @@
 import React, { useRef, useEffect } from 'react'
 import Konva from 'konva'
 import useImage from 'use-image'
-import { Rect } from 'react-konva'
-import { TOOLS } from '../../common/constants'
+import { Group, Rect } from 'react-konva'
+import { TOOLS } from '../../common/tools'
 import { getRgbaValue } from '../../common/utils/colors'
 import { getPointerRelativePos } from '../../common/utils/konva'
 import { getTilePos } from '../../store/editor/utils'
-import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
+import { Grid, DeflatedLayer, Selected, Tileset, Workspace } from '../../store/editor/types'
 
 interface Props {
     grid: Grid
     pointerPosition: Konva.Vector2d
     selected: Selected
-    selectedLayer: Layer | null
+    selectedLayer: DeflatedLayer | null
     tileset: Tileset
     workspace: Workspace
 }
@@ -87,20 +87,19 @@ const Pointer: React.FunctionComponent<Props> = ({
                 })
             }
         }
-    }, [fillPatternImage, tileset, selected])
+    }, [fillPatternImage, tileset, selected, height, width])
 
     return (
-        <>
+        <Group listening={false}>
             <Rect
                 visible={[TOOLS.REPLACE, TOOLS.STAMP].includes(selected.tool)}
-                listening={false}
                 ref={pointerRef}
                 strokeWidth={0.1}
                 x={posX}
                 y={posY}
             />
-            <Rect listening={false} ref={pointerOverlayRef} strokeWidth={0.5 / scale} x={posX} y={posY} />
-        </>
+            <Rect ref={pointerOverlayRef} strokeWidth={0.5 / scale} x={posX} y={posY} />
+        </Group>
     )
 }
 

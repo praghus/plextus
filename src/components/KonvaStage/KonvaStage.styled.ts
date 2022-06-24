@@ -1,7 +1,7 @@
 import { css } from '@emotion/react'
 
 import { Selected } from '../../store/editor/types'
-import { TOOLS } from '../../common/constants'
+import { TOOLS } from '../../common/tools'
 
 export const styles = ({ selected }: { selected: Selected }) => css`
     ${((selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP) &&

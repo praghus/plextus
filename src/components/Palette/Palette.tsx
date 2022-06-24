@@ -3,19 +3,27 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { debounce } from 'lodash'
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
-import { FormControl, IconButton, MenuItem, Select, Stack, Typography } from '@mui/material'
+import { FormControl, IconButton, MenuItem, Select, Stack, Typography, TextField } from '@mui/material'
 
 import { PALETTES } from '../../common/constants'
 import { changePalette, changePrimaryColor, changeSelectedPalette } from '../../store/editor/actions'
 import { selectPalette, selectSelected } from '../../store/editor/selectors'
-import { rgbaToHex } from '../../common/utils/colors'
+import { rgbaToHex, colorToRGBA } from '../../common/utils/colors'
 import { ColorBox } from '../ColorBox'
-import { StyledButtonContainer, StyledColorPicker, StyledColorsContainer, StyledPalette } from './Palette.styled'
+import {
+    StyledButtonContainer,
+    StyledColorPicker,
+    StyledColorValue,
+    StyledColorsContainer,
+    StyledPalette
+} from './Palette.styled'
 
 const DEFAULT = 'DEFAULT'
 
 const Palette: React.FunctionComponent = () => {
     const [colors, setColors] = useState<number[][]>([])
+    const [editingColor, setEditingColor] = useState<string | null>(null)
+
     const palette = useSelector(selectPalette)
     const selected = useSelector(selectSelected)
 
@@ -74,7 +82,7 @@ const Palette: React.FunctionComponent = () => {
                         ))}
                     </Select>
                 </FormControl>
-                <StyledColorsContainer>
+                <StyledColorsContainer scrollVisible={colors.length > 80}>
                     {colors.map((rgba, i) => (
                         <ColorBox
                             key={rgba.join()}
@@ -93,8 +101,42 @@ const Palette: React.FunctionComponent = () => {
                 sx={{ padding: '8px', width: '100%' }}
             >
                 <ColorBox rgba={selected.color} />
-                <Typography variant="overline" sx={{ marginLeft: 1 }}>
-                    {rgbaToHex(selected.color)}
+                <Typography variant="overline" sx={{ marginLeft: 1, width: '100%' }}>
+                    {typeof editingColor === 'string' ? (
+                        <TextField
+                            autoFocus
+                            fullWidth={true}
+                            size="small"
+                            type="text"
+                            variant="standard"
+                            value={editingColor}
+                            onBlur={() => {
+                                onChangePrimaryColor(colorToRGBA(editingColor))
+                                setEditingColor(null)
+                            }}
+                            onChange={e => {
+                                setEditingColor(e.target.value)
+                            }}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    onChangePrimaryColor(colorToRGBA(editingColor))
+                                    setEditingColor(null)
+                                }
+                                if (e.key === 'Escape') {
+                                    setEditingColor(null)
+                                }
+                            }}
+                        />
+                    ) : (
+                        <StyledColorValue
+                            {...{ editingColor }}
+                            onClick={() => {
+                                setEditingColor(rgbaToHex(selected.color))
+                            }}
+                        >
+                            {rgbaToHex(selected.color)}
+                        </StyledColorValue>
+                    )}
                 </Typography>
                 {selected.palette === DEFAULT && (
                     <StyledButtonContainer>

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import { Button } from '@mui/material'
 
+import { commonBoxShadow } from '../../views/App.styled'
 import { IMuiTheme } from '../../common/types'
 
 export const StyledStatusBar = styled.div`
@@ -19,7 +20,8 @@ export const StyledStatusBar = styled.div`
     backdrop-filter: blur(5px);
     color: ${({ theme }: IMuiTheme) => theme?.palette.text.secondary};
     background-color: ${({ theme }: IMuiTheme) =>
-        theme?.palette.mode === 'dark' ? 'rgba(34,34,34,0.85)' : 'rgba(255,255,255,0.85)'};
+        theme?.palette.mode === 'dark' ? 'rgba(24,24,24,0.85)' : 'rgba(255,255,255,0.85)'};
+    ${commonBoxShadow}
 `
 
 export const StyledCol = styled.div`

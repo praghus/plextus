@@ -1,8 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { clear } from '../../store/history/actions'
-import { loadStateFromFile } from '../../store/editor/actions'
+import { openProject } from '../../store/editor/actions'
 import { ProjectFile } from '../../store/editor/types'
 
 const upload = async (file: Blob): Promise<string> =>
@@ -20,12 +19,12 @@ interface Props {
 
 const ProjectUpload: React.FunctionComponent<Props> = ({ children }) => {
     const dispatch = useDispatch()
+    const onLoadProject = (project: ProjectFile) => dispatch(openProject(project))
     const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files && e.target.files[0]
         if (file) {
             const result = await upload(file)
-            dispatch(clear())
-            dispatch(loadStateFromFile(JSON.parse(result) as ProjectFile))
+            onLoadProject(JSON.parse(result) as ProjectFile)
         }
     }
 
