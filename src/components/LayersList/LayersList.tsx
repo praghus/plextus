@@ -24,7 +24,7 @@ import {
     VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material'
 
-import { createEmptyImage } from '../../common/utils/image'
+import { createImage } from '../../common/utils/image'
 import { changeItemPosition } from '../../common/utils/array'
 import { createEmptyLayer, createImageLayer, getLayerById } from '../../store/editor/utils'
 import { Layer } from '../../store/editor/types'
@@ -107,7 +107,7 @@ const LayersList: React.FunctionComponent = () => {
     }
 
     const onCreateImageLayer = async () => {
-        const blob = await createEmptyImage(canvas.width, canvas.height)
+        const blob = await createImage(canvas.width, canvas.height)
         if (blob) {
             const newLayer = createImageLayer(
                 t('i18_new_image_layer'),

@@ -1,20 +1,22 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { Group, Rect } from 'react-konva'
-import { Grid, DeflatedLayer, Workspace } from '../../store/editor/types'
-import { getCoordsFromPos, getPointerRelativePos } from '../../common/utils/konva'
+import { Grid, Layer, Workspace, Rectangle } from '../../store/editor/types'
+import { getCoordsFromPos, getPointerRelativePos, getSelectionRect } from '../../common/utils/konva'
 
 interface Props {
     grid: Grid
     isMouseDown: boolean
+    onChangeSelectedArea: (rect: Rectangle | null) => void
     pointerPosition: Konva.Vector2d
-    selectedLayer: DeflatedLayer | null
+    selectedLayer: Layer | null
     workspace: Workspace
 }
 
 const SelectTool: React.FunctionComponent<Props> = ({
     isMouseDown,
     grid,
+    onChangeSelectedArea,
     pointerPosition,
     selectedLayer,
     workspace
@@ -63,9 +65,22 @@ const SelectTool: React.FunctionComponent<Props> = ({
                 shape.height(y2 - y1)
             }
         } else if (isSelecting) {
+            if (shape) {
+                onChangeSelectedArea(getSelectionRect(shape))
+            }
             setIsSelecting(false)
         }
-    }, [grid, isMouseDown, pointerPosition, startPos, selectedLayer, shape, isSelecting, workspace])
+    }, [
+        grid,
+        isMouseDown,
+        isSelecting,
+        onChangeSelectedArea,
+        pointerPosition,
+        startPos,
+        selectedLayer,
+        shape,
+        workspace
+    ])
 
     return (
         <Group>

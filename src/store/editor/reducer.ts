@@ -14,6 +14,7 @@ import {
     EDITOR_CHANGE_PROJECT_NAME,
     EDITOR_CHANGE_SELECTED_AREA,
     EDITOR_CHANGE_SELECTED_LAYER,
+    EDITOR_CHANGE_SELECTED_STAMP,
     EDITOR_CHANGE_SELECTED_TILE,
     EDITOR_CHANGE_SCALE,
     EDITOR_CHANGE_TILESET,
@@ -103,6 +104,11 @@ function editorReducer(state = INITIAL_STATE, action: AnyAction): EditorState {
             return {
                 ...state,
                 selected: { ...state.selected, palette: action.payload.name }
+            }
+        case EDITOR_CHANGE_SELECTED_STAMP:
+            return {
+                ...state,
+                selected: { ...state.selected, stamp: action.payload.stamp }
             }
         case EDITOR_CHANGE_SELECTED_TILE:
             return {

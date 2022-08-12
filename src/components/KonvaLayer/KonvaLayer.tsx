@@ -3,12 +3,12 @@ import Konva from 'konva'
 import { Image } from 'react-konva'
 import { toast } from 'react-toastify'
 import { Theme } from '@mui/material/styles'
+import { isEqual } from 'lodash'
 
 import logger from '../../common/utils/logger'
 import { TOOLS } from '../../common/tools'
 import { SelectedTile } from '../../common/types'
-import { parseLayerData } from '../../common/utils/pako'
-import { createTileFromImageData, getTilePos } from '../../store/editor/utils'
+import { createTileFromImageData } from '../../store/editor/utils'
 import {
     actionDraw,
     actionLine,
@@ -18,14 +18,17 @@ import {
     pickColor
 } from '../../common/utils/konva'
 import { isArray } from '../../common/utils/array'
+import { getImage } from '../../common/utils/image'
 import { useCanvasBuffer } from '../../hooks/useCanvasBuffer'
-import { Grid, DeflatedLayer, Selected, Tileset, Workspace } from '../../store/editor/types'
+import { usePrevious } from '../../hooks/usePrevious'
+import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
 
 interface Props {
     grid: Grid
     isMouseDown: boolean
     keyDown: KeyboardEvent | null
-    layer: DeflatedLayer
+    layer: Layer
+    onCopySelectedArea: (image: HTMLCanvasElement) => void
     onChangeLayerData: (layerId: string, data: (number | null)[]) => void
     onChangeLayerImage: (layerId: string, blob: Blob) => void
     onChangeLayerOffset: (layerId: string, x: number, y: number) => void
@@ -33,6 +36,7 @@ interface Props {
     onChangeSelectedTile: (tileId: number) => void
     onChangeTileset: (tileset: Tileset) => void
     onSaveTilesetImage: (blob: Blob) => void
+    onPaste: () => void
     selected: Selected
     stage: Konva.Stage
     tileset: Tileset
@@ -46,6 +50,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     isMouseDown,
     keyDown,
     layer,
+    onCopySelectedArea,
     onChangeLayerData,
     onChangeLayerImage,
     onChangeLayerOffset,
@@ -53,6 +58,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     onChangeSelectedTile,
     onChangeTileset,
     onSaveTilesetImage,
+    onPaste,
     selected,
     stage,
     tileset,
@@ -66,6 +72,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     const imageRef = useRef<Konva.Image>(null)
     const lastPos = useRef<Konva.Vector2d>()
     const lastLinePos = useRef<Konva.Vector2d>()
+    const tempData = useRef<(number | null)[]>([])
     const isSelected = selected.layerId === layer.id
 
     const { opacity, visible } = layer
@@ -80,9 +87,12 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         bufferImage,
         clearBuffer,
         getBufferPos,
+        renderTile,
         renderFromBuffer,
         renderTileToBuffer
     } = useCanvasBuffer(grid, layer, stage, tileset, tilesetCanvas)
+
+    const prevData = usePrevious(layer.data)
 
     const getPos = () => getPointerRelativePos(workspace, stage.getPointerPosition() as Konva.Vector2d, layer.offset)
 
@@ -116,18 +126,22 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const updateLayer = (x: number, y: number, gid: number | null, update = false) => {
+    const updateLayer = async (x: number, y: number, gid: number | null) => {
         if (layer.width) {
             const pos = x + ((layer.width * tilewidth) / grid.width) * y
-            if (data && data[pos] !== gid) {
-                const tempData = [...data]
-                tempData[pos] = gid
-                setData(tempData)
-                if (update) {
-                    onChangeLayerData(layer.id, tempData)
+            if (gid !== -1) {
+                if (data && data[pos] !== gid) {
+                    tempData.current[pos] = gid
                 }
+                renderTile(gid, pos)
+            } else if (selected.stamp?.data) {
+                const { width, data } = selected.stamp
+                data.forEach((g, i) => {
+                    const x1 = x + (i % (width / grid.width))
+                    const y1 = y + Math.ceil((i + 1) / (width / grid.width) - 1)
+                    tempData.current[x1 + ((layer.width * tilewidth) / grid.width) * y1] = g
+                })
             }
-            drawTile(gid, pos)
             stage.batchDraw()
         }
     }
@@ -155,25 +169,6 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const drawTile = useCallback(
-        (gid: number | null, i: number) => {
-            if (ctx && layer.width) {
-                const x = (i % layer.width) * grid.width
-                const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
-                const [w, h] = [tileset.tilewidth, tileset.tileheight]
-                ctx.clearRect(x, y, w, h)
-                if (gid) {
-                    const { x: posX, y: posY } = getTilePos(gid, tileset)
-                    ctx.drawImage(tilesetCanvas, posX, posY, w, h, x, y, w, h)
-                } else if (isSelected) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.2)'
-                    ctx.fillRect(x, y, w, h)
-                }
-            }
-        },
-        [ctx, grid.height, grid.width, isSelected, layer.width, tileset, tilesetCanvas]
-    )
-
     const onStartDrawing = (secondBtnPressed = false) => {
         if (ctx && visible && isSelected && layer.width) {
             const currentPos = getPos()
@@ -198,7 +193,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                             ? cloneTile(x, y)
                             : updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                     } else if (selected.tool === TOOLS.STAMP) {
-                        renderTileToBuffer(selected.tileId, currentPos)
+                        renderTileToBuffer(selected, currentPos)
                     }
                     break
                 case TOOLS.PENCIL:
@@ -243,12 +238,12 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
             switch (selected.tool) {
                 case TOOLS.DELETE:
                 case TOOLS.STAMP:
-                    if (nextPos.x !== prevPos.x || nextPos.y !== prevPos.y) {
+                    if (selected.tileId > -1 && (nextPos.x !== prevPos.x || nextPos.y !== prevPos.y)) {
                         if (layer.data) {
                             const { x, y } = getCoordsFromPos(grid, nextPos)
                             updateLayer(x, y, selected.tool === TOOLS.STAMP ? selected.tileId : null)
                         } else if (selected.tool === TOOLS.STAMP) {
-                            renderTileToBuffer(selected.tileId, nextPos)
+                            renderTileToBuffer(selected, nextPos)
                         }
                     }
                     break
@@ -285,7 +280,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 case TOOLS.DELETE:
                 case TOOLS.REPLACE:
                 case TOOLS.STAMP:
-                    data && onChangeLayerData(layer.id, data)
+                    data && !isEqual(data, tempData.current) && onChangeLayerData(layer.id, tempData.current)
                     break
                 case TOOLS.BRIGHTNESS:
                 case TOOLS.ERASER:
@@ -296,8 +291,9 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                     if (selectedTile && !selectedTile.gid && bufferCtx) {
                         const gid = tileset.tilecount + 1
                         createTile(bufferCtx.getImageData(0, 0, tilewidth, tileheight))
-                        updateLayer(selectedTile.x, selectedTile.y, gid, true)
+                        updateLayer(selectedTile.x, selectedTile.y, gid)
                         renderFromBuffer({ ...selectedTile, gid })
+                        onChangeLayerData(layer.id, tempData.current)
                         toast.success(`New tile #${gid} created`)
                     } else {
                         renderFromBuffer(selectedTile)
@@ -316,25 +312,36 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const redraw = () => {
-        if (ctx && isArray(data)) {
-            ctx.clearRect(0, 0, width, height)
-            data.map(drawTile)
+    const redraw = useCallback(() => {
+        if (isArray(data)) {
+            data.forEach(renderTile)
             stage.batchDraw()
             logger.info('Redraw', 'LAYER')
         }
-    }
-
-    useEffect(() => {
-        if (layer.data) {
-            setData(parseLayerData(layer.data))
-            logger.info('Set data', 'LAYER')
-        }
-    }, [layer.data])
+    }, [data, renderTile, stage])
 
     useEffect(() => {
         redraw()
-    }, [layer.data, tilesetCanvas, image]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [redraw])
+
+    useEffect(() => {
+        if (!isEqual(layer.data, prevData) && isArray(layer.data)) {
+            setData(layer.data)
+            tempData.current = [...layer.data]
+            logger.info('Data has changed!', 'LAYER')
+        }
+    }, [layer.data, prevData])
+
+    useEffect(() => {
+        if (keyDown && isSelected && image) {
+            if (keyDown.code === 'KeyC' && (keyDown.ctrlKey || keyDown.metaKey) && selected.tool === TOOLS.SELECT) {
+                onCopySelectedArea(image)
+            }
+            if (keyDown.code === 'KeyV' && (keyDown.ctrlKey || keyDown.metaKey) && selected.tileId !== -1) {
+                onPaste()
+            }
+        }
+    }, [image, isSelected, keyDown, onCopySelectedArea, onPaste, selected.tool, selected.tileId])
 
     return (
         <Image

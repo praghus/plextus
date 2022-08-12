@@ -1,7 +1,7 @@
 import Konva from 'konva'
 
 import { TOOLS } from '../../common/tools'
-import { Canvas, Grid, Selected, Workspace } from '../../store/editor/types'
+import { Canvas, Grid, Rectangle, Selected, Workspace } from '../../store/editor/types'
 import { brightenDarken, getRgbaValue } from './colors'
 
 export const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
@@ -26,6 +26,16 @@ export const getPointerRelativePos = (
     x: (pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale,
     y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
 })
+
+export const getSelectionRect = (shape: Konva.Rect): Rectangle => {
+    const [x, y, w, h] = [shape.x(), shape.y(), shape.width(), shape.height()]
+    return {
+        height: Math.abs(h),
+        width: Math.abs(w),
+        x: w < 0 ? x + w : x,
+        y: h < 0 ? y + h : y
+    }
+}
 
 export const pickColor = (ctx: CanvasRenderingContext2D, pos: Konva.Vector2d): number[] =>
     Object.values(ctx.getImageData(pos.x, pos.y, 1, 1).data)

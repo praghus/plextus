@@ -3,7 +3,7 @@ import { call, put, select, takeLatest } from 'redux-saga/effects'
 import { toast } from 'react-toastify'
 import i18n from '../../common/translations/i18n'
 import logger from '../../common/utils/logger'
-import { importLayer, generateReducedPalette } from '../../common/utils/image'
+import { createImage, importLayer, generateReducedPalette } from '../../common/utils/image'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
 import { canvasToBlob, downloadProjectFile } from '../../common/utils/data'
@@ -41,7 +41,8 @@ import {
     changeTilesetImage,
     changePalette,
     changeProjectName,
-    adjustWorkspaceSize
+    adjustWorkspaceSize,
+    changeSelectedStamp
 } from './actions'
 import { clear } from '../history/actions'
 import { APP_STORAGE_KEY } from '../app/constants'
@@ -55,6 +56,7 @@ import {
     EDITOR_CHANGE_LAYER_VISIBLE,
     EDITOR_CLEAR_PROJECT,
     EDITOR_CREATE_NEW_PROJECT,
+    EDITOR_COPY_SELECTED_AREA,
     EDITOR_CROP,
     EDITOR_REMOVE_LAYER,
     EDITOR_REMOVE_TILE,
@@ -64,7 +66,8 @@ import {
     EDITOR_CREATE_TILE_LAYER_FROM_FILE,
     INITIAL_STATE,
     EDITOR_CREATE_IMAGE_LAYER_FROM_FILE,
-    EDITOR_OPEN_PROJECT_FILE
+    EDITOR_OPEN_PROJECT_FILE,
+    EDITOR_PASTE
 } from './constants'
 import { DeflatedLayer, Grid, Layer, Canvas, Selected, Tileset } from './types'
 import { createEmptyLayer, createImageLayer, getStateToSave } from './utils'
@@ -142,6 +145,56 @@ export function* changeLayerOpacity(action: AnyAction): Generator {
 export function* changeLayerVisible(action: AnyAction): Generator {
     const { layerId, visible } = action.payload
     yield changeLayerProp(layerId, { visible })
+}
+
+export function* copySelectedArea(action: AnyAction): SagaIterator<void> {
+    try {
+        const grid: Grid = yield select(selectGrid)
+        const layers: Layer[] = yield select(selectLayers)
+        const { area, layerId }: Selected = yield select(selectSelected)
+        const { imageCanvas } = action.payload
+
+        const selectedLayer = layers.find(({ id }) => id === layerId)
+
+        if (area && area.width > 0 && area.height > 0) {
+            const ctx = imageCanvas.getContext('2d') as CanvasRenderingContext2D
+            const imageData = ctx.getImageData(area.x, area.y, area.width, area.height)
+            const blob = yield call(createImage, area.width, area.height, imageData)
+            const image = window.URL.createObjectURL(blob)
+
+            const left = area.x / grid.width
+            const top = area.y / grid.height
+            const width = area.width / grid.width
+            const height = area.height / grid.height
+            const data: (number | null)[] | null = selectedLayer?.data ? new Array(width * height).fill(null) : null
+
+            if (selectedLayer?.data && data) {
+                for (let y = 0; y < height; y += 1) {
+                    for (let x = 0; x < width; x += 1) {
+                        data[x + width * y] =
+                            x + left >= 0 && x + left < selectedLayer.width
+                                ? selectedLayer.data[x + left + selectedLayer.width * (y + top)] || null
+                                : null
+                    }
+                }
+            }
+            yield put(changeSelectedStamp({ data, height: area.height, image, width: area.width }))
+        }
+    } catch (err) {
+        logger.error(err)
+    }
+}
+
+export function* paste(): SagaIterator<void> {
+    try {
+        const { stamp }: Selected = yield select(selectSelected)
+        if (stamp?.image) {
+            yield put(changeSelectedTile(-1))
+            yield put(changeTool(TOOLS.STAMP))
+        }
+    } catch (err) {
+        logger.error(err)
+    }
 }
 
 export function* cropArea(): SagaIterator<void> {
@@ -373,8 +426,10 @@ export default function* editorSaga(): Generator {
         yield takeLatest(EDITOR_CHANGE_LAYER_OFFSET, changeLayerOffset),
         yield takeLatest(EDITOR_CHANGE_LAYER_OPACITY, changeLayerOpacity),
         yield takeLatest(EDITOR_CHANGE_LAYER_VISIBLE, changeLayerVisible),
+        yield takeLatest(EDITOR_COPY_SELECTED_AREA, copySelectedArea),
         yield takeLatest(EDITOR_CROP, cropArea),
         yield takeLatest(EDITOR_OPEN_PROJECT_FILE, openProject),
+        yield takeLatest(EDITOR_PASTE, paste),
         yield takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
         yield takeLatest(EDITOR_REMOVE_TILE, removeTile),
         yield takeLatest(EDITOR_SAVE_CHANGES, saveChangesSaga),

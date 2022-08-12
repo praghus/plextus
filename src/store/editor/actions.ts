@@ -8,7 +8,8 @@ import {
     Tileset,
     ProjectConfig,
     LayerImportConfig,
-    ProjectFile
+    ProjectFile,
+    Stamp
 } from './types'
 import {
     EDITOR_CHANGE_CANVAS,
@@ -48,13 +49,16 @@ import {
     EDITOR_RESET_TO_DEFAULTS,
     EDITOR_SAVE_CHANGES,
     EDITOR_SAVE_CHANGES_TO_FILE,
+    EDITOR_COPY_SELECTED_AREA,
     EDITOR_SET_TILESET_IMAGE_SUCCESS,
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_TOGGLE_SHOW_GRID,
     EDITOR_CREATE_NEW_PROJECT,
     EDITOR_CREATE_IMAGE_LAYER_FROM_FILE,
     EDITOR_CREATE_TILE_LAYER_FROM_FILE,
-    EDITOR_LOAD_STATE_FROM_FILE
+    EDITOR_LOAD_STATE_FROM_FILE,
+    EDITOR_CHANGE_SELECTED_STAMP,
+    EDITOR_PASTE
 } from './constants'
 
 export const adjustWorkspaceSize = (): AnyAction => changeWorkspaceSize(window.innerWidth, window.innerHeight)
@@ -159,10 +163,16 @@ export const changeSelectedArea = (area: Rectangle | null) =>
         type: EDITOR_CHANGE_SELECTED_AREA
     } as const)
 
-export const changeSelectedTile = (tileId: number) =>
+export const changeSelectedTile = (tileId: number | null) =>
     ({
         payload: { tileId },
         type: EDITOR_CHANGE_SELECTED_TILE
+    } as const)
+
+export const changeSelectedStamp = (stamp: Stamp) =>
+    ({
+        payload: { stamp },
+        type: EDITOR_CHANGE_SELECTED_STAMP
     } as const)
 
 export const changeWorkspaceSize = (width: number, height: number) =>
@@ -235,6 +245,17 @@ export const changeLayerVisible = (layerId: string, visible: boolean) =>
     ({
         payload: { layerId, visible },
         type: EDITOR_CHANGE_LAYER_VISIBLE
+    } as const)
+
+export const copySelectedArea = (imageCanvas: HTMLCanvasElement) =>
+    ({
+        payload: { imageCanvas },
+        type: EDITOR_COPY_SELECTED_AREA
+    } as const)
+
+export const paste = () =>
+    ({
+        type: EDITOR_PASTE
     } as const)
 
 export const crop = () =>

@@ -1,25 +1,22 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
 import { useDispatch, useSelector } from 'react-redux'
 import { IconButton, ListItemIcon, Menu, MenuItem, PopoverOrigin, ToggleButton, Tooltip } from '@mui/material'
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
 
 import { TOOLS, TOOL_DESC, TOOL_ICONS, AVAILABLE_TOOLS } from '../../common/tools'
-import { selectSelected } from '../../store/editor/selectors'
+import { selectSelected, selectWorkspace } from '../../store/editor/selectors'
 import { changeTool } from '../../store/editor/actions'
 
 import { StyledToolBarContainer, StyledToggleButtonGroup } from './ToolBar.styled'
 
-const MAX_TOOLS = 8
-const MAIN_TOOLS = [...AVAILABLE_TOOLS]
-const MORE_TOOLS = MAIN_TOOLS.splice(MAX_TOOLS)
-
 const ToolBar: React.FunctionComponent = () => {
     const theme = useTheme()
     const selected = useSelector(selectSelected)
+    const workspace = useSelector(selectWorkspace)
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-    const [lastSelectedTool, setLastSelectedTool] = useState<keyof typeof TOOLS>(MORE_TOOLS[0])
+    const [lastSelectedTool, setLastSelectedTool] = useState<keyof typeof TOOLS>(AVAILABLE_TOOLS[0])
 
     const dispatch = useDispatch()
     const onChangeTool = useCallback((tool: string) => tool && dispatch(changeTool(tool)), [dispatch])
@@ -81,6 +78,14 @@ const ToolBar: React.FunctionComponent = () => {
         [selected.tool, iconSelectedColor, iconColor, changeSelectedTool]
     )
 
+    const ToolsMenu = useMemo(() => {
+        const main = [...AVAILABLE_TOOLS]
+        const max = Math.max(Math.round((workspace.height * 0.5) / 50) - 2, 2)
+        const more = main.splice(max)
+        setLastSelectedTool(more[0])
+        return { main, more }
+    }, [workspace.height])
+
     return (
         <StyledToolBarContainer>
             <StyledToggleButtonGroup
@@ -89,8 +94,8 @@ const ToolBar: React.FunctionComponent = () => {
                 orientation="vertical"
                 onChange={(_, value) => onChangeTool(value as string)}
             >
-                {MAIN_TOOLS.map(renderToolButton)}
-                {MORE_TOOLS.includes(selected.tool)
+                {ToolsMenu.main.map(renderToolButton)}
+                {ToolsMenu.more.includes(selected.tool)
                     ? renderToolButton(selected.tool)
                     : renderToolButton(lastSelectedTool)}
             </StyledToggleButtonGroup>
@@ -104,7 +109,7 @@ const ToolBar: React.FunctionComponent = () => {
                 anchorOrigin={menuOrigin}
                 transformOrigin={menuOrigin}
             >
-                {MORE_TOOLS.map(renterMoreToolMenuItem)}
+                {ToolsMenu.more.map(renterMoreToolMenuItem)}
             </Menu>
         </StyledToolBarContainer>
     )
