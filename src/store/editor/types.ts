@@ -25,6 +25,13 @@ export type Layer = {
     data?: number[]
 }
 
+export type Stamp = {
+    width: number
+    height: number
+    data: (number | null)[] | null
+    image: string
+}
+
 export type Grid = {
     color: number[]
     width: number

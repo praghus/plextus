@@ -5,11 +5,11 @@ import { getImage } from '../common/utils/image'
 import { getCoordsFromPos } from '../common/utils/konva'
 import { SelectedTile } from '../common/types'
 import { getTilePos } from '../store/editor/utils'
-import { Grid, DeflatedLayer, Tileset } from '../store/editor/types'
+import { Grid, Layer, Selected, Tileset } from '../store/editor/types'
 
 export const useCanvasBuffer = (
     grid: Grid,
-    layer: DeflatedLayer,
+    layer: Layer,
     stage: Konva.Stage,
     tileset: Tileset,
     tilesetCanvas: HTMLCanvasElement
@@ -37,17 +37,32 @@ export const useCanvasBuffer = (
         [ctx, height, stage, width]
     )
 
-    const clearBuffer = (tile?: SelectedTile) => {
-        if (bufferImage && bufferCtx) {
-            bufferCtx.clearRect(0, 0, bufferImage.width, bufferImage.height)
-            if (tile && tile.gid) {
-                const { x, y } = getTilePos(tile.gid, tileset)
-                bufferCtx.drawImage(tilesetCanvas, x, y, tilewidth, tileheight, 0, 0, tilewidth, tileheight)
-            } else if (layerImage) {
-                bufferCtx.drawImage(layerImage, 0, 0)
+    const renderTile = useCallback(
+        (gid: number | null, i: number) => {
+            if (ctx && layer.width) {
+                const x = (i % layer.width) * grid.width
+                const y = Math.ceil((i + 1) / layer.width - 1) * grid.height
+                const [w, h] = [tileset.tilewidth, tileset.tileheight]
+                ctx.clearRect(x, y, w, h)
+                if (gid) {
+                    const posX = ((gid - tileset.firstgid) % tileset.columns) * w
+                    const posY = (Math.ceil((gid - tileset.firstgid + 1) / tileset.columns) - 1) * h
+                    ctx.drawImage(tilesetCanvas, posX, posY, w, h, x, y, w, h)
+                }
             }
-        }
-    }
+        },
+        [
+            ctx,
+            grid.height,
+            grid.width,
+            layer.width,
+            tileset.firstgid,
+            tileset.columns,
+            tileset.tilewidth,
+            tileset.tileheight,
+            tilesetCanvas
+        ]
+    )
 
     const renderFromBuffer = (tile?: SelectedTile) => {
         if (ctx && bufferImage) {
@@ -68,21 +83,42 @@ export const useCanvasBuffer = (
         }
     }
 
-    const renderTileToBuffer = (tileId: number, pos: Konva.Vector2d) => {
-        if (bufferCtx && tileId) {
-            const { x, y } = getTilePos(tileId, tileset)
-            bufferCtx.drawImage(
-                tilesetCanvas,
-                x,
-                y,
-                tilewidth,
-                tileheight,
-                Math.ceil(-1 + pos.x / grid.width) * grid.width,
-                Math.ceil(-1 + pos.y / grid.height) * grid.height,
-                tilewidth,
-                tileheight
-            )
+    const renderTileToBuffer = async (selected: Selected, pos: Konva.Vector2d) => {
+        if (bufferCtx && selected.tileId) {
+            if (selected.tileId === -1 && selected.stamp?.image) {
+                const stampImage = await getImage(selected.stamp.image)
+                bufferCtx.drawImage(
+                    stampImage,
+                    Math.ceil(-1 + pos.x / grid.width) * grid.width,
+                    Math.ceil(-1 + pos.y / grid.height) * grid.height
+                )
+            } else {
+                const { x, y } = getTilePos(selected.tileId, tileset)
+                bufferCtx.drawImage(
+                    tilesetCanvas,
+                    x,
+                    y,
+                    tilewidth,
+                    tileheight,
+                    Math.ceil(-1 + pos.x / grid.width) * grid.width,
+                    Math.ceil(-1 + pos.y / grid.height) * grid.height,
+                    tilewidth,
+                    tileheight
+                )
+            }
             renderFromBuffer()
+        }
+    }
+
+    const clearBuffer = (tile?: SelectedTile) => {
+        if (bufferImage && bufferCtx) {
+            bufferCtx.clearRect(0, 0, bufferImage.width, bufferImage.height)
+            if (tile && tile.gid) {
+                const { x, y } = getTilePos(tile.gid, tileset)
+                bufferCtx.drawImage(tilesetCanvas, x, y, tilewidth, tileheight, 0, 0, tilewidth, tileheight)
+            } else if (layerImage) {
+                bufferCtx.drawImage(layerImage, 0, 0)
+            }
         }
     }
 
@@ -124,6 +160,7 @@ export const useCanvasBuffer = (
         height,
         image,
         renderFromBuffer,
+        renderTile,
         renderTileToBuffer,
         width
     }

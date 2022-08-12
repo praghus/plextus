@@ -6,13 +6,13 @@ import { TOOLS } from '../../common/tools'
 import { getRgbaValue } from '../../common/utils/colors'
 import { getPointerRelativePos } from '../../common/utils/konva'
 import { getTilePos } from '../../store/editor/utils'
-import { Grid, DeflatedLayer, Selected, Tileset, Workspace } from '../../store/editor/types'
+import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
 
 interface Props {
     grid: Grid
     pointerPosition: Konva.Vector2d
     selected: Selected
-    selectedLayer: DeflatedLayer | null
+    selectedLayer: Layer | null
     tileset: Tileset
     workspace: Workspace
 }
@@ -35,29 +35,35 @@ const Pointer: React.FunctionComponent<Props> = ({
     const x = Math.ceil((pointerRelPosition.x - offset.x) / grid.width) - 1
     const y = Math.ceil((pointerRelPosition.y - offset.y) / grid.height) - 1
 
-    const [fillPatternImage] = useImage(tileset.image)
-    const [posX, posY] = [TOOLS.DELETE, TOOLS.REPLACE, TOOLS.STAMP].includes(selected.tool)
-        ? [x * width + offset.x, y * height + offset.y]
-        : [Math.floor(pointerRelPosition.x), Math.floor(pointerRelPosition.y)]
+    const pasteImage = selected.tileId === -1 && (selected.stamp?.data || selectedLayer?.image) && selected.stamp?.image
+
+    const [fillPatternImage] = useImage(pasteImage || tileset.image)
+
+    const [posX, posY] =
+        [TOOLS.DELETE, TOOLS.REPLACE, TOOLS.STAMP].includes(selected.tool) && selectedLayer?.data
+            ? [x * width + offset.x, y * height + offset.y]
+            : [Math.floor(pointerRelPosition.x), Math.floor(pointerRelPosition.y)]
 
     useEffect(() => {
         if (pointerRef.current && pointerOverlayRef.current && fillPatternImage) {
             const pointer = pointerRef.current
             const overlay = pointerOverlayRef.current
             if ([TOOLS.STAMP, TOOLS.REPLACE].includes(selected.tool)) {
+                const w = (pasteImage && selected.stamp?.width) || width
+                const h = (pasteImage && selected.stamp?.height) || height
                 overlay.setAttrs({
                     fill: 'rgba(150,200,255,0.3)',
-                    height,
+                    height: h,
                     stroke: '#96cdff',
-                    width
+                    width: w
                 })
                 pointer.setAttrs({
                     fillPatternImage,
-                    height,
+                    height: h,
                     stroke: '#96cdff',
-                    width
+                    width: w
                 })
-                pointer.fillPatternOffset(getTilePos(selected.tileId, tileset))
+                pointer.fillPatternOffset(pasteImage ? { x: 0, y: 0 } : getTilePos(selected.tileId, tileset))
             } else if (selected.tool === TOOLS.DELETE) {
                 overlay.setAttrs({
                     fill: 'rgba(255,128,128,0.3)',
@@ -87,7 +93,7 @@ const Pointer: React.FunctionComponent<Props> = ({
                 })
             }
         }
-    }, [fillPatternImage, tileset, selected, height, width])
+    }, [pasteImage, fillPatternImage, tileset, selected, height, width])
 
     return (
         <Group listening={false}>

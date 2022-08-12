@@ -97,6 +97,11 @@ export const getStateToSave = async (state: RootState) => {
                     layer.image ? { ...layer, image: await getDataFromObjectURL(layer.image) } : layer
                 )
             ),
+            selected: {
+                ...state[EDITOR_RESOURCE_NAME].selected,
+                stamp: null,
+                tileId: null
+            },
             tileset: {
                 ...state[EDITOR_RESOURCE_NAME].tileset,
                 image: await getDataFromObjectURL(editorState.tileset.image)

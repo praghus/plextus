@@ -16,7 +16,7 @@ import { getRgbaValue } from '../../common/utils/colors'
 import {
     selectCanvas,
     selectGrid,
-    selectRawLayers,
+    selectLayers,
     selectSelected,
     selectTileset,
     selectWorkspace
@@ -33,7 +33,9 @@ import {
     changeSelectedTile,
     changeTileset,
     changeTilesetImage,
-    crop
+    copySelectedArea,
+    crop,
+    paste
 } from '../../store/editor/actions'
 import { useZoomEvents } from '../../hooks/useZoomEvents'
 import { CropTool } from '../CropTool'
@@ -56,7 +58,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const selected = useSelector(selectSelected)
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
-    const layers = useSelector(selectRawLayers)
+    const layers = useSelector(selectLayers)
     const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
 
@@ -82,7 +84,8 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const dispatch = useDispatch()
 
     const onAdjustWorkspaceSize = useCallback(() => dispatch(adjustWorkspaceSize()), [dispatch])
-    const onChangeSelectedArea = (rect: Rectangle) => dispatch(changeSelectedArea(rect))
+    const onCopySelectedArea = (image: HTMLCanvasElement) => dispatch(copySelectedArea(image))
+    const onChangeSelectedArea = (rect: Rectangle | null) => dispatch(changeSelectedArea(rect))
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
     const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
     const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
@@ -90,6 +93,7 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
     const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
     const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
+    const onPaste = () => dispatch(paste())
     const onKeyUp = () => setKeyDown(null)
     const onKeyDown = (keyDown: KeyboardEvent) => setKeyDown(keyDown)
     const onDragEnd = () => stage && onChangePosition(stage.position())
@@ -194,6 +198,8 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                                         onChangePrimaryColor,
                                         onChangeSelectedTile,
                                         onChangeTileset,
+                                        onCopySelectedArea,
+                                        onPaste,
                                         onSaveTilesetImage,
                                         selected,
                                         stage,
@@ -206,7 +212,17 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                             ))}
                         {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, grid, onChangeSelectedArea }} />}
                         {selected.tool === TOOLS.SELECT && (
-                            <SelectTool {...{ canvas, grid, isMouseDown, pointerPosition, selectedLayer, workspace }} />
+                            <SelectTool
+                                {...{
+                                    canvas,
+                                    grid,
+                                    isMouseDown,
+                                    onChangeSelectedArea,
+                                    pointerPosition,
+                                    selectedLayer,
+                                    workspace
+                                }}
+                            />
                         )}
                         {stage && (
                             <GridLines

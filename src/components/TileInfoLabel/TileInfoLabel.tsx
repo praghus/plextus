@@ -4,12 +4,12 @@ import { useSelector } from 'react-redux'
 
 import { getCoordsFromPos, getPointerRelativePos } from '../../common/utils/konva'
 import { selectCanvas, selectGrid, selectWorkspace, selectTileset } from '../../store/editor/selectors'
-import { DeflatedLayer } from '../../store/editor/types'
+import { Layer } from '../../store/editor/types'
 import { StyledLabel } from './TileInfoLabel.styled'
 
 interface Props {
     pointerPosition: Konva.Vector2d | null
-    selectedLayer: DeflatedLayer | null
+    selectedLayer: Layer | null
 }
 
 const TileInfoLabel: React.FunctionComponent<Props> = ({ pointerPosition, selectedLayer }) => {

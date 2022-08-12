@@ -15,13 +15,16 @@ export function getImage(src: string): Promise<HTMLImageElement> {
     })
 }
 
-export function createEmptyImage(width: number, height: number): Promise<Blob> {
+export function createImage(width: number, height: number, imageData?: ImageData): Promise<Blob> {
     return new Promise((resolve, reject) => {
         const canvasElement = document.createElement('canvas')
         const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
         canvasElement.width = width
         canvasElement.height = height
         ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
+        if (imageData) {
+            ctx.putImageData(imageData, 0, 0)
+        }
         canvasElement.toBlob((blob: Blob | null) => (blob ? resolve(blob) : reject()), 'image/png')
     })
 }

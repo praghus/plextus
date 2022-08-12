@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
 import { Canvas, Grid, Rectangle } from '../../store/editor/types'
+import { getSelectionRect } from '../../common/utils/konva'
 
 interface Props {
     canvas: Canvas
@@ -30,17 +31,16 @@ const CropTool: React.FunctionComponent<Props> = ({ canvas, grid, onChangeSelect
         [width, height]
     )
 
-    const setArea = useCallback(
-        () =>
-            shape &&
+    const setArea = useCallback(() => {
+        if (shape) {
             onChangeSelectedArea({
                 height: shape.scaleY(),
                 width: shape.scaleX(),
                 x: shape.x() / width,
                 y: shape.y() / height
-            }),
-        [height, onChangeSelectedArea, shape, width]
-    )
+            })
+        }
+    }, [height, onChangeSelectedArea, shape, width])
 
     useEffect(() => {
         if (shape && transformer) {
@@ -63,8 +63,8 @@ const CropTool: React.FunctionComponent<Props> = ({ canvas, grid, onChangeSelect
                 id="selectRect"
                 fill="rgba(0,128,255,0.3)"
                 onTransform={(e: Konva.KonvaEventObject<Event>) => {
-                    e.target.scaleX(Math.round((e.target.scaleX() / width) * width))
-                    e.target.scaleY(Math.round((e.target.scaleY() / height) * height))
+                    e.target.scaleX(Math.max(1, Math.round((e.target.scaleX() / width) * width)))
+                    e.target.scaleY(Math.max(1, Math.round((e.target.scaleY() / height) * height)))
                     e.target.position(getPosition(e))
                     e.evt.preventDefault()
                 }}
