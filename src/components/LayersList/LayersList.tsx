@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
@@ -35,7 +35,13 @@ import {
     changeLayerOpacity,
     changeLayerVisible
 } from '../../store/editor/actions'
-import { selectCanvas, selectSelected, selectLayers, selectTileset } from '../../store/editor/selectors'
+import {
+    selectCanvas,
+    selectSelected,
+    selectLayers,
+    selectTileset,
+    selectSelectedLayer
+} from '../../store/editor/selectors'
 import { ConfirmationDialog } from '../ConfirmationDialog'
 import { LayerPropertiesDialog } from '../LayerPropertiesDialog'
 import { ImageUpload } from '../ImageUpload'
@@ -52,6 +58,8 @@ const LayersList: React.FunctionComponent = () => {
     const layers = useSelector(selectLayers)
     const selected = useSelector(selectSelected)
     const tileset = useSelector(selectTileset)
+    const selectedLayer = useSelector(selectSelectedLayer)
+
     const reversedList = [...layers].reverse()
     const currentLayer = getLayerById(layers, selected.layerId) || layers[0]
 
@@ -129,11 +137,6 @@ const LayersList: React.FunctionComponent = () => {
         }
         setPropertiesDialogOpen(false)
     }
-
-    const selectedLayer = useMemo(
-        () => layers.find(({ id }) => id === selected.layerId) || null,
-        [layers, selected.layerId]
-    )
 
     return (
         <>

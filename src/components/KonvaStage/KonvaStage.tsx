@@ -18,6 +18,7 @@ import {
     selectGrid,
     selectLayers,
     selectSelected,
+    selectSelectedLayer,
     selectTileset,
     selectWorkspace
 } from '../../store/editor/selectors'
@@ -61,9 +62,9 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const layers = useSelector(selectLayers)
     const tileset = useSelector(selectTileset)
     const workspace = useSelector(selectWorkspace)
+    const selectedLayer = useSelector(selectSelectedLayer)
 
     const backgroundColor = canvas.background && getRgbaValue(canvas.background)
-    const selectedLayer = layers.find(({ id }) => id === selected.layerId) || null
 
     const [stage, setStage] = useState<Konva.Stage>()
     const [isMouseDown, setIsMouseDown] = useState<boolean>(false)
@@ -83,7 +84,6 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const theme = useTheme()
     const dispatch = useDispatch()
 
-    const onAdjustWorkspaceSize = useCallback(() => dispatch(adjustWorkspaceSize()), [dispatch])
     const onCopySelectedArea = (image: HTMLCanvasElement) => dispatch(copySelectedArea(image))
     const onChangeSelectedArea = (rect: Rectangle | null) => dispatch(changeSelectedArea(rect))
     const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
@@ -136,8 +136,8 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
 
     useEffect(() => {
         onCenter()
-        onAdjustWorkspaceSize()
-    }, [workspace.width, workspace.height, onCenter, onAdjustWorkspaceSize])
+        dispatch(adjustWorkspaceSize())
+    }, [workspace.width, workspace.height, onCenter, dispatch])
 
     useEffect(() => {
         if (selected.tool === TOOLS.CROP) {

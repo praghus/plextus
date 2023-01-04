@@ -22,15 +22,16 @@ interface Props {
 
 const TabContainer: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const [tab, setTab] = useState(0)
+    const sx = { minWidth: '30px' }
 
     return (
         <StyledTabContainer>
             <Box sx={{ width: '100%' }}>
                 <Tabs value={tab} variant="fullWidth" onChange={(_, value) => setTab(value as number)}>
-                    <Tab icon={<LayersIcon />} sx={{ minWidth: '30px' }} />
-                    <Tab icon={<GridViewIcon />} sx={{ minWidth: '30px' }} />
-                    <Tab icon={<ColorLensIcon />} sx={{ minWidth: '30px' }} />
-                    <Tab icon={<SettingsIcon />} sx={{ minWidth: '30px' }} />
+                    <Tab icon={<LayersIcon />} {...{ sx }} />
+                    <Tab icon={<GridViewIcon />} {...{ sx }} />
+                    <Tab icon={<ColorLensIcon />} {...{ sx }} />
+                    <Tab icon={<SettingsIcon />} {...{ sx }} />
                 </Tabs>
                 <TabPanel value={tab} index={0}>
                     <LayersList />

@@ -15,10 +15,10 @@ import {
     getCoordsFromPos,
     getPointerRelativePos,
     fillColor,
-    pickColor
+    pickColor,
+    fillTile
 } from '../../common/utils/konva'
 import { isArray } from '../../common/utils/array'
-import { getImage } from '../../common/utils/image'
 import { useCanvasBuffer } from '../../hooks/useCanvasBuffer'
 import { usePrevious } from '../../hooks/usePrevious'
 import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
@@ -139,7 +139,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 data.forEach((g, i) => {
                     const x1 = x + (i % (width / grid.width))
                     const y1 = y + Math.ceil((i + 1) / (width / grid.width) - 1)
-                    tempData.current[x1 + ((layer.width * tilewidth) / grid.width) * y1] = g
+                    if (g !== null) tempData.current[x1 + ((layer.width * tilewidth) / grid.width) * y1] = g
                 })
             }
             stage.batchDraw()
@@ -208,12 +208,19 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 case TOOLS.PICKER:
                     onChangePrimaryColor(pickColor(ctx, currentPos))
                     break
-                case TOOLS.FILL:
+                case TOOLS.COLOR_FILL:
                     if (secondBtnPressed) {
                         onChangePrimaryColor(pickColor(ctx, currentPos))
                     } else if (bufferCtx && bufferImage) {
                         fillColor(pos, selected.color, bufferImage, bufferCtx)
                         renderFromBuffer(selectedTile)
+                    }
+                    break
+                case TOOLS.TILE_FILL:
+                    if (selected.tileId) {
+                        fillTile(selected.tileId, currentPos, layer, grid, tileset, newData =>
+                            onChangeLayerData(layer.id, newData)
+                        )
                     }
                     break
                 case TOOLS.LINE:
@@ -286,7 +293,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
                 case TOOLS.ERASER:
                 case TOOLS.LINE:
                 case TOOLS.PENCIL:
-                case TOOLS.FILL:
+                case TOOLS.COLOR_FILL:
                     // create a new tile when it was drawn on empty slot
                     if (selectedTile && !selectedTile.gid && bufferCtx) {
                         const gid = tileset.tilecount + 1

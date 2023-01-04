@@ -40,7 +40,7 @@ const Pointer: React.FunctionComponent<Props> = ({
     const [fillPatternImage] = useImage(pasteImage || tileset.image)
 
     const [posX, posY] =
-        [TOOLS.DELETE, TOOLS.REPLACE, TOOLS.STAMP].includes(selected.tool) && selectedLayer?.data
+        [TOOLS.DELETE, TOOLS.REPLACE, TOOLS.STAMP, TOOLS.TILE_FILL].includes(selected.tool) && selectedLayer?.data
             ? [x * width + offset.x, y * height + offset.y]
             : [Math.floor(pointerRelPosition.x), Math.floor(pointerRelPosition.y)]
 
@@ -48,7 +48,7 @@ const Pointer: React.FunctionComponent<Props> = ({
         if (pointerRef.current && pointerOverlayRef.current && fillPatternImage) {
             const pointer = pointerRef.current
             const overlay = pointerOverlayRef.current
-            if ([TOOLS.STAMP, TOOLS.REPLACE].includes(selected.tool)) {
+            if ([TOOLS.STAMP, TOOLS.REPLACE, , TOOLS.TILE_FILL].includes(selected.tool)) {
                 const w = (pasteImage && selected.stamp?.width) || width
                 const h = (pasteImage && selected.stamp?.height) || height
                 overlay.setAttrs({
@@ -98,7 +98,7 @@ const Pointer: React.FunctionComponent<Props> = ({
     return (
         <Group listening={false}>
             <Rect
-                visible={[TOOLS.REPLACE, TOOLS.STAMP].includes(selected.tool)}
+                visible={[TOOLS.REPLACE, TOOLS.STAMP, TOOLS.TILE_FILL].includes(selected.tool)}
                 ref={pointerRef}
                 strokeWidth={0.1}
                 x={posX}

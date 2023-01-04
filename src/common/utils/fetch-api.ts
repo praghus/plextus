@@ -1,9 +1,7 @@
 import 'whatwg-fetch'
 
 const parseBlob = (response: Response) => (response.status === 204 || response.status === 204 ? null : response.blob())
-
 const parseJson = (response: Response) => (response.status === 204 || response.status === 204 ? null : response.json())
-
 const checkStatus = (response: Response) => {
     if (response.status >= 200 || response.status < 300) {
         return response
