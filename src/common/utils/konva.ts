@@ -1,7 +1,7 @@
 import Konva from 'konva'
 
 import { TOOLS } from '../../common/tools'
-import { Canvas, Grid, Rectangle, Selected, Workspace } from '../../store/editor/types'
+import { Canvas, Grid, Layer, Rectangle, Selected, Tileset, Workspace } from '../../store/editor/types'
 import { brightenDarken, getRgbaValue } from './colors'
 
 export const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
@@ -18,6 +18,9 @@ export const getCoordsFromPos = (grid: Grid, pos: Konva.Vector2d): Konva.Vector2
     y: Math.ceil(pos.y / grid.height) - 1
 })
 
+export const pickColor = (ctx: CanvasRenderingContext2D, pos: Konva.Vector2d): number[] =>
+    Object.values(ctx.getImageData(pos.x, pos.y, 1, 1).data)
+
 export const getPointerRelativePos = (
     workspace: Workspace,
     pos: Konva.Vector2d,
@@ -27,7 +30,7 @@ export const getPointerRelativePos = (
     y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
 })
 
-export const getSelectionRect = (shape: Konva.Rect): Rectangle => {
+export function getSelectionRect(shape: Konva.Rect): Rectangle {
     const [x, y, w, h] = [shape.x(), shape.y(), shape.width(), shape.height()]
     return {
         height: Math.abs(h),
@@ -36,9 +39,6 @@ export const getSelectionRect = (shape: Konva.Rect): Rectangle => {
         y: h < 0 ? y + h : y
     }
 }
-
-export const pickColor = (ctx: CanvasRenderingContext2D, pos: Konva.Vector2d): number[] =>
-    Object.values(ctx.getImageData(pos.x, pos.y, 1, 1).data)
 
 export function centerStage(
     stage: Konva.Stage,
@@ -57,7 +57,7 @@ export function centerStage(
     stage.scale({ x: scale, y: scale })
     stage.batchDraw()
 
-    cb(stage.position(), stage.scale())
+    cb(stage.position(), { x: scale, y: scale } as Konva.Vector2d)
 }
 
 export function actionDraw(
@@ -197,4 +197,80 @@ export function fillColor(
     }
     floodFill()
     ctx.putImageData(colorLayer, 0, 0)
+}
+
+export function fillTile(
+    gid: number,
+    pos: Konva.Vector2d,
+    layer: Layer,
+    grid: Grid,
+    tileset: Tileset,
+    cb: (data: number[]) => void
+): void {
+    if (!layer.data) return
+
+    const { width, height } = layer
+    const { x: px, y: py } = getCoordsFromPos(grid, pos)
+
+    const startPos = px + ((layer.width * tileset.tilewidth) / grid.width) * py
+    const tileStack = [[px, py]]
+    const data = [...layer.data]
+    const startGid = data[startPos]
+
+    let x: number, y: number, tilePos: number, reachLeft: boolean, reachRight: boolean
+
+    if (gid === startGid) return
+
+    const matchStartGid = (tilePos: number) => data[tilePos] === startGid
+
+    const fillCell = (tilePos: number) => {
+        data[tilePos] = gid
+    }
+
+    const floodFill = () => {
+        const newPos = tileStack.pop() as number[]
+        x = newPos[0]
+        y = newPos[1]
+        tilePos = x + ((layer.width * tileset.tilewidth) / grid.width) * y
+
+        while (y >= 0 && matchStartGid(tilePos)) {
+            y--
+            tilePos -= width
+        }
+        tilePos += width
+        reachLeft = false
+        reachRight = false
+        y++
+
+        while (y < height && matchStartGid(tilePos)) {
+            fillCell(tilePos)
+            if (x > 0) {
+                if (matchStartGid(tilePos - 1)) {
+                    if (!reachLeft) {
+                        tileStack.push([x - 1, y])
+                        reachLeft = true
+                    }
+                } else if (reachLeft) {
+                    reachLeft = false
+                }
+            }
+            if (x < width - 1) {
+                if (matchStartGid(tilePos + 1)) {
+                    if (!reachRight) {
+                        tileStack.push([x + 1, y])
+                        reachRight = true
+                    }
+                } else if (reachRight) {
+                    reachRight = false
+                }
+            }
+            y++
+            tilePos += width
+        }
+        if (tileStack.length) {
+            floodFill()
+        }
+    }
+    floodFill()
+    cb(data)
 }

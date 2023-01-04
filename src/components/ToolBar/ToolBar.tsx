@@ -1,19 +1,21 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
 import { useDispatch, useSelector } from 'react-redux'
 import { IconButton, ListItemIcon, Menu, MenuItem, PopoverOrigin, ToggleButton, Tooltip } from '@mui/material'
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
 
 import { TOOLS, TOOL_DESC, TOOL_ICONS, AVAILABLE_TOOLS } from '../../common/tools'
-import { selectSelected, selectWorkspace } from '../../store/editor/selectors'
+import { selectSelected, selectSelectedLayer, selectWorkspace } from '../../store/editor/selectors'
 import { changeTool } from '../../store/editor/actions'
 
 import { StyledToolBarContainer, StyledToggleButtonGroup } from './ToolBar.styled'
 
 const ToolBar: React.FunctionComponent = () => {
     const theme = useTheme()
+
     const selected = useSelector(selectSelected)
     const workspace = useSelector(selectWorkspace)
+    const selectedLayer = useSelector(selectSelectedLayer)
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
     const [lastSelectedTool, setLastSelectedTool] = useState<keyof typeof TOOLS>(AVAILABLE_TOOLS[0])
@@ -22,8 +24,15 @@ const ToolBar: React.FunctionComponent = () => {
     const onChangeTool = useCallback((tool: string) => tool && dispatch(changeTool(tool)), [dispatch])
 
     const open = Boolean(anchorEl)
-    const iconColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'
-    const iconSelectedColor = theme.palette.mode === 'dark' ? '#90caf9' : '#1976d2'
+    const colors = useMemo(
+        () => ({
+            default: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+            disabled: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+            selected: theme.palette.mode === 'dark' ? '#90caf9' : '#1976d2'
+        }),
+        [theme.palette.mode]
+    )
+
     const menuOrigin: PopoverOrigin = { horizontal: 'right', vertical: 'bottom' }
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -43,39 +52,55 @@ const ToolBar: React.FunctionComponent = () => {
         [onChangeTool]
     )
 
+    const isDisabled = useCallback(
+        (value: keyof typeof TOOLS) =>
+            !selectedLayer ||
+            (!selectedLayer.data && (value === TOOLS.TILE_FILL || value === TOOLS.REPLACE || value === TOOLS.DELETE)),
+        [selectedLayer]
+    )
+
     const renderToolButton = useCallback(
         (value: keyof typeof TOOLS) => {
             const Icon = TOOL_ICONS[value]
+            const disabled = isDisabled(value)
             return (
                 <Tooltip title={TOOL_DESC[value]} placement="right" key={`tool-button-${value.toLowerCase()}`}>
-                    <ToggleButton {...{ value }}>
+                    <ToggleButton {...{ disabled, value }}>
                         <Icon
                             sx={{ fontSize: 22 }}
-                            htmlColor={selected.tool === value ? iconSelectedColor : iconColor}
+                            htmlColor={
+                                disabled
+                                    ? colors.disabled
+                                    : (selected.tool === value && colors.selected) || colors.default
+                            }
                         />
                     </ToggleButton>
                 </Tooltip>
             )
         },
-        [iconColor, iconSelectedColor, selected.tool]
+        [isDisabled, colors, selected.tool]
     )
 
     const renterMoreToolMenuItem = useCallback(
         (value: keyof typeof TOOLS) => {
             const Icon = TOOL_ICONS[value]
             return (
-                <MenuItem onClick={() => changeSelectedTool(value)} key={`tool-item-${value.toLowerCase()}`}>
+                <MenuItem
+                    disabled={isDisabled(value)}
+                    onClick={() => changeSelectedTool(value)}
+                    key={`tool-item-${value.toLowerCase()}`}
+                >
                     <ListItemIcon>
                         <Icon
                             sx={{ fontSize: 22 }}
-                            htmlColor={selected.tool === value ? iconSelectedColor : iconColor}
+                            htmlColor={selected.tool === value ? colors.selected : colors.default}
                         />
                     </ListItemIcon>
                     {TOOL_DESC[value]}
                 </MenuItem>
             )
         },
-        [selected.tool, iconSelectedColor, iconColor, changeSelectedTool]
+        [isDisabled, selected.tool, colors, changeSelectedTool]
     )
 
     const ToolsMenu = useMemo(() => {
@@ -85,6 +110,12 @@ const ToolBar: React.FunctionComponent = () => {
         setLastSelectedTool(more[0])
         return { main, more }
     }, [workspace.height])
+
+    useEffect(() => {
+        if (isDisabled(selected.tool)) {
+            onChangeTool(TOOLS.DRAG)
+        }
+    }, [isDisabled, onChangeTool, selected.tool])
 
     return (
         <StyledToolBarContainer>
@@ -100,7 +131,7 @@ const ToolBar: React.FunctionComponent = () => {
                     : renderToolButton(lastSelectedTool)}
             </StyledToggleButtonGroup>
             <IconButton onClick={handleClick} sx={{ margin: '5px' }}>
-                <MoreHorizIcon fontSize="small" htmlColor={iconColor} />
+                <MoreHorizIcon fontSize="small" htmlColor={colors.default} />
             </IconButton>
             <Menu
                 open={open}

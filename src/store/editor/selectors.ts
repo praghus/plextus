@@ -17,6 +17,11 @@ export const selectSelected = createSelector(selectEditor, ({ selected }) => sel
 export const selectTileset = createSelector(selectEditor, ({ tileset }) => tileset)
 export const selectTilesetImage = createSelector(selectEditor, ({ tileset }) => tileset.image)
 export const selectWorkspace = createSelector(selectEditor, ({ workspace }) => workspace)
+export const selectSelectedLayer = createSelector(
+    selectLayers,
+    selectSelected,
+    (layers, selected) => layers.find(({ id }) => id === selected.layerId) || null
+)
 export const selectUndoable = createSelector(selectEditor, ({ canvas, tileset, layers }) => ({
     canvas,
     layers,
