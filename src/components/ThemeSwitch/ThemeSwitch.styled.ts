@@ -5,11 +5,12 @@ export const StyledThemeSwitch = muiStyled(Switch, {
     shouldForwardProp: prop => prop !== 'tiny'
 })<{ tiny: boolean | undefined }>(({ theme, tiny }) => {
     const iconSize = tiny ? 16 : 20
+    const darkMode = theme.palette.mode === 'dark'
     return {
         '& .MuiSwitch-switchBase': {
             '&.Mui-checked': {
                 '& + .MuiSwitch-track': {
-                    backgroundColor: theme.palette.mode === 'dark' ? '#8796a5' : '#aab4be',
+                    backgroundColor: darkMode ? '#8796a5' : '#aab4be',
                     opacity: 1
                 },
                 '& .MuiSwitch-thumb:before': {
@@ -38,12 +39,12 @@ export const StyledThemeSwitch = muiStyled(Switch, {
                 top: 0,
                 width: '100%'
             },
-            backgroundColor: theme.palette.mode === 'dark' ? '#003892' : '#001e3c',
+            backgroundColor: darkMode ? '#003892' : '#001e3c',
             height: tiny ? 20 : 32,
             width: tiny ? 20 : 32
         },
         '& .MuiSwitch-track': {
-            backgroundColor: theme.palette.mode === 'dark' ? '#8796a5' : '#aab4be',
+            backgroundColor: darkMode ? '#8796a5' : '#aab4be',
             borderRadius: 20 / 2,
             opacity: 1
         },

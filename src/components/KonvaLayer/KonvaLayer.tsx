@@ -126,7 +126,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         }
     }
 
-    const updateLayer = async (x: number, y: number, gid: number | null) => {
+    const updateLayer = (x: number, y: number, gid: number | null) => {
         if (layer.width) {
             const pos = x + ((layer.width * tilewidth) / grid.width) * y
             if (gid !== -1) {
@@ -164,8 +164,10 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
 
     const replaceTile = (gid: number) => {
         if (data && selected.tileId) {
-            const tempData = data.map(tile => (tile === gid ? selected.tileId : tile))
-            setData(tempData)
+            onChangeLayerData(
+                layer.id,
+                data.map(tile => (tile === gid ? selected.tileId : tile))
+            )
         }
     }
 

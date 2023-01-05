@@ -1,4 +1,4 @@
-import { AnyAction } from 'redux'
+import { AnyAction } from '@reduxjs/toolkit'
 import { AppState } from './types'
 import {
     APP_REHYDRATE_STORE_SUCCESS,

@@ -5,7 +5,7 @@ import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-import { getImage } from '../common/utils/image'
+import { createCanvasElement, getImage } from '../common/utils/image'
 import { THEMES } from '../common/constants'
 import { APP_RESOURCE_NAME } from '../store/app/constants'
 import { EDITOR_RESOURCE_NAME } from '../store/editor/constants'
@@ -42,7 +42,7 @@ const App: React.FunctionComponent = () => {
     const tileset = useSelector(selectTileset)
     const isDarkModeEnabled = useMediaQuery('(prefers-color-scheme: dark)')
 
-    const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
+    const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(createCanvasElement()[0])
 
     const dispatch = useDispatch()
     const onAdjustWorkspaceSize = useCallback(() => dispatch(adjustWorkspaceSize()), [dispatch])
@@ -63,8 +63,7 @@ const App: React.FunctionComponent = () => {
     useLayoutEffect(() => {
         async function getTilesetImage(src: string) {
             const image = await getImage(src)
-            const canvasElement = document.createElement('canvas')
-            const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
+            const [canvasElement, ctx] = createCanvasElement()
             canvasElement.width = image.width
             canvasElement.height = image.height
             ctx.drawImage(image, 0, 0)

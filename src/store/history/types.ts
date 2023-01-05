@@ -1,4 +1,5 @@
-import { AnyAction } from 'redux'
+import { AnyAction } from '@reduxjs/toolkit'
+
 import { INITIAL_STATE } from './constants'
 import { Canvas, DeflatedLayer, Tileset } from '../editor/types'
 

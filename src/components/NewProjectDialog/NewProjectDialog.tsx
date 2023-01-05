@@ -7,7 +7,6 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
     InputAdornment,
     Stack,
     TextField,
@@ -49,7 +48,6 @@ const NewProjectDialog: React.FunctionComponent = () => {
 
     return (
         <Dialog open={isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
-            <DialogTitle id="form-dialog-title">{t('i18_new_project')}</DialogTitle>
             <DialogContent sx={{ maxWidth: '500px' }}>
                 <TextField
                     sx={{ marginBottom: '20px' }}

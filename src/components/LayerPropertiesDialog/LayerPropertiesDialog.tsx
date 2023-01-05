@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControlLabel,
-    Stack,
-    Switch,
-    TextField
-} from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, FormControlLabel, Stack, Switch, TextField } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Layer } from '../../store/editor/types'
@@ -31,7 +21,6 @@ const LayerPropertiesDialog: React.FunctionComponent<Props> = ({ layer, onSave, 
 
     return (
         <Dialog {...{ onClose, open }}>
-            <DialogTitle>{t('i18_layer_properties')}</DialogTitle>
             <DialogContent>
                 {model && (
                     <>
@@ -119,6 +108,11 @@ const LayerPropertiesDialog: React.FunctionComponent<Props> = ({ layer, onSave, 
                         }
                         sx={{ marginLeft: '10px', marginRight: 'auto' }}
                     />
+                )}
+                {layer?.image && (
+                    <Button onClick={onClose} color="primary">
+                        Convert
+                    </Button>
                 )}
                 <Button onClick={onClose} color="primary">
                     {t('i18_cancel')}

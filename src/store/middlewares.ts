@@ -1,14 +1,8 @@
-import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
+import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit'
 import createUndoMiddleware from './history/middleware'
 import logger from '../common/utils/logger'
-import { selectUndoable, selectTileset, selectRawLayers, selectCanvas } from './editor/selectors'
-import {
-    changeLayersSuccess,
-    changeTilesetImageSuccess,
-    cropSuccess,
-    historyAction,
-    removeTileSuccess
-} from './editor/actions'
+import { selectTileset, selectRawLayers, selectCanvas } from './editor/selectors'
+import { changeLayersSuccess, changeTilesetImageSuccess, cropSuccess, removeTileSuccess } from './editor/actions'
 import {
     EDITOR_SET_TILESET_IMAGE,
     EDITOR_CHANGE_LAYERS_SUCCESS,
@@ -52,32 +46,28 @@ const cacheMiddleware: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => 
 }
 
 const undoMiddleware = createUndoMiddleware({
-    getViewState: selectUndoable,
-    revertingActions: {
-        [EDITOR_CHANGE_LAYERS_SUCCESS]: {
-            action: (action: AnyAction, { layers }: RevertingPayload) => changeLayersSuccess(layers),
-            getBefore: (state: RootState) => ({ layers: selectRawLayers(state) })
-        },
-        [EDITOR_CROP_SUCCESS]: {
-            action: (action: AnyAction, { canvas, layers }: RevertingPayload) => cropSuccess(layers, canvas),
-            getBefore: (state: RootState) => ({
-                canvas: selectCanvas(state),
-                layers: selectRawLayers(state)
-            })
-        },
-        [EDITOR_REMOVE_TILE_SUCCESS]: {
-            action: (action: AnyAction, { layers, tileset }: RevertingPayload) => removeTileSuccess(layers, tileset),
-            getBefore: (state: RootState) => ({
-                layers: selectRawLayers(state),
-                tileset: selectTileset(state)
-            })
-        },
-        [EDITOR_SET_TILESET_IMAGE]: {
-            action: (action: AnyAction, { image }: RevertingPayload) => changeTilesetImageSuccess(image),
-            getBefore: (state: RootState) => ({ tileset: selectTileset(state) })
-        }
+    [EDITOR_CHANGE_LAYERS_SUCCESS]: {
+        action: (action: AnyAction, { layers }: RevertingPayload) => changeLayersSuccess(layers),
+        getBefore: (state: RootState) => ({ layers: selectRawLayers(state) })
     },
-    setViewState: historyAction
+    [EDITOR_CROP_SUCCESS]: {
+        action: (action: AnyAction, { canvas, layers }: RevertingPayload) => cropSuccess(layers, canvas),
+        getBefore: (state: RootState) => ({
+            canvas: selectCanvas(state),
+            layers: selectRawLayers(state)
+        })
+    },
+    [EDITOR_REMOVE_TILE_SUCCESS]: {
+        action: (action: AnyAction, { layers, tileset }: RevertingPayload) => removeTileSuccess(layers, tileset),
+        getBefore: (state: RootState) => ({
+            layers: selectRawLayers(state),
+            tileset: selectTileset(state)
+        })
+    },
+    [EDITOR_SET_TILESET_IMAGE]: {
+        action: (action: AnyAction, { image }: RevertingPayload) => changeTilesetImageSuccess(image),
+        getBefore: (state: RootState) => ({ tileset: selectTileset(state) })
+    }
 })
 
 export { cacheMiddleware, undoMiddleware }

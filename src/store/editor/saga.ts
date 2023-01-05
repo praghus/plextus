@@ -1,9 +1,9 @@
-import { AnyAction } from 'redux'
+import { AnyAction } from '@reduxjs/toolkit'
 import { call, put, select, takeLatest } from 'redux-saga/effects'
 import { toast } from 'react-toastify'
 import i18n from '../../common/translations/i18n'
 import logger from '../../common/utils/logger'
-import { createImage, importLayer, generateReducedPalette } from '../../common/utils/image'
+import { createImage, importLayer, generateReducedPalette, get2DContext } from '../../common/utils/image'
 import { clearCache, setCacheBlob } from '../../common/utils/storage'
 import { compressLayerData } from '../../common/utils/pako'
 import { canvasToBlob, downloadProjectFile } from '../../common/utils/data'
@@ -77,6 +77,7 @@ export function* clearProject(): SagaIterator<void> {
     try {
         // historyData.forEach(URL.revokeObjectURL)
         clearCache()
+        yield put(clear())
         yield put(resetToDefaults())
     } catch (err) {
         logger.error(err)
@@ -87,6 +88,7 @@ export function* openProject(action: AnyAction): SagaIterator<void> {
     const { data } = action.payload
     try {
         clearCache()
+        yield put(clear())
         yield put(resetToDefaults())
         yield put(loadStateFromFile(data))
         yield put(adjustWorkspaceSize())
@@ -157,7 +159,7 @@ export function* copySelectedArea(action: AnyAction): SagaIterator<void> {
         const selectedLayer = layers.find(({ id }) => id === layerId)
 
         if (area && area.width > 0 && area.height > 0) {
-            const ctx = imageCanvas.getContext('2d') as CanvasRenderingContext2D
+            const ctx = get2DContext(imageCanvas)
             const imageData = ctx.getImageData(area.x, area.y, area.width, area.height)
             const blob = yield call(createImage, area.width, area.height, imageData)
             const image = window.URL.createObjectURL(blob)

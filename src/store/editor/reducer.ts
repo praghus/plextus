@@ -1,4 +1,5 @@
-import { AnyAction } from 'redux'
+import { AnyAction } from '@reduxjs/toolkit'
+
 import { Canvas, EditorState } from './types'
 import {
     INITIAL_STATE,
