@@ -12,6 +12,7 @@ import { StyledToolBarContainer, StyledToggleButtonGroup } from './ToolBar.style
 
 const ToolBar: React.FunctionComponent = () => {
     const theme = useTheme()
+    const darkMode = theme.palette.mode === 'dark'
 
     const selected = useSelector(selectSelected)
     const workspace = useSelector(selectWorkspace)
@@ -24,13 +25,14 @@ const ToolBar: React.FunctionComponent = () => {
     const onChangeTool = useCallback((tool: string) => tool && dispatch(changeTool(tool)), [dispatch])
 
     const open = Boolean(anchorEl)
+
     const colors = useMemo(
         () => ({
-            default: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-            disabled: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-            selected: theme.palette.mode === 'dark' ? '#90caf9' : '#1976d2'
+            default: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+            disabled: darkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+            selected: darkMode ? '#90caf9' : '#1976d2'
         }),
-        [theme.palette.mode]
+        [darkMode]
     )
 
     const menuOrigin: PopoverOrigin = { horizontal: 'right', vertical: 'bottom' }

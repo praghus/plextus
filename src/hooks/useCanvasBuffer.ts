@@ -1,7 +1,7 @@
 import Konva from 'konva'
 import { useCallback, useState, useEffect } from 'react'
 
-import { getImage } from '../common/utils/image'
+import { createCanvasElement, get2DContext, getImage } from '../common/utils/image'
 import { getCoordsFromPos } from '../common/utils/konva'
 import { SelectedTile } from '../common/types'
 import { getTilePos } from '../store/editor/utils'
@@ -66,7 +66,7 @@ export const useCanvasBuffer = (
 
     const renderFromBuffer = (tile?: SelectedTile) => {
         if (ctx && bufferImage) {
-            const tilesetContext = tilesetCanvas.getContext('2d')
+            const tilesetContext = get2DContext(tilesetCanvas)
             if (tile && bufferCtx && tilesetContext) {
                 ctx.clearRect(tile.x * tilewidth, tile.y * tileheight, tilewidth, tileheight)
                 ctx.drawImage(bufferImage, tile.x * tilewidth, tile.y * tileheight, tilewidth, tileheight)
@@ -135,10 +135,8 @@ export const useCanvasBuffer = (
     }, [ctx, getLayerImage, layer.image])
 
     useEffect(() => {
-        const canvasElement = document.createElement('canvas')
-        const canvasContext = canvasElement.getContext('2d') as CanvasRenderingContext2D
-        const canvasBufferElement = document.createElement('canvas')
-        const canvasBufferContext = canvasBufferElement.getContext('2d') as CanvasRenderingContext2D
+        const [canvasElement, canvasContext] = createCanvasElement()
+        const [canvasBufferElement, canvasBufferContext] = createCanvasElement()
 
         canvasElement.width = width
         canvasElement.height = height

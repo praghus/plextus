@@ -10,7 +10,7 @@ import { getTilesetDimensions, createEmptyTile, getTilePos } from '../../store/e
 import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } from '../../store/editor/actions'
 import { selectGrid, selectSelected, selectTileset } from '../../store/editor/selectors'
 import { getCoordsFromPos, getPointerRelativePos } from '../../common/utils/konva'
-import { downloadImage } from '../../common/utils/image'
+import { downloadImage, get2DContext } from '../../common/utils/image'
 import { useZoomEvents } from '../../hooks/useZoomEvents'
 import { Workspace, Tileset as TilesetType } from '../../store/editor/types'
 import { ConfirmationDialog } from '../ConfirmationDialog'
@@ -30,7 +30,7 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const tileset = useSelector(selectTileset)
     const selected = useSelector(selectSelected)
     const imageDimensions = useMemo<Dim>(() => getTilesetDimensions(tileset), [tileset])
-    const tilesetContext = tilesetCanvas.getContext('2d')
+    const tilesetContext = get2DContext(tilesetCanvas)
 
     const { t } = useTranslation()
 

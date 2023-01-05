@@ -22,8 +22,3 @@ export const selectSelectedLayer = createSelector(
     selectSelected,
     (layers, selected) => layers.find(({ id }) => id === selected.layerId) || null
 )
-export const selectUndoable = createSelector(selectEditor, ({ canvas, tileset, layers }) => ({
-    canvas,
-    layers,
-    tileset
-}))

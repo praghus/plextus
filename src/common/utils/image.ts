@@ -1,10 +1,17 @@
-import { v4 as uuidv4 } from 'uuid'
 import { execute } from 'wasm-imagemagick'
 import { IMPORT_MODES, TILESET_FILENAME } from '../constants'
 import { INITIAL_STATE } from '../../store/editor/constants'
 import { LayerImportConfig, Tileset } from '../../store/editor/types'
 import { spliceIntoChunks } from './array'
-import { canvasToBlob } from './data'
+import { canvasToBlob, createDownloadLink } from './data'
+
+export const get2DContext = (canvasElement: HTMLCanvasElement): CanvasRenderingContext2D =>
+    canvasElement.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
+
+export const createCanvasElement = (): [HTMLCanvasElement, CanvasRenderingContext2D] => {
+    const canvasElement = document.createElement('canvas')
+    return [canvasElement, get2DContext(canvasElement)]
+}
 
 export function getImage(src: string): Promise<HTMLImageElement> {
     return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -17,8 +24,7 @@ export function getImage(src: string): Promise<HTMLImageElement> {
 
 export function createImage(width: number, height: number, imageData?: ImageData): Promise<Blob> {
     return new Promise((resolve, reject) => {
-        const canvasElement = document.createElement('canvas')
-        const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
+        const [canvasElement, ctx] = createCanvasElement()
         canvasElement.width = width
         canvasElement.height = height
         ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
@@ -30,20 +36,17 @@ export function createImage(width: number, height: number, imageData?: ImageData
 }
 
 export function downloadImage(canvas: HTMLCanvasElement): void {
-    const downloadLink = document.createElement('a')
-    const dataURL = canvas.toDataURL('image/png')
-    const url = dataURL.replace(/^data:image\/png/, 'data:application/octet-stream')
-    downloadLink.setAttribute('download', TILESET_FILENAME)
-    downloadLink.setAttribute('href', url)
-    downloadLink.click()
+    createDownloadLink(
+        TILESET_FILENAME,
+        canvas.toDataURL('image/png').replace(/^data:image\/png/, 'data:application/octet-stream')
+    )
 }
 
 export function uploadImage(
     file: Blob
 ): Promise<{ image: HTMLImageElement; blob: Blob; canvas: HTMLCanvasElement; width: number; height: number }> {
     return new Promise((resolve, reject) => {
-        const canvasElement = document.createElement('canvas')
-        const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
+        const [canvasElement, ctx] = createCanvasElement()
         const imageReader = new FileReader()
         imageReader.readAsDataURL(file)
         imageReader.onload = async ev => {
@@ -69,8 +72,7 @@ export async function getTilesetHashData(
     tileset: Tileset
 ): Promise<{ tempTiles: ImageData[]; tempTilesHash: string[] }> {
     const { image, columns, tilecount, tilewidth, tileheight } = tileset
-    const canvasElement = document.createElement('canvas')
-    const ctx = canvasElement.getContext('2d') as CanvasRenderingContext2D
+    const [canvasElement, ctx] = createCanvasElement()
     const tempTiles: ImageData[] = []
     const tempTilesHash: string[] = []
     const tw = columns * tilewidth
@@ -98,10 +100,8 @@ export async function getTilesetHashData(
 export async function importLayer(image: CanvasImageSource, config: LayerImportConfig, tileset: Tileset) {
     const { columns, mode, name, offset, resolution, tileSize } = config
     if (image) {
-        const layerCanvas = document.createElement('canvas')
-        const layerContext = layerCanvas.getContext('2d') as CanvasRenderingContext2D
-        const tilesetCanvas = document.createElement('canvas')
-        const tilesetContext = tilesetCanvas.getContext('2d') as CanvasRenderingContext2D
+        const [layerCanvas, layerContext] = createCanvasElement()
+        const [tilesetCanvas, tilesetContext] = createCanvasElement()
 
         const { w: layerwidth, h: layerheight } = resolution
         const { w: tilewidth, h: tileheight } = tileSize
@@ -115,7 +115,7 @@ export async function importLayer(image: CanvasImageSource, config: LayerImportC
         const layer = {
             data: [] as number[],
             height: (Math.ceil(layerheight / tileheight) * tileheight) / tileheight,
-            id: uuidv4(),
+            id: crypto.randomUUID(),
             offset: { x: 0, y: 0 },
             opacity: 255,
             visible: true,
@@ -183,8 +183,7 @@ export async function reduceColors(blob: Blob, colorsCount = 256): Promise<Blob>
 export async function generateReducedPalette(blob: Blob): Promise<number[][]> {
     const fetchedSourceImage = await new Response(blob).arrayBuffer()
     const sourceBytes = new Uint8Array(fetchedSourceImage)
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const [canvasElement, ctx] = createCanvasElement()
     const tempPalette: string[] = []
 
     const { outputFiles, exitCode } = await execute({
@@ -198,8 +197,8 @@ export async function generateReducedPalette(blob: Blob): Promise<number[][]> {
         const paletteImg = await getImage(window.URL.createObjectURL(pal))
         const { width, height } = paletteImg
 
-        canvas.width = width
-        canvas.height = height
+        canvasElement.width = width
+        canvasElement.height = height
         ctx.clearRect(0, 0, width, height)
         ctx.drawImage(paletteImg, 0, 0)
 

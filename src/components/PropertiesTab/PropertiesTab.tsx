@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { ColorPicker, Color, ColorValue } from 'mui-color'
-import { Grid, InputAdornment, Slider, TextField, Typography } from '@mui/material'
+import { Divider, Grid, InputAdornment, Slider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
 import { selectCanvas, selectGrid, selectSelected } from '../../store/editor/selectors'
@@ -19,6 +19,10 @@ const PropertiesTab: React.FunctionComponent = () => {
 
     const gridColor = grid.color ? rgbaToHex(grid.color) : (theme.palette.mode === 'dark' && '#fff') || '#000'
     const canvasBackground = rgbaToHex(canvas?.background || [0, 0, 0, 0])
+    const marks = [
+        { label: '1px', value: 1 },
+        { label: `${grid.width}px`, value: grid.width }
+    ]
 
     const [toolSize, setToolSize] = useState<number>(selected.toolSize)
 
@@ -41,25 +45,24 @@ const PropertiesTab: React.FunctionComponent = () => {
             <Grid container spacing={2} alignItems="center" justifyContent="center">
                 <Grid item xs={12}>
                     <Typography variant="subtitle1">Pixel tool size</Typography>
-                </Grid>
-                <Grid item xs={1}></Grid>
-                <Grid item xs={8}>
-                    <Slider
-                        min={1}
-                        max={grid.width}
-                        marks
-                        value={typeof toolSize === 'number' ? toolSize : 0}
-                        onChange={(_, value) => setToolSize(value as number)}
-                        onChangeCommitted={(_, value) => {
-                            Number.isInteger(value) && value > 0 && onChangeToolSize(value as number)
-                        }}
-                    />
-                </Grid>
-                <Grid item xs={3}>
-                    {toolSize} pixels
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ margin: 2 }}>
+                        <Slider
+                            min={1}
+                            max={grid.width}
+                            marks={marks}
+                            valueLabelDisplay="auto"
+                            getAriaValueText={(value: number) => `${value} px`}
+                            value={typeof toolSize === 'number' ? toolSize : 0}
+                            onChange={(_, value) => setToolSize(value as number)}
+                            onChangeCommitted={(_, value) => {
+                                Number.isInteger(value) && value > 0 && onChangeToolSize(value as number)
+                            }}
+                        />
+                    </Stack>
+                    <Divider />
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography variant="subtitle1">Grid pitch every</Typography>
+                    <Typography variant="subtitle1">Grid pitch</Typography>
                     <StyledPropContainer>
                         <TextField
                             type="number"
@@ -77,7 +80,8 @@ const PropertiesTab: React.FunctionComponent = () => {
                         />
                     </StyledPropContainer>
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={12}>
+                    <Divider />
                     <StyledPropContainer>
                         <ColorPicker
                             hideTextfield
@@ -87,10 +91,8 @@ const PropertiesTab: React.FunctionComponent = () => {
                                 onChangeGridColor(rgb)
                             }}
                         />
-                        Grid
+                        Grid color
                     </StyledPropContainer>
-                </Grid>
-                <Grid item xs={7}>
                     <StyledPropContainer>
                         <ColorPicker
                             hideTextfield
@@ -100,7 +102,7 @@ const PropertiesTab: React.FunctionComponent = () => {
                                 onChangeCanvasBackground(alpha > 0 ? rgb : null)
                             }}
                         />
-                        Background
+                        Background color
                     </StyledPropContainer>
                 </Grid>
             </Grid>

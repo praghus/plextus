@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
-
 import { TOOLS } from '../../common/tools'
 import { PALETTES, DEFAULT_TILESET_IMAGE } from '../../common/constants'
 import { Canvas, DeflatedLayer, Grid, Rectangle, Stamp } from './types'
@@ -55,7 +53,7 @@ export const EDITOR_CREATE_IMAGE_LAYER_FROM_FILE = `${EDITOR_RESOURCE_NAME}/EDIT
 export const EDITOR_LOAD_STATE_FROM_FILE = `${EDITOR_RESOURCE_NAME}/EDITOR_LOAD_STATE_FROM_FILE`
 export const DEFAULT_PALLETE = PALETTES.DAWNBRINGER_32_PALETTE.colors
 
-const layerId = uuidv4()
+const layerId = crypto.randomUUID()
 
 export const INITIAL_STATE = {
     canvas: null as Canvas | null,

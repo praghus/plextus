@@ -1,3 +1,5 @@
+import { createCanvasElement } from './image'
+
 export const rgbToHex = (r: number, g: number, b: number): string =>
     `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`
 
@@ -13,10 +15,9 @@ export function componentToHex(c: number): string {
 }
 
 export function colorToRGBA(colorStr: string): number[] {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-    canvas.height = 1
-    canvas.width = 1
+    const [canvasElement, ctx] = createCanvasElement()
+    canvasElement.height = 1
+    canvasElement.width = 1
     ctx.fillStyle = colorStr
     ctx.fillRect(0, 0, 1, 1)
     const c = ctx.getImageData(0, 0, 1, 1).data

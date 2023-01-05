@@ -34,10 +34,14 @@ export async function canvasToBlob(canvas: HTMLCanvasElement, type = 'image/png'
     })
 }
 
-export function downloadProjectFile(fileName: string, content: string, type = 'application/json'): void {
+export function downloadProjectFile(fileName: string, content: string): void {
+    const file = new Blob([content], { type: 'application/json' })
+    createDownloadLink(fileName, URL.createObjectURL(file))
+}
+
+export function createDownloadLink(fileName: string, url: string) {
     const downloadLink = document.createElement('a')
-    const file = new Blob([content], { type })
-    downloadLink.href = URL.createObjectURL(file)
+    downloadLink.href = url
     downloadLink.download = fileName
     downloadLink.click()
 }

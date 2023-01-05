@@ -267,7 +267,7 @@ const ImportDialog: React.FunctionComponent = () => {
                                     value={colorsCount}
                                     onChange={e => {
                                         const c = parseInt(e.target.value)
-                                        Number.isInteger(c) && c > 1 && setColorsCount(c)
+                                        Number.isInteger(c) && setColorsCount(c)
                                     }}
                                     InputProps={{
                                         inputProps: { min: 2 }

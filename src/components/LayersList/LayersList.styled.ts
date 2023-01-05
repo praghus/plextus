@@ -11,13 +11,14 @@ export const StyledBottomContainer = styled.div`
 export const StyledButtonContainer = styled.div`
     width: 115px;
     display: flex;
-    padding-top: 4px;
-    margin-right: 6px;
+    padding: 4px;
+    margin-right: 10px;
 `
 
 export const StyledSliderContainer = styled.div`
     width: 200px;
     display: flex;
+    padding-left: 4px;
     padding-top: 6px;
     padding-right: 10px;
 `

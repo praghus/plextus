@@ -1,11 +1,13 @@
-import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
+import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit'
 import { get, includes } from 'lodash'
+import { historyAction } from '../editor/actions'
+
 import { add } from './actions'
 import { HISTORY_REDO, HISTORY_UNDO } from './constants'
 import { selectUndoItem, selectRedoItem } from './selectors'
 import { HistoryState, UndoRedoAction } from './types'
 
-function createUndoMiddleware({ getViewState, setViewState, revertingActions }): Middleware {
+function createUndoMiddleware(revertingActions: Record<string, unknown>): Middleware {
     const SUPPORTED_ACTIONS = Object.keys(revertingActions)
     let acting = false
 
@@ -22,7 +24,7 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }):
                         if (undoItem) {
                             acting = true
                             dispatch(getUndoAction(undoItem))
-                            setViewState && dispatch(setViewState(undoItem.before))
+                            dispatch(historyAction(undoItem.before))
                             acting = false
                         }
                     }
@@ -32,7 +34,7 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }):
                         const redoItem = selectRedoItem(state)
                         if (redoItem) {
                             acting = true
-                            setViewState && dispatch(setViewState(redoItem.before))
+                            dispatch(historyAction(redoItem.before))
                             dispatch(redoItem.action)
                             acting = false
                         }
@@ -40,7 +42,7 @@ function createUndoMiddleware({ getViewState, setViewState, revertingActions }):
                     break
                 default:
                     if (!acting && includes(SUPPORTED_ACTIONS, action.type)) {
-                        getViewState && dispatch(add(action, getBefore(state, action)))
+                        dispatch(add(action, getBefore(state, action)))
                     }
                     break
             }

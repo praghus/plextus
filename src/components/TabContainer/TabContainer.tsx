@@ -16,33 +16,47 @@ import { Tileset } from '../Tileset'
 import { LayersList } from '../LayersList'
 import { StyledTabContainer } from './TabContainer.styled'
 
+const tabIcons = [LayersIcon, GridViewIcon, ColorLensIcon, SettingsIcon]
+
 interface Props {
     tilesetCanvas: HTMLCanvasElement
 }
 
 const TabContainer: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
-    const [tab, setTab] = useState(0)
-    const sx = { minWidth: '30px' }
+    const [value, setValue] = useState(0)
+    const [closed, setClosed] = useState(false)
 
     return (
         <StyledTabContainer>
             <Box sx={{ width: '100%' }}>
-                <Tabs value={tab} variant="fullWidth" onChange={(_, value) => setTab(value as number)}>
-                    <Tab icon={<LayersIcon />} {...{ sx }} />
-                    <Tab icon={<GridViewIcon />} {...{ sx }} />
-                    <Tab icon={<ColorLensIcon />} {...{ sx }} />
-                    <Tab icon={<SettingsIcon />} {...{ sx }} />
+                <Tabs
+                    {...{ value }}
+                    variant="fullWidth"
+                    TabIndicatorProps={{ hidden: true }}
+                    onChange={(_, v) => {
+                        setValue(v)
+                        setClosed(false)
+                    }}
+                >
+                    {tabIcons.map((Icon, idx) => (
+                        <Tab
+                            icon={<Icon />}
+                            key={`tab-icon-${idx}`}
+                            sx={{ minWidth: '30px' }}
+                            onClick={() => value === idx && setClosed(!closed)}
+                        />
+                    ))}
                 </Tabs>
-                <TabPanel value={tab} index={0}>
+                <TabPanel {...{ closed, value }} index={0}>
                     <LayersList />
                 </TabPanel>
-                <TabPanel value={tab} index={1}>
+                <TabPanel {...{ closed, value }} index={1}>
                     <Tileset {...{ tilesetCanvas }} />
                 </TabPanel>
-                <TabPanel value={tab} index={2}>
+                <TabPanel {...{ closed, value }} index={2}>
                     <Palette />
                 </TabPanel>
-                <TabPanel value={tab} index={3}>
+                <TabPanel {...{ closed, value }} index={3}>
                     <PropertiesTab />
                 </TabPanel>
             </Box>

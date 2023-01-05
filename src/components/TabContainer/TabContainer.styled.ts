@@ -7,10 +7,9 @@ export const StyledTabContainer = styled.div`
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 310px;
+    width: 300px;
     display: flex;
     flex-direction: column;
-    padding: 5px;
     font-size: small;
     z-index: 100;
     border-top: 1px solid ${({ theme }: IMuiTheme) => theme?.palette.divider};

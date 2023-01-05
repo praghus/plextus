@@ -1,4 +1,4 @@
-import { combineReducers, AnyAction, Reducer } from 'redux'
+import { combineReducers, AnyAction, Reducer } from '@reduxjs/toolkit'
 import { APP_REHYDRATE_STORE_SUCCESS, APP_RESOURCE_NAME } from './app/constants'
 import { EDITOR_RESOURCE_NAME } from './editor/constants'
 import { HISTORY_RESOURCE_NAME } from './history/constants'

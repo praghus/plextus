@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
 import { Canvas, Grid, Rectangle } from '../../store/editor/types'
-import { getSelectionRect } from '../../common/utils/konva'
 
 interface Props {
     canvas: Canvas
