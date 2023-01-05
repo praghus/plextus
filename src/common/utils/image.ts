@@ -1,4 +1,6 @@
+import { uuid } from 'uuidv4'
 import { execute } from 'wasm-imagemagick'
+
 import { IMPORT_MODES, TILESET_FILENAME } from '../constants'
 import { INITIAL_STATE } from '../../store/editor/constants'
 import { LayerImportConfig, Tileset } from '../../store/editor/types'
@@ -115,7 +117,7 @@ export async function importLayer(image: CanvasImageSource, config: LayerImportC
         const layer = {
             data: [] as number[],
             height: (Math.ceil(layerheight / tileheight) * tileheight) / tileheight,
-            id: crypto.randomUUID(),
+            id: uuid(),
             offset: { x: 0, y: 0 },
             opacity: 255,
             visible: true,
