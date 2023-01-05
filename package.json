@@ -140,6 +140,7 @@
         "timers-browserify": "^2.0.12",
         "use-image": "^1.0.7",
         "util": "^0.12.4",
+        "uuidv4": "^6.2.13",
         "wasm-imagemagick": "^1.2.8",
         "whatwg-fetch": "^3.6.2",
         "xmlbuilder2": "^3.0.2",

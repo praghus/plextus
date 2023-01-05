@@ -50,9 +50,11 @@ const App: React.FunctionComponent = () => {
 
     useEffect(() => {
         window.addEventListener('resize', onAdjustWorkspaceSize)
+        window.addEventListener('orientationchange', onAdjustWorkspaceSize)
         onAdjustWorkspaceSize()
         return () => {
             window.removeEventListener('resize', onAdjustWorkspaceSize)
+            window.removeEventListener('orientationchange', onAdjustWorkspaceSize)
         }
     }, [onAdjustWorkspaceSize])
 

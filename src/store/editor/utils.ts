@@ -1,4 +1,6 @@
 import Konva from 'konva'
+import { uuid } from 'uuidv4'
+
 import request from '../../common/utils/fetch-api'
 import { createCanvasElement } from '../../common/utils/image'
 import { getCacheItem } from '../../common/utils/storage'
@@ -61,7 +63,7 @@ export const createTileFromImageData = async (
 export const createEmptyLayer = (name: string, width: number, height: number): Layer => ({
     data: new Array(width * height).fill(null),
     height,
-    id: crypto.randomUUID(),
+    id: uuid(),
     name,
     offset: { x: 0, y: 0 },
     opacity: 255,
@@ -71,7 +73,7 @@ export const createEmptyLayer = (name: string, width: number, height: number): L
 
 export const createImageLayer = (name: string, image: string, width: number, height: number): Layer => ({
     height,
-    id: crypto.randomUUID(),
+    id: uuid(),
     image,
     name,
     offset: { x: 0, y: 0 },
