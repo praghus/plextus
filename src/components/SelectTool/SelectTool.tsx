@@ -1,22 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { Group, Rect } from 'react-konva'
-import { Grid, Layer, Workspace, Rectangle } from '../../store/editor/types'
+import { Grid, Layer, Workspace } from '../../store/editor/types'
 import { getCoordsFromPos, getPointerRelativePos, getSelectionRect } from '../../common/utils/konva'
+import { EditorActions } from '../../hooks/useEditorActions'
 
 interface Props {
     grid: Grid
     isMouseDown: boolean
-    onChangeSelectedArea: (rect: Rectangle | null) => void
+    editorActions: EditorActions
     pointerPosition: Konva.Vector2d
     selectedLayer: Layer | null
     workspace: Workspace
 }
 
 const SelectTool: React.FunctionComponent<Props> = ({
+    editorActions: { onChangeSelectedArea },
     isMouseDown,
     grid,
-    onChangeSelectedArea,
     pointerPosition,
     selectedLayer,
     workspace

@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
-import { Canvas, Grid, Rectangle } from '../../store/editor/types'
+
+import { Canvas, Grid } from '../../store/editor/types'
+import { EditorActions } from '../../hooks/useEditorActions'
 
 interface Props {
     canvas: Canvas
     grid: Grid
-    onChangeSelectedArea: (rect: Rectangle) => void
+    editorActions: EditorActions
 }
 
-const CropTool: React.FunctionComponent<Props> = ({ canvas, grid, onChangeSelectedArea }) => {
+const CropTool: React.FunctionComponent<Props> = ({ canvas, editorActions: { onChangeSelectedArea }, grid }) => {
     const { width, height } = grid
     const [shape, setShape] = useState<Konva.Rect>()
     const [transformer, setTransformer] = useState<Konva.Transformer>()
@@ -39,7 +41,7 @@ const CropTool: React.FunctionComponent<Props> = ({ canvas, grid, onChangeSelect
                 y: shape.y() / height
             })
         }
-    }, [height, onChangeSelectedArea, shape, width])
+    }, [height, shape, width, onChangeSelectedArea])
 
     useEffect(() => {
         if (shape && transformer) {

@@ -1,10 +1,10 @@
 import { createSelector } from 'reselect'
-import { store } from '../store'
+import { RootState } from '../store'
 import { Canvas, DeflatedLayer, EditorState, Layer } from './types'
 import { DEFAULT_PALLETE, EDITOR_RESOURCE_NAME } from './constants'
 import { parseLayerData } from '../../common/utils/pako'
 
-export const selectEditor = (state: ReturnType<typeof store.getState>): EditorState => state[EDITOR_RESOURCE_NAME]
+export const selectEditor = (state: RootState): EditorState => state[EDITOR_RESOURCE_NAME]
 export const selectCanvas = createSelector(selectEditor, ({ canvas }) => canvas as Canvas)
 export const selectGrid = createSelector(selectEditor, ({ grid }) => grid)
 export const selectRawLayers = createSelector(selectEditor, ({ layers }) => layers)

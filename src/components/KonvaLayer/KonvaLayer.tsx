@@ -20,23 +20,16 @@ import {
 } from '../../common/utils/konva'
 import { isArray } from '../../common/utils/array'
 import { useCanvasBuffer } from '../../hooks/useCanvasBuffer'
+import { EditorActions } from '../../hooks/useEditorActions'
 import { usePrevious } from '../../hooks/usePrevious'
 import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
 
 interface Props {
+    editorActions: EditorActions
     grid: Grid
     isMouseDown: boolean
     keyDown: KeyboardEvent | null
     layer: Layer
-    onCopySelectedArea: (image: HTMLCanvasElement) => void
-    onChangeLayerData: (layerId: string, data: (number | null)[]) => void
-    onChangeLayerImage: (layerId: string, blob: Blob) => void
-    onChangeLayerOffset: (layerId: string, x: number, y: number) => void
-    onChangePrimaryColor: (color: number[]) => void
-    onChangeSelectedTile: (tileId: number) => void
-    onChangeTileset: (tileset: Tileset) => void
-    onSaveTilesetImage: (blob: Blob) => void
-    onPaste: () => void
     selected: Selected
     stage: Konva.Stage
     tileset: Tileset
@@ -46,19 +39,21 @@ interface Props {
 }
 
 const KonvaLayer: React.FunctionComponent<Props> = ({
+    editorActions: {
+        onCopySelectedArea,
+        onChangeLayerData,
+        onChangeLayerImage,
+        onChangeLayerOffset,
+        onChangePrimaryColor,
+        onChangeSelectedTile,
+        onChangeTileset,
+        onSaveTilesetImage,
+        onPaste
+    },
     grid,
     isMouseDown,
     keyDown,
     layer,
-    onCopySelectedArea,
-    onChangeLayerData,
-    onChangeLayerImage,
-    onChangeLayerOffset,
-    onChangePrimaryColor,
-    onChangeSelectedTile,
-    onChangeTileset,
-    onSaveTilesetImage,
-    onPaste,
     selected,
     stage,
     tileset,
@@ -66,6 +61,9 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     theme,
     workspace
 }) => {
+    const { opacity, visible } = layer
+    const { tilewidth, tileheight } = tileset
+
     const [data, setData] = useState<(number | null)[]>()
     const [selectedTile, setSelectedTile] = useState<SelectedTile>()
 
@@ -74,9 +72,6 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     const lastLinePos = useRef<Konva.Vector2d>()
     const tempData = useRef<(number | null)[]>([])
     const isSelected = selected.layerId === layer.id
-
-    const { opacity, visible } = layer
-    const { tilewidth, tileheight } = tileset
 
     const {
         ctx,

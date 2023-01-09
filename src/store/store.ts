@@ -11,7 +11,6 @@ const middlewares = [sagaMiddleware, cacheMiddleware, undoMiddleware]
 
 const { run: runSaga } = sagaMiddleware
 
-/* istanbul ignore next */
 export const store = configureStore({
     devTools: !IS_PRODUCTION,
     enhancers: [
@@ -28,3 +27,6 @@ export const store = configureStore({
     ],
     reducer: createReducer()
 })
+
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch
