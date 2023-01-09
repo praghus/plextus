@@ -1,16 +1,16 @@
-import { uuid } from 'uuidv4'
+import { v4 as uuidv4 } from 'uuid'
 import { execute } from 'wasm-imagemagick'
 
-import { IMPORT_MODES, TILESET_FILENAME } from '../constants'
 import { INITIAL_STATE } from '../../store/editor/constants'
 import { LayerImportConfig, Tileset } from '../../store/editor/types'
+import { IMPORT_MODES, TILESET_FILENAME } from '../constants'
 import { spliceIntoChunks } from './array'
 import { canvasToBlob, createDownloadLink } from './data'
 
 export const get2DContext = (canvasElement: HTMLCanvasElement): CanvasRenderingContext2D =>
     canvasElement.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
 
-export const createCanvasElement = (): [HTMLCanvasElement, CanvasRenderingContext2D] => {
+export function createCanvasElement(): [HTMLCanvasElement, CanvasRenderingContext2D] {
     const canvasElement = document.createElement('canvas')
     return [canvasElement, get2DContext(canvasElement)]
 }
@@ -117,7 +117,7 @@ export async function importLayer(image: CanvasImageSource, config: LayerImportC
         const layer = {
             data: [] as number[],
             height: (Math.ceil(layerheight / tileheight) * tileheight) / tileheight,
-            id: uuid(),
+            id: uuidv4(),
             offset: { x: 0, y: 0 },
             opacity: 255,
             visible: true,

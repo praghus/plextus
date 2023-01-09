@@ -1,5 +1,5 @@
 import Konva from 'konva'
-import { uuid } from 'uuidv4'
+import { v4 as uuidv4 } from 'uuid'
 
 import request from '../../common/utils/fetch-api'
 import { createCanvasElement } from '../../common/utils/image'
@@ -7,10 +7,8 @@ import { getCacheItem } from '../../common/utils/storage'
 import { canvasToBlob, dataURLToObjectURL, getDataFromObjectURL } from '../../common/utils/data'
 import { APP_STORAGE_KEY } from '../app/constants'
 import { EDITOR_RESOURCE_NAME } from './constants'
-import { DeflatedLayer, Layer, Tileset } from './types'
-import { store } from '../store'
-
-type RootState = ReturnType<typeof store.getState>
+import { DeflatedLayer, EditorState, Layer, Tileset } from './types'
+import { RootState } from '../store'
 
 export const getLayerById = (layers: Layer[], id: string) => layers.find(layer => layer.id === id)
 
@@ -63,7 +61,7 @@ export const createTileFromImageData = async (
 export const createEmptyLayer = (name: string, width: number, height: number): Layer => ({
     data: new Array(width * height).fill(null),
     height,
-    id: uuid(),
+    id: uuidv4(),
     name,
     offset: { x: 0, y: 0 },
     opacity: 255,
@@ -73,7 +71,7 @@ export const createEmptyLayer = (name: string, width: number, height: number): L
 
 export const createImageLayer = (name: string, image: string, width: number, height: number): Layer => ({
     height,
-    id: uuid(),
+    id: uuidv4(),
     image,
     name,
     offset: { x: 0, y: 0 },
@@ -87,28 +85,25 @@ export const getTilesetDimensions = (tileset: Tileset) => ({
     w: tileset.columns * tileset.tilewidth
 })
 
-export const getStateToSave = async (state: RootState) => {
-    const editorState = state[EDITOR_RESOURCE_NAME]
-    return {
-        [EDITOR_RESOURCE_NAME]: {
-            ...editorState,
-            layers: await Promise.all(
-                editorState.layers.map(async (layer: Layer) =>
-                    layer.image ? { ...layer, image: await getDataFromObjectURL(layer.image) } : layer
-                )
-            ),
-            selected: {
-                ...state[EDITOR_RESOURCE_NAME].selected,
-                stamp: null,
-                tileId: null
-            },
-            tileset: {
-                ...state[EDITOR_RESOURCE_NAME].tileset,
-                image: await getDataFromObjectURL(editorState.tileset.image)
-            }
+export const getStateToSave = async (editorState: EditorState) => ({
+    [EDITOR_RESOURCE_NAME]: {
+        ...editorState,
+        layers: await Promise.all(
+            editorState.layers.map(async (layer: DeflatedLayer) =>
+                layer.image ? { ...layer, image: await getDataFromObjectURL(layer.image) } : layer
+            )
+        ),
+        selected: {
+            ...editorState.selected,
+            stamp: null,
+            tileId: null
+        },
+        tileset: {
+            ...editorState.tileset,
+            image: await getDataFromObjectURL(editorState.tileset.image)
         }
     }
-}
+})
 
 export const loadStateFromStore = async () => {
     const stateBlob = await getCacheItem(APP_STORAGE_KEY)

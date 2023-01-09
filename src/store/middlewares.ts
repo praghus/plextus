@@ -12,9 +12,7 @@ import {
 import { APP_REHYDRATE_STORE_SUCCESS, APP_REHYDRATE_STORE_ERROR, APP_REHYDRATE_STORE_START } from './app/constants'
 import { loadStateFromStore } from './editor/utils'
 import { RevertingPayload } from './history/types'
-import { store } from './store'
-
-type RootState = ReturnType<typeof store.getState>
+import { RootState } from './store'
 
 let isLoadExecuted = false
 

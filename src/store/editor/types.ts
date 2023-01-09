@@ -82,6 +82,7 @@ export type LayerImportConfig = {
 }
 
 export type ProjectFile = {
+    name: string
     canvas: Canvas
     grid: Grid
     layers: DeflatedLayer[]

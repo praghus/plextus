@@ -1,15 +1,14 @@
 /** @jsx jsx */
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Konva from 'konva'
+import { debounce } from 'lodash'
 import { jsx } from '@emotion/react'
 import { useTheme } from '@mui/material/styles'
-import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
 
 import { IS_MOBILE } from '../../common/constants'
 import { undo, redo } from '../../store/history/actions'
-import { Rectangle, Tileset } from '../../store/editor/types'
 import { TOOLS } from '../../common/tools'
 import { centerStage } from '../../common/utils/konva'
 import { getRgbaValue } from '../../common/utils/colors'
@@ -22,23 +21,8 @@ import {
     selectTileset,
     selectWorkspace
 } from '../../store/editor/selectors'
-import {
-    adjustWorkspaceSize,
-    changeLayerData,
-    changeLayerImage,
-    changeLayerOffset,
-    changePosition,
-    changePrimaryColor,
-    changeScale,
-    changeSelectedArea,
-    changeSelectedTile,
-    changeTileset,
-    changeTilesetImage,
-    copySelectedArea,
-    crop,
-    paste
-} from '../../store/editor/actions'
 import { useZoomEvents } from '../../hooks/useZoomEvents'
+import { useEditorActions } from '../../hooks/useEditorActions'
 import { CropTool } from '../CropTool'
 import { GridLines } from '../GridLines'
 import { KonvaLayer } from '../KonvaLayer'
@@ -64,14 +48,13 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     const workspace = useSelector(selectWorkspace)
     const selectedLayer = useSelector(selectSelectedLayer)
 
-    const backgroundColor = canvas.background && getRgbaValue(canvas.background)
-
     const [stage, setStage] = useState<Konva.Stage>()
     const [isMouseDown, setIsMouseDown] = useState<boolean>(false)
     const [isMouseOver, setIsMouseOver] = useState<boolean>(false)
     const [pointerPosition, setPointerPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
     const [keyDown, setKeyDown] = useState<KeyboardEvent | null>(null)
 
+    const backgroundColor = canvas.background && getRgbaValue(canvas.background)
     const draggable = !IS_MOBILE && (selected.tool === TOOLS.DRAG || selected.tool === TOOLS.CROP)
     const isPointerVisible = useMemo(
         () =>
@@ -81,49 +64,35 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         [isMouseDown, isMouseOver, selected.tool]
     )
 
-    const theme = useTheme()
     const dispatch = useDispatch()
+    const theme = useTheme()
+    const editorActions = useEditorActions(dispatch)
 
-    const onCopySelectedArea = (image: HTMLCanvasElement) => dispatch(copySelectedArea(image))
-    const onChangeSelectedArea = (rect: Rectangle | null) => dispatch(changeSelectedArea(rect))
-    const onChangeLayerData = (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data))
-    const onChangeLayerImage = (layerId: string, blob: Blob) => dispatch(changeLayerImage(layerId, blob))
-    const onChangePrimaryColor = (color: number[]) => dispatch(changePrimaryColor(color))
-    const onChangeSelectedTile = (tileId: number) => dispatch(changeSelectedTile(tileId))
-    const onChangeTileset = (tileset: Tileset) => dispatch(changeTileset(tileset))
-    const onChangeLayerOffset = (layerId: string, x: number, y: number) => dispatch(changeLayerOffset(layerId, x, y))
-    const onSaveTilesetImage = (blob: Blob) => dispatch(changeTilesetImage(blob))
-    const onPaste = () => dispatch(paste())
+    const { onCrop, onAdjustWorkspaceSize, onChangePosition, onChangeScale } = editorActions
+
+    const onChangeScaleDebounced = useMemo(() => debounce(onChangeScale, 300), [onChangeScale])
+    const onChangePositionDebounced = useMemo(() => debounce(onChangePosition, 300), [onChangePosition])
+
+    const { onTouchEnd, onTouchMove, onWheel } = useZoomEvents(stage, onChangePositionDebounced, onChangeScaleDebounced)
+
     const onKeyUp = () => setKeyDown(null)
     const onKeyDown = (keyDown: KeyboardEvent) => setKeyDown(keyDown)
-    const onDragEnd = () => stage && onChangePosition(stage.position())
+    const onDragEnd = () => stage && onChangePositionDebounced(stage.position())
     const onMouseMove = () => stage && setPointerPosition(stage.getPointerPosition() as Konva.Vector2d)
-
-    const onChangePosition = useMemo(
-        () => debounce((pos: Konva.Vector2d) => dispatch(changePosition(pos.x, pos.y)), 300),
-        [dispatch]
-    )
-
-    const onChangeScale = useMemo(
-        () => debounce((scale: Konva.Vector2d) => dispatch(changeScale(scale.x)), 300),
-        [dispatch]
-    )
 
     const onCenter = useCallback(
         () =>
             stage &&
             centerStage(stage, canvas, (pos, scale) => {
-                onChangePosition(pos)
-                onChangeScale(scale)
+                onChangePositionDebounced(pos)
+                onChangeScaleDebounced(scale)
             }),
-        [canvas, onChangePosition, onChangeScale, stage]
+        [canvas, onChangePositionDebounced, onChangeScaleDebounced, stage]
     )
 
     const handleStage = useCallback((node: Konva.Stage) => {
         setStage(node)
     }, [])
-
-    const { onTouchEnd, onTouchMove, onWheel } = useZoomEvents(stage, onChangePosition, onChangeScale)
 
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)
@@ -136,8 +105,8 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
 
     useEffect(() => {
         onCenter()
-        dispatch(adjustWorkspaceSize())
-    }, [workspace.width, workspace.height, onCenter, dispatch])
+        onAdjustWorkspaceSize()
+    }, [workspace.width, workspace.height, onCenter, onAdjustWorkspaceSize])
 
     useEffect(() => {
         if (selected.tool === TOOLS.CROP) {
@@ -151,10 +120,10 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                 dispatch(keyDown.shiftKey ? redo() : undo())
             }
             if (keyDown.code === 'Enter' && selected.tool === TOOLS.CROP) {
-                dispatch(crop())
+                onCrop()
             }
         }
-    }, [dispatch, keyDown, selected.tool])
+    }, [dispatch, onCrop, keyDown, selected.tool])
 
     return (
         <div>
@@ -188,19 +157,11 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                                 <KonvaLayer
                                     key={`layer-${layer.id}`}
                                     {...{
+                                        editorActions,
                                         grid,
                                         isMouseDown,
                                         keyDown,
                                         layer,
-                                        onChangeLayerData,
-                                        onChangeLayerImage,
-                                        onChangeLayerOffset,
-                                        onChangePrimaryColor,
-                                        onChangeSelectedTile,
-                                        onChangeTileset,
-                                        onCopySelectedArea,
-                                        onPaste,
-                                        onSaveTilesetImage,
                                         selected,
                                         stage,
                                         theme,
@@ -210,14 +171,14 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
                                     }}
                                 />
                             ))}
-                        {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, grid, onChangeSelectedArea }} />}
+                        {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, editorActions, grid }} />}
                         {selected.tool === TOOLS.SELECT && (
                             <SelectTool
                                 {...{
                                     canvas,
+                                    editorActions,
                                     grid,
                                     isMouseDown,
-                                    onChangeSelectedArea,
                                     pointerPosition,
                                     selectedLayer,
                                     workspace
