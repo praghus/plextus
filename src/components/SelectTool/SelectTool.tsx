@@ -3,19 +3,17 @@ import Konva from 'konva'
 import { Group, Rect } from 'react-konva'
 import { Grid, Layer, Workspace } from '../../store/editor/types'
 import { getCoordsFromPos, getPointerRelativePos, getSelectionRect } from '../../common/utils/konva'
-import { EditorActions } from '../../hooks/useEditorActions'
+import { useEditorActions } from '../../hooks/useEditorActions'
 
 interface Props {
     grid: Grid
     isMouseDown: boolean
-    editorActions: EditorActions
     pointerPosition: Konva.Vector2d
     selectedLayer: Layer | null
     workspace: Workspace
 }
 
 const SelectTool: React.FunctionComponent<Props> = ({
-    editorActions: { onChangeSelectedArea },
     isMouseDown,
     grid,
     pointerPosition,
@@ -25,6 +23,8 @@ const SelectTool: React.FunctionComponent<Props> = ({
     const [shape, setShape] = useState<Konva.Rect>()
     const [startPos, setStartPos] = useState<Konva.Vector2d>()
     const [isSelecting, setIsSelecting] = useState<boolean>(false)
+
+    const { onChangeSelectedArea } = useEditorActions()
 
     const handleShape = useCallback((node: Konva.Rect) => {
         setShape(node)

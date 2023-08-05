@@ -3,18 +3,19 @@ import Konva from 'konva'
 import { Rect, Transformer } from 'react-konva'
 
 import { Canvas, Grid } from '../../store/editor/types'
-import { EditorActions } from '../../hooks/useEditorActions'
+import { useEditorActions } from '../../hooks/useEditorActions'
 
 interface Props {
     canvas: Canvas
     grid: Grid
-    editorActions: EditorActions
 }
 
-const CropTool: React.FunctionComponent<Props> = ({ canvas, editorActions: { onChangeSelectedArea }, grid }) => {
+const CropTool: React.FunctionComponent<Props> = ({ canvas, grid }) => {
     const { width, height } = grid
     const [shape, setShape] = useState<Konva.Rect>()
     const [transformer, setTransformer] = useState<Konva.Transformer>()
+
+    const { onChangeSelectedArea } = useEditorActions()
 
     const handleShape = useCallback((node: Konva.Rect) => {
         setShape(node)
