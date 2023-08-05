@@ -20,12 +20,11 @@ import {
 } from '../../common/utils/konva'
 import { isArray } from '../../common/utils/array'
 import { useCanvasBuffer } from '../../hooks/useCanvasBuffer'
-import { EditorActions } from '../../hooks/useEditorActions'
+import { useEditorActions } from '../../hooks/useEditorActions'
 import { usePrevious } from '../../hooks/usePrevious'
 import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
 
 interface Props {
-    editorActions: EditorActions
     grid: Grid
     isMouseDown: boolean
     keyDown: KeyboardEvent | null
@@ -39,17 +38,6 @@ interface Props {
 }
 
 const KonvaLayer: React.FunctionComponent<Props> = ({
-    editorActions: {
-        onCopySelectedArea,
-        onChangeLayerData,
-        onChangeLayerImage,
-        onChangeLayerOffset,
-        onChangePrimaryColor,
-        onChangeSelectedTile,
-        onChangeTileset,
-        onSaveTilesetImage,
-        onPaste
-    },
     grid,
     isMouseDown,
     keyDown,
@@ -66,6 +54,18 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
 
     const [data, setData] = useState<(number | null)[]>()
     const [selectedTile, setSelectedTile] = useState<SelectedTile>()
+
+    const {
+        onCopySelectedArea,
+        onChangeLayerData,
+        onChangeLayerImage,
+        onChangeLayerOffset,
+        onChangePrimaryColor,
+        onChangeSelectedTile,
+        onChangeTileset,
+        onSaveTilesetImage,
+        onPaste
+    } = useEditorActions()
 
     const imageRef = useRef<Konva.Image>(null)
     const lastPos = useRef<Konva.Vector2d>()

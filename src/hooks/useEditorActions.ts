@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import Konva from 'konva'
+import { useDispatch } from 'react-redux'
 
 import { Rectangle, Tileset } from '../store/editor/types'
-import { AppDispatch } from '../store/store'
 
 import {
     adjustWorkspaceSize,
@@ -21,8 +21,9 @@ import {
     paste
 } from '../store/editor/actions'
 
-export const useEditorActions = (dispatch: AppDispatch) =>
-    useMemo(
+export const useEditorActions = () => {
+    const dispatch = useDispatch()
+    const actions = useMemo(
         () => ({
             onAdjustWorkspaceSize: () => dispatch(adjustWorkspaceSize()),
             onChangeLayerData: (layerId: string, data: (number | null)[]) => dispatch(changeLayerData(layerId, data)),
@@ -41,5 +42,6 @@ export const useEditorActions = (dispatch: AppDispatch) =>
         }),
         [dispatch]
     )
-
+    return actions
+}
 export type EditorActions = ReturnType<typeof useEditorActions>

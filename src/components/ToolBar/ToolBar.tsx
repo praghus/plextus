@@ -66,7 +66,7 @@ const ToolBar: React.FunctionComponent = () => {
             const Icon = TOOL_ICONS[value]
             const disabled = isDisabled(value)
             return (
-                <Tooltip title={TOOL_DESC[value]} placement="right" key={`tool-button-${value.toLowerCase()}`}>
+                <Tooltip title={TOOL_DESC[value]} placement="right" key={`tool-button-${value?.toLowerCase()}`}>
                     <ToggleButton {...{ disabled, value }}>
                         <Icon
                             sx={{ fontSize: 22 }}
@@ -107,7 +107,7 @@ const ToolBar: React.FunctionComponent = () => {
 
     const ToolsMenu = useMemo(() => {
         const main = [...AVAILABLE_TOOLS]
-        const max = Math.max(Math.round((workspace.height * 0.5) / 50) - 2, 2)
+        const max = Math.max(Math.round((workspace.height * 0.6) / 40) - 2, 2)
         const more = main.splice(max)
         setLastSelectedTool(more[0])
         return { main, more }
@@ -128,13 +128,16 @@ const ToolBar: React.FunctionComponent = () => {
                 onChange={(_, value) => onChangeTool(value as string)}
             >
                 {ToolsMenu.main.map(renderToolButton)}
-                {ToolsMenu.more.includes(selected.tool)
-                    ? renderToolButton(selected.tool)
-                    : renderToolButton(lastSelectedTool)}
+                {ToolsMenu.more.length
+                    ? (ToolsMenu.more.includes(selected.tool) && renderToolButton(selected.tool)) ||
+                      renderToolButton(lastSelectedTool)
+                    : null}
             </StyledToggleButtonGroup>
-            <IconButton onClick={handleClick} sx={{ margin: '5px' }}>
-                <MoreHorizIcon fontSize="small" htmlColor={colors.default} />
-            </IconButton>
+            {ToolsMenu.more.length ? (
+                <IconButton onClick={handleClick} sx={{ margin: '5px' }}>
+                    <MoreHorizIcon fontSize="small" htmlColor={colors.default} />
+                </IconButton>
+            ) : null}
             <Menu
                 open={open}
                 onClose={handleClose}

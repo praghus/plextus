@@ -4,7 +4,7 @@ import Konva from 'konva'
 import { debounce } from 'lodash'
 import { jsx } from '@emotion/react'
 import { useTheme } from '@mui/material/styles'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector, ReactReduxContext, Provider } from 'react-redux'
 import { Stage, Layer, Rect } from 'react-konva'
 
 import { IS_MOBILE } from '../../common/constants'
@@ -66,9 +66,8 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
 
     const dispatch = useDispatch()
     const theme = useTheme()
-    const editorActions = useEditorActions(dispatch)
 
-    const { onCrop, onAdjustWorkspaceSize, onChangePosition, onChangeScale } = editorActions
+    const { onCrop, onAdjustWorkspaceSize, onChangePosition, onChangeScale } = useEditorActions()
 
     const onChangeScaleDebounced = useMemo(() => debounce(onChangeScale, 300), [onChangeScale])
     const onChangePositionDebounced = useMemo(() => debounce(onChangePosition, 300), [onChangePosition])
@@ -128,95 +127,103 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
     return (
         <div>
             <div css={styles({ selected })}>
-                <Stage
-                    ref={handleStage}
-                    width={workspace.width}
-                    height={workspace.height}
-                    onContextMenu={e => e.evt.preventDefault()}
-                    onTouchStart={() => setIsMouseDown(true)}
-                    onMouseDown={() => setIsMouseDown(true)}
-                    onMouseUp={() => setIsMouseDown(false)}
-                    onMouseOver={() => setIsMouseOver(true)}
-                    onMouseOut={() => setIsMouseOver(false)}
-                    onTouchEnd={() => {
-                        onTouchEnd()
-                        setIsMouseDown(false)
-                    }}
-                    {...{ draggable, onDragEnd, onMouseMove, onTouchMove, onWheel }}
-                >
-                    <Layer imageSmoothingEnabled={false}>
-                        <TransparentBackground
-                            {...{ theme }}
-                            width={canvas.width}
-                            height={canvas.height}
-                            scale={1 / workspace.scale}
-                        />
-                        {backgroundColor && <Rect width={canvas.width} height={canvas.height} fill={backgroundColor} />}
-                        {stage &&
-                            layers.map(layer => (
-                                <KonvaLayer
-                                    key={`layer-${layer.id}`}
-                                    {...{
-                                        editorActions,
-                                        grid,
-                                        isMouseDown,
-                                        keyDown,
-                                        layer,
-                                        selected,
-                                        stage,
-                                        theme,
-                                        tileset,
-                                        tilesetCanvas,
-                                        workspace
-                                    }}
-                                />
-                            ))}
-                        {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, editorActions, grid }} />}
-                        {selected.tool === TOOLS.SELECT && (
-                            <SelectTool
-                                {...{
-                                    canvas,
-                                    editorActions,
-                                    grid,
-                                    isMouseDown,
-                                    pointerPosition,
-                                    selectedLayer,
-                                    workspace
-                                }}
-                            />
-                        )}
-                        {stage && (
-                            <GridLines
-                                x={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.x : 0}
-                                y={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.y : 0}
-                                width={
-                                    selectedLayer
-                                        ? selectedLayer.width * (selectedLayer.image ? 1 : tileset.tilewidth)
-                                        : canvas.width
-                                }
-                                height={
-                                    selectedLayer
-                                        ? selectedLayer.height * (selectedLayer.image ? 1 : tileset.tileheight)
-                                        : canvas.height
-                                }
-                                scale={stage.scaleX()}
-                                {...{ grid, theme }}
-                            />
-                        )}
-                        {isPointerVisible && (
-                            <Pointer
-                                {...{
-                                    grid,
-                                    pointerPosition,
-                                    selected,
-                                    selectedLayer,
-                                    tileset,
-                                    workspace
-                                }}
-                            />
-                        )}
-                    </Layer>
-                </Stage>
+                <ReactReduxContext.Consumer>
+                    {({ store }) => (
+                        <Stage
+                            ref={handleStage}
+                            width={workspace.width}
+                            height={workspace.height}
+                            onContextMenu={e => e.evt.preventDefault()}
+                            onTouchStart={() => setIsMouseDown(true)}
+                            onMouseDown={() => setIsMouseDown(true)}
+                            onMouseUp={() => setIsMouseDown(false)}
+                            onMouseOver={() => setIsMouseOver(true)}
+                            onMouseOut={() => setIsMouseOver(false)}
+                            onTouchEnd={() => {
+                                onTouchEnd()
+                                setIsMouseDown(false)
+                            }}
+                            {...{ draggable, onDragEnd, onMouseMove, onTouchMove, onWheel }}
+                        >
+                            <Provider {...{ store }}>
+                                <Layer imageSmoothingEnabled={false}>
+                                    <TransparentBackground
+                                        {...{ theme }}
+                                        width={canvas.width}
+                                        height={canvas.height}
+                                        scale={1 / workspace.scale}
+                                    />
+                                    {backgroundColor && (
+                                        <Rect width={canvas.width} height={canvas.height} fill={backgroundColor} />
+                                    )}
+                                    {stage &&
+                                        layers.map(layer => (
+                                            <KonvaLayer
+                                                key={`layer-${layer.id}`}
+                                                {...{
+                                                    grid,
+                                                    isMouseDown,
+                                                    keyDown,
+                                                    layer,
+                                                    selected,
+                                                    stage,
+                                                    theme,
+                                                    tileset,
+                                                    tilesetCanvas,
+                                                    workspace
+                                                }}
+                                            />
+                                        ))}
+                                    {selected.tool === TOOLS.CROP && <CropTool {...{ canvas, grid }} />}
+                                    {selected.tool === TOOLS.SELECT && (
+                                        <SelectTool
+                                            {...{
+                                                canvas,
+                                                grid,
+                                                isMouseDown,
+                                                pointerPosition,
+                                                selectedLayer,
+                                                workspace
+                                            }}
+                                        />
+                                    )}
+                                    {stage && (
+                                        <GridLines
+                                            x={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.x : 0}
+                                            y={selected.tool !== TOOLS.OFFSET ? selectedLayer?.offset.y : 0}
+                                            width={
+                                                selectedLayer
+                                                    ? selectedLayer.width *
+                                                      (selectedLayer.image ? 1 : tileset.tilewidth)
+                                                    : canvas.width
+                                            }
+                                            height={
+                                                selectedLayer
+                                                    ? selectedLayer.height *
+                                                      (selectedLayer.image ? 1 : tileset.tileheight)
+                                                    : canvas.height
+                                            }
+                                            scale={stage.scaleX()}
+                                            {...{ grid, theme }}
+                                        />
+                                    )}
+                                    {isPointerVisible && (
+                                        <Pointer
+                                            {...{
+                                                grid,
+                                                pointerPosition,
+                                                selected,
+                                                selectedLayer,
+                                                tileset,
+                                                workspace
+                                            }}
+                                        />
+                                    )}
+                                </Layer>
+                            </Provider>
+                        </Stage>
+                    )}
+                </ReactReduxContext.Consumer>
                 <TileInfoLabel {...{ pointerPosition, selectedLayer }} />
             </div>
             {stage && <StatusBar {...{ onCenter, stage }} />}
