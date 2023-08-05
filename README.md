@@ -17,14 +17,14 @@ Plextus is a pixel art editor designed to make tiled maps and tilesets. In addit
 
 **Development**
 
-`yarn run start-dev`
+`yarn start`
 
 -   Build app continuously (HMR enabled)
 -   App served @ `http://localhost:8080`
 
 **Production**
 
-`yarn run start-prod`
+`yarn start-prod`
 
 -   Build app once (HMR disabled) to `/dist/`
 -   App served @ `http://localhost:3000`
