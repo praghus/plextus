@@ -65,7 +65,7 @@ const ToolBar: React.FunctionComponent = () => {
         (value: keyof typeof TOOLS) => {
             const Icon = TOOL_ICONS[value]
             const disabled = isDisabled(value)
-            return (
+            return value ? (
                 <Tooltip title={TOOL_DESC[value]} placement="right" key={`tool-button-${value?.toLowerCase()}`}>
                     <ToggleButton {...{ disabled, value }}>
                         <Icon
@@ -78,7 +78,7 @@ const ToolBar: React.FunctionComponent = () => {
                         />
                     </ToggleButton>
                 </Tooltip>
-            )
+            ) : null
         },
         [isDisabled, colors, selected.tool]
     )
