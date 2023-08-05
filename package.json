@@ -73,7 +73,7 @@
         "eslint-plugin-eslint-comments": "^3.2.0",
         "eslint-plugin-import": "^2.23.4",
         "eslint-plugin-jest": "^25.2.4",
-        "eslint-plugin-jsdoc": "^37.0.3",
+        "eslint-plugin-jsdoc": "^46.4.6",
         "eslint-plugin-lodash": "^7.2.0",
         "eslint-plugin-new-with-error": "^2.0.0",
         "eslint-plugin-perf-standard": "^1.0.3",
