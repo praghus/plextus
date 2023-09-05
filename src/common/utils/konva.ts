@@ -26,8 +26,8 @@ export const getPointerRelativePos = (
     pos: Konva.Vector2d,
     offset?: Konva.Vector2d
 ): Konva.Vector2d => ({
-    x: (pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale,
-    y: (pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale
+    x: Math.floor((pos.x - ((offset && offset.x * workspace.scale) || 0) - workspace.x) / workspace.scale),
+    y: Math.floor((pos.y - ((offset && offset.y * workspace.scale) || 0) - workspace.y) / workspace.scale)
 })
 
 export function getSelectionRect(shape: Konva.Rect): Rectangle {
