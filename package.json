@@ -58,7 +58,7 @@
         "@types/react-dom": "^18.0.0",
         "@types/react-helmet": "^6.1.1",
         "@types/uuid": "^9.0.0",
-        "@types/webpack-env": "^1.16.0",
+        "@types/webpack-env": "^1.18.1",
         "@typescript-eslint/eslint-plugin": "^5.4.0",
         "@typescript-eslint/parser": "^5.4.0",
         "babel-loader": "^8.2.2",
@@ -101,6 +101,7 @@
         "webpack": "^5.37.1",
         "webpack-cli": "^4.7.0",
         "webpack-dev-server": "^4.5.0",
+        "webpack-env": "^0.8.0",
         "webpack-merge": "^5.7.3"
     },
     "dependencies": {

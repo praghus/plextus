@@ -8,8 +8,7 @@ import {
     ImageSearch as ImageSearchIcon
 } from '@mui/icons-material'
 
-import { selectIsLoading, selectIsImportDialogOpen, selectIsNewProjectDialogOpen } from '../../store/app/selectors'
-import { changeAppIsNewProjectDialogOpen } from '../../store/app/actions'
+import { selectIsLoading, selectIsImportDialogOpen } from '../../store/app/selectors'
 import { openProject } from '../../store/editor/actions'
 import { selectCanvas } from '../../store/editor/selectors'
 import { PlextusLogo } from '../Icons'
@@ -18,6 +17,7 @@ import { ProjectUpload } from '../ProjectUpload'
 import { ThemeSwitch } from '../ThemeSwitch'
 import { ProjectFile } from '../../store/editor/types'
 import { StyledDialogContent } from './WelcomeDialog.styled'
+import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
 
 import pjson from '../../../package.json'
 import demoProject from '../../assets/projects/demo-project.json'
@@ -26,12 +26,13 @@ const WelcomeDialog: React.FunctionComponent = () => {
     const canvas = useSelector(selectCanvas)
     const isLoading = useSelector(selectIsLoading)
     const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
-    const isNewProjectDialogOpen = useSelector(selectIsNewProjectDialogOpen)
-    const isOpen = !canvas && !isLoading && !isImportDialogOpen && !isNewProjectDialogOpen
+
+    const [isNewProjectDialogOpen, setNewProjectDialogOpen] = useNewProjectDialogToggle()
 
     const dispatch = useDispatch()
-    const onToggleNewProjectDialog = (open: boolean) => dispatch(changeAppIsNewProjectDialogOpen(open))
     const onLoadDemoProject = () => dispatch(openProject(demoProject as ProjectFile))
+
+    const isOpen = !canvas && !isLoading && !isImportDialogOpen && !isNewProjectDialogOpen
 
     return (
         <Dialog open={isOpen}>
@@ -70,7 +71,7 @@ const WelcomeDialog: React.FunctionComponent = () => {
                     <ImageUpload />
                 </Button>
 
-                <Button variant="contained" onClick={() => onToggleNewProjectDialog(true)} startIcon={<AddBoxIcon />}>
+                <Button variant="contained" onClick={() => setNewProjectDialogOpen(true)} startIcon={<AddBoxIcon />}>
                     New project
                 </Button>
             </DialogActions>

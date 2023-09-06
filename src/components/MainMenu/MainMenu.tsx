@@ -17,9 +17,9 @@ import {
 } from '@mui/icons-material'
 
 import { exportToTmx } from '../../common/utils/tmx'
+import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
 import { selectHistory } from '../../store/history/selectors'
 import { selectCanvas, selectLayers, selectProjectName, selectTileset } from '../../store/editor/selectors'
-import { changeAppIsNewProjectDialogOpen } from '../../store/app/actions'
 import { changeProjectName, clearProject, saveChanges, saveChangesToFile } from '../../store/editor/actions'
 import { undo, redo } from '../../store/history/actions'
 import { PlextusLogo } from '../Icons'
@@ -39,6 +39,8 @@ const MainMenu: React.FunctionComponent = () => {
     const [editingName, setEditingName] = useState<string | null>(null)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
 
+    const [, setNewProjectDialogOpen] = useNewProjectDialogToggle()
+
     const { t } = useTranslation()
 
     const dispatch = useDispatch()
@@ -46,7 +48,6 @@ const MainMenu: React.FunctionComponent = () => {
     const handleClick = (e: React.MouseEvent) => setAnchorEl(e.currentTarget as HTMLAnchorElement)
     const onSaveChanges = () => dispatch(saveChanges())
     const onSaveChangesToFile = () => dispatch(saveChangesToFile())
-    const onShowNewProjectDialog = () => dispatch(changeAppIsNewProjectDialogOpen(true))
     const onChangeProjectName = (name: string) => dispatch(changeProjectName(name))
     const onUndo = () => dispatch(undo())
     const onRedo = () => dispatch(redo())
@@ -75,7 +76,7 @@ const MainMenu: React.FunctionComponent = () => {
                 <MenuItem
                     onClick={() => {
                         handleClose()
-                        onShowNewProjectDialog()
+                        setNewProjectDialogOpen(true)
                     }}
                 >
                     <ListItemIcon>

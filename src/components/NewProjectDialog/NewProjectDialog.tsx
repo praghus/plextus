@@ -12,18 +12,17 @@ import {
     TextField,
     Typography
 } from '@mui/material'
-import { changeAppIsNewProjectDialogOpen } from '../../store/app/actions'
+import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
 import { createNewProject } from '../../store/editor/actions'
-import { selectIsNewProjectDialogOpen } from '../../store/app/selectors'
 import { selectTileset } from '../../store/editor/selectors'
 import { ProjectConfig } from '../../store/editor/types'
 
 const NewProjectDialog: React.FunctionComponent = () => {
     const tileset = useSelector(selectTileset)
-    const isOpen = useSelector(selectIsNewProjectDialogOpen)
 
     const { t } = useTranslation()
 
+    const [isOpen, setIsOpen] = useNewProjectDialogToggle()
     const [config, setConfig] = useState<ProjectConfig>({
         columns: tileset.columns,
         h: 160 / tileset.tileheight,
@@ -35,7 +34,7 @@ const NewProjectDialog: React.FunctionComponent = () => {
 
     const dispatch = useDispatch()
 
-    const onClose = () => dispatch(changeAppIsNewProjectDialogOpen(false))
+    const onClose = () => setIsOpen(false)
     const handleClose = (e: React.SyntheticEvent<Element, Event>, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()

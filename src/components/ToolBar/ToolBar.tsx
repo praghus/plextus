@@ -83,7 +83,7 @@ const ToolBar: React.FunctionComponent = () => {
         [isDisabled, colors, selected.tool]
     )
 
-    const renterMoreToolMenuItem = useCallback(
+    const renderMoreToolMenuItem = useCallback(
         (value: keyof typeof TOOLS) => {
             const Icon = TOOL_ICONS[value]
             return (
@@ -133,7 +133,7 @@ const ToolBar: React.FunctionComponent = () => {
                       renderToolButton(lastSelectedTool)
                     : null}
             </StyledToggleButtonGroup>
-            {ToolsMenu.more.length ? (
+            {ToolsMenu.more.length > 1 ? (
                 <IconButton onClick={handleClick} sx={{ margin: '5px' }}>
                     <MoreHorizIcon fontSize="small" htmlColor={colors.default} />
                 </IconButton>
@@ -145,7 +145,7 @@ const ToolBar: React.FunctionComponent = () => {
                 anchorOrigin={menuOrigin}
                 transformOrigin={menuOrigin}
             >
-                {ToolsMenu.more.map(renterMoreToolMenuItem)}
+                {ToolsMenu.more.map(renderMoreToolMenuItem)}
             </Menu>
         </StyledToolBarContainer>
     )
