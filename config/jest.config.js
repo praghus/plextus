@@ -16,8 +16,6 @@ module.exports = {
 
     roots: ['<rootDir>/src'],
 
-    setupFilesAfterEnv: ['<rootDir>/config/jest.setup.js'],
-
     snapshotSerializers: ['enzyme-to-json/serializer'],
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
     transform: {

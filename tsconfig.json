@@ -21,17 +21,13 @@
     "noFallthroughCasesInSwitch": true,
     "jsx": "react",
     "baseUrl": "./src",
-    "types": [
+    "types": [ 
       "node",
-      "react/next", 
-      "react-dom/next",
-      "@types/jest",
-      "@types/enzyme-adapter-react-16",
-      "@types/webpack-env",
-      "@emotion/react/types/css-prop"
+      "jest",
+      "webpack-env",
     ],
     "typeRoots": [
-      "../node_modules/@types", "./src/types"
+      "./node_modules/@types", "./src/types"
     ]
   },
   "include": [

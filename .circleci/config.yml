@@ -4,7 +4,7 @@ orbs:
   gh-pages: sugarshin/gh-pages@1.0.1
 
 jobs:
-  build_and_test:
+  build:
     executor: node/default
     steps:
       - add_ssh_keys:
@@ -21,11 +21,10 @@ jobs:
           paths:
             - .
       - gh-pages/deploy:
-          setup-git: true 
           ssh-fingerprints: SHA256:odTvIULMtMyBg4MikX1JAeO11ImOTzsh0dTFvYi7dXY
 
 workflows:
-  test_my_app:
+  deploy:
     jobs:
-      - build_and_test
+      - build
 

@@ -21,7 +21,6 @@ export const useZoomEvents = (
                 const newPos = typeof dragBoundFunc === 'function' ? dragBoundFunc(pos) : pos
                 onChangePosition(newPos)
                 stage.position(newPos)
-                // stage.batchDraw()
             }
         },
         [stage, onChangePosition, dragBoundFunc]
@@ -41,7 +40,6 @@ export const useZoomEvents = (
                         y: y - ((y - stage.y()) / oldScale) * newScale
                     })
                     stage.scale({ x: newScale, y: newScale })
-                    // stage.batchDraw()
                 }
             }
         },
@@ -52,8 +50,8 @@ export const useZoomEvents = (
         (e: Konva.KonvaEventObject<WheelEvent>) => {
             e.evt.preventDefault()
             if (stage) {
-                const { altKey, metaKey, deltaX, deltaY } = e.evt
-                if (altKey || metaKey) {
+                const { ctrlKey, metaKey, deltaX, deltaY } = e.evt
+                if (ctrlKey || metaKey) {
                     onScale(deltaY > 0 ? stage.scaleX() / SCALE_BY : stage.scaleX() * SCALE_BY)
                 } else {
                     onPosition({

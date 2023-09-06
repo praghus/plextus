@@ -8,8 +8,4 @@ export const selectIsLoading = createSelector(selectApp, ({ isLoading }) => isLo
 export const selectLastUpdateTime = createSelector(selectApp, ({ lastUpdateTime }) => lastUpdateTime)
 export const selectImportedImage = createSelector(selectApp, ({ importedImage }) => importedImage)
 export const selectIsImportDialogOpen = createSelector(selectApp, ({ importedImage }) => Boolean(importedImage))
-export const selectIsNewProjectDialogOpen = createSelector(
-    selectApp,
-    ({ isNewProjectDialogOpen }) => isNewProjectDialogOpen
-)
 export const selectAppTheme = createSelector(selectApp, ({ theme }) => theme)
