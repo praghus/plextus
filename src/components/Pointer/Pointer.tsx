@@ -42,7 +42,7 @@ const Pointer: React.FunctionComponent<Props> = ({
     const [posX, posY] =
         [TOOLS.DELETE, TOOLS.REPLACE, TOOLS.STAMP, TOOLS.TILE_FILL].includes(selected.tool) && selectedLayer?.data
             ? [x * width + offset.x, y * height + offset.y]
-            : [pointerRelPosition.x, pointerRelPosition.y]
+            : [Math.floor(pointerRelPosition.x), Math.floor(pointerRelPosition.y)]
 
     useEffect(() => {
         if (pointerRef.current && pointerOverlayRef.current && fillPatternImage) {

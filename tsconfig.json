@@ -23,8 +23,6 @@
     "baseUrl": "./src",
     "types": [ 
       "node",
-      "react/next", 
-      "react-dom/next",
       "jest",
       "webpack-env",
     ],
