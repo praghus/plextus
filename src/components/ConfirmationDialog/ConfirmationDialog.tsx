@@ -10,7 +10,7 @@ interface Props {
     title: string
 }
 
-const ConfirmationDialog: React.FunctionComponent<Props> = ({ message, onConfirm, onClose, open, title }) => {
+const ConfirmationDialog = ({ message, onConfirm, onClose, open, title }: Props) => {
     const { t } = useTranslation()
     return (
         <Dialog {...{ onClose, open }}>
@@ -29,6 +29,5 @@ const ConfirmationDialog: React.FunctionComponent<Props> = ({ message, onConfirm
         </Dialog>
     )
 }
-ConfirmationDialog.displayName = 'ConfirmationDialog'
 
 export default ConfirmationDialog

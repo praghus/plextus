@@ -17,7 +17,7 @@ interface Props {
     scale?: number
 }
 
-const TransparentBackground: React.FunctionComponent<Props> = ({ width, height, scale, theme }) => (
+const TransparentBackground = ({ width, height, scale, theme }: Props) => (
     <Rect
         {...{ height, width }}
         // shadowBlur={2}
@@ -27,7 +27,5 @@ const TransparentBackground: React.FunctionComponent<Props> = ({ width, height, 
         fillPatternScaleY={scale || 1}
     />
 )
-
-TransparentBackground.displayName = 'TransparentBackground'
 
 export default TransparentBackground

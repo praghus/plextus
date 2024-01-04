@@ -17,7 +17,7 @@ interface Props {
     children?: React.ReactNode
 }
 
-const ProjectUpload: React.FunctionComponent<Props> = ({ children }) => {
+const ProjectUpload = ({ children }: Props) => {
     const dispatch = useDispatch()
     const onLoadProject = (project: ProjectFile) => dispatch(openProject(project))
     const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,6 +35,5 @@ const ProjectUpload: React.FunctionComponent<Props> = ({ children }) => {
         </>
     )
 }
-ProjectUpload.displayName = 'ProjectUpload'
 
 export default ProjectUpload

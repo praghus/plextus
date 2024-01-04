@@ -7,7 +7,7 @@ interface Props {
     children?: React.ReactNode
 }
 
-const ImageUpload: React.FunctionComponent<Props> = ({ children }) => {
+const ImageUpload = ({ children }: Props) => {
     const dispatch = useDispatch()
 
     const upload = async (file: File) => {
@@ -30,6 +30,5 @@ const ImageUpload: React.FunctionComponent<Props> = ({ children }) => {
         </>
     )
 }
-ImageUpload.displayName = 'ImageUpload'
 
 export default ImageUpload

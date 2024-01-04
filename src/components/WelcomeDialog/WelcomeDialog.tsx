@@ -22,7 +22,7 @@ import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
 import pjson from '../../../package.json'
 import demoProject from '../../assets/projects/demo-project.json'
 
-const WelcomeDialog: React.FunctionComponent = () => {
+const WelcomeDialog = () => {
     const canvas = useSelector(selectCanvas)
     const isLoading = useSelector(selectIsLoading)
     const isImportDialogOpen = useSelector(selectIsImportDialogOpen)
@@ -78,6 +78,5 @@ const WelcomeDialog: React.FunctionComponent = () => {
         </Dialog>
     )
 }
-WelcomeDialog.displayName = 'WelcomeDialog'
 
 export default WelcomeDialog

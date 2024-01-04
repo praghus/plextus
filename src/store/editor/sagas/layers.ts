@@ -1,6 +1,18 @@
 import { AnyAction } from '@reduxjs/toolkit'
-import { call, put, select } from 'redux-saga/effects'
+import { all, call, put, select, takeLatest } from 'redux-saga/effects'
 
+import {
+    EDITOR_CHANGE_LAYERS,
+    EDITOR_CHANGE_LAYER_DATA,
+    EDITOR_CHANGE_LAYER_IMAGE,
+    EDITOR_CHANGE_LAYER_NAME,
+    EDITOR_CHANGE_LAYER_OFFSET,
+    EDITOR_CHANGE_LAYER_OPACITY,
+    EDITOR_CHANGE_LAYER_VISIBLE,
+    EDITOR_REMOVE_LAYER,
+    EDITOR_CREATE_TILE_LAYER_FROM_FILE,
+    EDITOR_CREATE_IMAGE_LAYER_FROM_FILE
+} from '../constants'
 import logger from '../../../common/utils/logger'
 import { generateReducedPalette, importLayer } from '../../../common/utils/image'
 import { compressLayerData } from '../../../common/utils/pako'
@@ -176,4 +188,19 @@ export {
     createImageLayerFromFile,
     createTileLayerFromFile,
     removeLayer
+}
+
+export default function* layersSaga() {
+    yield all([
+        takeLatest(EDITOR_CHANGE_LAYERS, changeLayersSaga),
+        takeLatest(EDITOR_CHANGE_LAYER_DATA, changeLayerData),
+        takeLatest(EDITOR_CHANGE_LAYER_IMAGE, changeLayerImage),
+        takeLatest(EDITOR_CHANGE_LAYER_NAME, changeLayerName),
+        takeLatest(EDITOR_CHANGE_LAYER_OFFSET, changeLayerOffset),
+        takeLatest(EDITOR_CHANGE_LAYER_OPACITY, changeLayerOpacity),
+        takeLatest(EDITOR_CHANGE_LAYER_VISIBLE, changeLayerVisible),
+        takeLatest(EDITOR_REMOVE_LAYER, removeLayer),
+        takeLatest(EDITOR_CREATE_TILE_LAYER_FROM_FILE, createTileLayerFromFile),
+        takeLatest(EDITOR_CREATE_IMAGE_LAYER_FROM_FILE, createImageLayerFromFile)
+    ])
 }

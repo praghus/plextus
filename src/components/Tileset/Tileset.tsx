@@ -25,7 +25,7 @@ interface Props {
     tilesetCanvas: HTMLCanvasElement
 }
 
-const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
+const Tileset = ({ tilesetCanvas }: Props) => {
     const grid = useSelector(selectGrid)
     const tileset = useSelector(selectTileset)
     const selected = useSelector(selectSelected)
@@ -232,11 +232,5 @@ const Tileset: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         </>
     )
 }
-Tileset.displayName = 'Tileset'
 
 export default Tileset
-
-// repositionStage(
-//     ((newTileId - 1) % columns) * tilewidth * scale.x,
-//     Math.ceil(newTileId / columns - 1) * tileheight * scale.y
-// )

@@ -10,7 +10,7 @@ interface Props {
     grid: Grid
 }
 
-const CropTool: React.FunctionComponent<Props> = ({ canvas, grid }) => {
+const CropTool = ({ canvas, grid }: Props) => {
     const { width, height } = grid
     const [shape, setShape] = useState<Konva.Rect>()
     const [transformer, setTransformer] = useState<Konva.Transformer>()
@@ -60,7 +60,6 @@ const CropTool: React.FunctionComponent<Props> = ({ canvas, grid }) => {
         <>
             <Rect
                 {...{ height, width }}
-                draggable
                 ref={handleShape}
                 id="selectRect"
                 fill="rgba(0,128,255,0.3)"
@@ -76,11 +75,11 @@ const CropTool: React.FunctionComponent<Props> = ({ canvas, grid }) => {
                 }}
                 onDragEnd={setArea}
                 onTransformEnd={setArea}
+                draggable
             />
             <Transformer ref={handleTransformer} rotateEnabled={false} />
         </>
     )
 }
-CropTool.displayName = 'CropTool'
 
 export default CropTool

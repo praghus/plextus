@@ -10,7 +10,7 @@ import { changeTool } from '../../store/editor/actions'
 
 import { StyledToolBarContainer, StyledToggleButtonGroup } from './ToolBar.styled'
 
-const ToolBar: React.FunctionComponent = () => {
+const ToolBar = () => {
     const theme = useTheme()
     const darkMode = theme.palette.mode === 'dark'
 
@@ -150,6 +150,5 @@ const ToolBar: React.FunctionComponent = () => {
         </StyledToolBarContainer>
     )
 }
-ToolBar.displayName = 'ToolBar'
 
 export default ToolBar

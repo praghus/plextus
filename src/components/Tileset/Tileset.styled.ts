@@ -14,7 +14,11 @@ export const StyledTilesetImageContainer = styled.div`
         linear-gradient(45deg, transparent 75%, ${({ theme }: IMuiTheme) => theme?.palette.action.hover} 75%),
         linear-gradient(135deg, transparent 75%, ${({ theme }: IMuiTheme) => theme?.palette.action.hover} 75%);
     background-size: 8px 8px;
-    background-position: 0 0, 4px 0, 4px -4px, 0px 4px;
+    background-position:
+        0 0,
+        4px 0,
+        4px -4px,
+        0px 4px;
     background-color: ${({ theme }: IMuiTheme) => theme?.palette.background.default};
 `
 

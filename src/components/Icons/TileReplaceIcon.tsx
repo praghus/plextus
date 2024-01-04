@@ -1,7 +1,7 @@
 import React from 'react'
-import SvgIcon from '@mui/material/SvgIcon'
+import SvgIcon, { SvgIconTypeMap } from '@mui/material/SvgIcon'
 
-const TileReplaceIcon: React.FunctionComponent = props => (
+const TileReplaceIcon = (props: SvgIconTypeMap) => (
     <SvgIcon viewBox="0 0 1024 1024" {...props}>
         <path
             d={`M620.544 137.6c103.936 10.432 187.328 72.96 205.12 180.224h-60.16l97.088 144.448 
@@ -18,6 +18,5 @@ const TileReplaceIcon: React.FunctionComponent = props => (
         />
     </SvgIcon>
 )
-TileReplaceIcon.displayName = 'TileReplaceIcon'
 
 export default TileReplaceIcon

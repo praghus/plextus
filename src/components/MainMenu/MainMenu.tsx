@@ -28,7 +28,7 @@ import { ImageUpload } from '../ImageUpload'
 import { ProjectUpload } from '../ProjectUpload'
 import { StyledMenuContainer, StyledPaper, StyledProjectName } from './MainMenu.styled'
 
-const MainMenu: React.FunctionComponent = () => {
+const MainMenu = () => {
     const canvas = useSelector(selectCanvas)
     const layers = useSelector(selectLayers)
     const projectName = useSelector(selectProjectName)
@@ -207,6 +207,5 @@ const MainMenu: React.FunctionComponent = () => {
         </StyledMenuContainer>
     )
 }
-MainMenu.displayName = 'MainMenu'
 
 export default MainMenu

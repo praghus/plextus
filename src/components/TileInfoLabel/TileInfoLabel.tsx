@@ -12,7 +12,7 @@ interface Props {
     selectedLayer: Layer | null
 }
 
-const TileInfoLabel: React.FunctionComponent<Props> = ({ pointerPosition, selectedLayer }) => {
+const TileInfoLabel = ({ pointerPosition, selectedLayer }: Props) => {
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
@@ -39,6 +39,5 @@ const TileInfoLabel: React.FunctionComponent<Props> = ({ pointerPosition, select
         </StyledLabel>
     ) : null
 }
-TileInfoLabel.displayName = 'TileInfoLabel'
 
 export default TileInfoLabel

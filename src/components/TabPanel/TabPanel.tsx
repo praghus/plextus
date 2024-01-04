@@ -8,7 +8,7 @@ interface Props {
     value: number
 }
 
-const TabPanel: React.FunctionComponent<Props> = ({ children, closed, value, index, ...other }) => (
+const TabPanel = ({ children, closed, value, index, ...other }: Props) => (
     <div
         role="tabpanel"
         hidden={closed}
@@ -23,6 +23,5 @@ const TabPanel: React.FunctionComponent<Props> = ({ children, closed, value, ind
         {value === index && <Box>{children}</Box>}
     </div>
 )
-TabPanel.displayName = 'TabPanel'
 
 export default TabPanel

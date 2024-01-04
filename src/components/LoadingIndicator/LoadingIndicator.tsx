@@ -11,7 +11,7 @@ interface Props {
     size?: number
 }
 
-const LoadingIndicator: React.FunctionComponent<Props> = ({ color, loading, size }) => {
+const LoadingIndicator = ({ color, loading, size }: Props) => {
     const theme = useTheme()
     return (
         <Backdrop sx={{ color: '#fff', zIndex: theme.zIndex.drawer + 1 }} open={loading}>
@@ -19,7 +19,7 @@ const LoadingIndicator: React.FunctionComponent<Props> = ({ color, loading, size
         </Backdrop>
     )
 }
-LoadingIndicator.displayName = 'LoadingIndicator'
+
 LoadingIndicator.defaultProps = {
     color: '#fff',
     size: 15

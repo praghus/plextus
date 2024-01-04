@@ -10,7 +10,7 @@ import { changeCanvasBackground, changeGridColor, changeGridPitch, changeToolSiz
 import { rgbaToHex } from '../../common/utils/colors'
 import { StyledSettingsContainer, StyledPropContainer } from './PropertiesTab.styled'
 
-const PropertiesTab: React.FunctionComponent = () => {
+const PropertiesTab = () => {
     const canvas = useSelector(selectCanvas)
     const grid = useSelector(selectGrid)
     const selected = useSelector(selectSelected)
@@ -55,7 +55,7 @@ const PropertiesTab: React.FunctionComponent = () => {
                             value={typeof toolSize === 'number' ? toolSize : 0}
                             onChange={(_, value) => setToolSize(value as number)}
                             onChangeCommitted={(_, value) => {
-                                Number.isInteger(value) && value > 0 && onChangeToolSize(value as number)
+                                Number.isInteger(value) && (value as number) > 0 && onChangeToolSize(value as number)
                             }}
                         />
                     </Stack>
@@ -109,6 +109,5 @@ const PropertiesTab: React.FunctionComponent = () => {
         </StyledSettingsContainer>
     )
 }
-PropertiesTab.displayName = 'PropertiesTab'
 
 export default PropertiesTab

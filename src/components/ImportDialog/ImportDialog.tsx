@@ -29,7 +29,7 @@ import { LayerImportConfig } from '../../store/editor/types'
 import { ImportPreview } from '../ImportPreview'
 import { dataURLToBlob } from '../../common/utils/data'
 
-const ImportDialog: React.FunctionComponent = () => {
+const ImportDialog = () => {
     const canvas = useSelector(selectCanvas)
     const tileset = useSelector(selectTileset)
     const importedImage = useSelector(selectImportedImage)
@@ -300,6 +300,5 @@ const ImportDialog: React.FunctionComponent = () => {
         </Dialog>
     )
 }
-ImportDialog.displayName = 'ImportDialog'
 
 export default ImportDialog

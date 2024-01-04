@@ -17,7 +17,7 @@ import { createNewProject } from '../../store/editor/actions'
 import { selectTileset } from '../../store/editor/selectors'
 import { ProjectConfig } from '../../store/editor/types'
 
-const NewProjectDialog: React.FunctionComponent = () => {
+const NewProjectDialog = () => {
     const tileset = useSelector(selectTileset)
 
     const { t } = useTranslation()
@@ -165,6 +165,5 @@ const NewProjectDialog: React.FunctionComponent = () => {
         </Dialog>
     )
 }
-NewProjectDialog.displayName = 'NewProjectDialog'
 
 export default NewProjectDialog

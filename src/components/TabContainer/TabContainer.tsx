@@ -22,7 +22,7 @@ interface Props {
     tilesetCanvas: HTMLCanvasElement
 }
 
-const TabContainer: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
+const TabContainer = ({ tilesetCanvas }: Props) => {
     const [value, setValue] = useState(0)
     const [closed, setClosed] = useState(false)
 
@@ -63,6 +63,5 @@ const TabContainer: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         </StyledTabContainer>
     )
 }
-TabContainer.displayName = 'TabContainer'
 
 export default TabContainer
