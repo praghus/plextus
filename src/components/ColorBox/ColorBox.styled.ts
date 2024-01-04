@@ -19,7 +19,11 @@ export const StyledTransparentContainer = styled.div`
         linear-gradient(45deg, transparent 75%, ${({ theme }: IMuiTheme) => theme?.palette.action.hover} 75%),
         linear-gradient(135deg, transparent 75%, ${({ theme }: IMuiTheme) => theme?.palette.action.hover} 75%);
     background-size: 8px 8px;
-    background-position: 0 0, 4px 0, 4px -4px, 0px 4px;
+    background-position:
+        0 0,
+        4px 0,
+        4px -4px,
+        0px 4px;
 
     &.selected {
         box-shadow: 0 0 0 2px ${({ theme }: IMuiTheme) => (theme?.palette.mode === 'dark' ? '#90caf9' : '#1976d2')};

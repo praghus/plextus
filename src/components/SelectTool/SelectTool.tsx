@@ -13,13 +13,7 @@ interface Props {
     workspace: Workspace
 }
 
-const SelectTool: React.FunctionComponent<Props> = ({
-    isMouseDown,
-    grid,
-    pointerPosition,
-    selectedLayer,
-    workspace
-}) => {
+const SelectTool = ({ isMouseDown, grid, pointerPosition, selectedLayer, workspace }: Props) => {
     const [shape, setShape] = useState<Konva.Rect>()
     const [startPos, setStartPos] = useState<Konva.Vector2d>()
     const [isSelecting, setIsSelecting] = useState<boolean>(false)
@@ -89,6 +83,5 @@ const SelectTool: React.FunctionComponent<Props> = ({
         </Group>
     )
 }
-SelectTool.displayName = 'SelectTool'
 
 export default SelectTool

@@ -11,7 +11,7 @@ interface Props {
     tiny?: boolean
 }
 
-const ThemeSwitch: React.FunctionComponent<Props> = ({ tiny }) => {
+const ThemeSwitch = ({ tiny }: Props) => {
     const appTheme = useSelector(selectAppTheme)
     const dispatch = useDispatch()
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -19,6 +19,5 @@ const ThemeSwitch: React.FunctionComponent<Props> = ({ tiny }) => {
 
     return <StyledThemeSwitch sx={{ m: 1 }} checked={appTheme === THEMES.DARK} {...{ onChange, tiny }} />
 }
-ThemeSwitch.displayName = 'ThemeSwitch'
 
 export default ThemeSwitch

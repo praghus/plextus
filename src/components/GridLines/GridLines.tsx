@@ -50,7 +50,6 @@ const GridLines = forwardRef<Konva.Group | null, Props>(
     }
 )
 
-GridLines.displayName = 'Grid'
 GridLines.defaultProps = {
     dash: true
 }

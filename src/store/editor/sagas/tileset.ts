@@ -1,5 +1,5 @@
 import { AnyAction } from '@reduxjs/toolkit'
-import { put, select } from 'redux-saga/effects'
+import { all, put, select, takeLatest } from 'redux-saga/effects'
 
 import logger from '../../../common/utils/logger'
 import { compressLayerData } from '../../../common/utils/pako'
@@ -7,6 +7,7 @@ import { changeAppIsLoading } from '../../app/actions'
 import { selectLayers } from '../selectors'
 import { changeTilesetImageSuccess, removeTileSuccess } from '../actions'
 import { DeflatedLayer, Layer } from '../types'
+import { EDITOR_REMOVE_TILE, EDITOR_SET_TILESET_IMAGE } from '../constants'
 
 function* removeTile(action: AnyAction) {
     const { tileId, tileset } = action.payload
@@ -40,4 +41,6 @@ function* setTilesetImage(action: AnyAction) {
     }
 }
 
-export { removeTile, setTilesetImage }
+export default function* tilesetSaga() {
+    yield all([takeLatest(EDITOR_REMOVE_TILE, removeTile), takeLatest(EDITOR_SET_TILESET_IMAGE, setTilesetImage)])
+}

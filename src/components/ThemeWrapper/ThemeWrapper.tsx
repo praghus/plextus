@@ -11,7 +11,7 @@ interface Props {
     children?: React.ReactNode
 }
 
-const ThemeWrapper: React.FunctionComponent<Props> = ({ children }) => {
+const ThemeWrapper = ({ children }: Props) => {
     const appTheme = useSelector(selectAppTheme)
     return (
         <ThemeProvider theme={appTheme === THEMES.DARK ? darkTheme : lightTheme}>
@@ -20,6 +20,5 @@ const ThemeWrapper: React.FunctionComponent<Props> = ({ children }) => {
         </ThemeProvider>
     )
 }
-ThemeWrapper.displayName = 'ThemeWrapper'
 
 export default ThemeWrapper

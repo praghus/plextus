@@ -37,7 +37,7 @@ interface Props {
     workspace: Workspace
 }
 
-const KonvaLayer: React.FunctionComponent<Props> = ({
+const KonvaLayer = ({
     grid,
     isMouseDown,
     keyDown,
@@ -48,7 +48,7 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
     tilesetCanvas,
     theme,
     workspace
-}) => {
+}: Props) => {
     const { opacity, visible } = layer
     const { tilewidth, tileheight } = tileset
 
@@ -375,7 +375,5 @@ const KonvaLayer: React.FunctionComponent<Props> = ({
         />
     )
 }
-
-KonvaLayer.displayName = 'KonvaLayer'
 
 export default KonvaLayer

@@ -20,7 +20,7 @@ import {
 
 const DEFAULT = 'DEFAULT'
 
-const Palette: React.FunctionComponent = () => {
+const Palette = () => {
     const [colors, setColors] = useState<number[][]>([])
     const [editingColor, setEditingColor] = useState<string | null>(null)
 
@@ -152,6 +152,5 @@ const Palette: React.FunctionComponent = () => {
         </>
     )
 }
-Palette.displayName = 'Palette'
 
 export default Palette

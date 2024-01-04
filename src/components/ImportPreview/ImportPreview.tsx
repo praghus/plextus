@@ -17,7 +17,7 @@ interface Props {
     config: LayerImportConfig
 }
 
-const ImportPreview: React.FunctionComponent<Props> = ({ image, config }) => {
+const ImportPreview = ({ image, config }: Props) => {
     const { offset, mode, resolution, tileSize } = config
 
     const width = Math.ceil((resolution.w + offset.x) / tileSize.w) * tileSize.w
@@ -112,6 +112,5 @@ const ImportPreview: React.FunctionComponent<Props> = ({ image, config }) => {
         </>
     )
 }
-ImportPreview.displayName = 'ImportPreview'
 
 export default ImportPreview

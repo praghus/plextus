@@ -39,7 +39,7 @@ interface Props {
     tilesetCanvas: HTMLCanvasElement
 }
 
-const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
+const KonvaStage = ({ tilesetCanvas }: Props) => {
     const selected = useSelector(selectSelected)
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
@@ -230,6 +230,5 @@ const KonvaStage: React.FunctionComponent<Props> = ({ tilesetCanvas }) => {
         </div>
     )
 }
-KonvaStage.displayName = 'KonvaStage'
 
 export default KonvaStage

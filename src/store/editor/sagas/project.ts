@@ -1,7 +1,14 @@
 import { AnyAction } from '@reduxjs/toolkit'
-import { call, put, select } from 'redux-saga/effects'
+import { all, call, put, select, takeLatest } from 'redux-saga/effects'
 import { toast } from 'react-toastify'
 
+import {
+    EDITOR_CLEAR_PROJECT,
+    EDITOR_CREATE_NEW_PROJECT,
+    EDITOR_SAVE_CHANGES,
+    EDITOR_SAVE_CHANGES_TO_FILE,
+    EDITOR_OPEN_PROJECT_FILE
+} from '../constants'
 import i18n from '../../../common/translations/i18n'
 import logger from '../../../common/utils/logger'
 import { TOOLS } from '../../../common/tools'
@@ -129,4 +136,12 @@ function* saveChangesToFile() {
     }
 }
 
-export { createNewProject, clearProject, openProject, saveChangesToStorage, saveChangesToFile }
+export default function* projectSaga() {
+    yield all([
+        takeLatest(EDITOR_CLEAR_PROJECT, clearProject),
+        takeLatest(EDITOR_OPEN_PROJECT_FILE, openProject),
+        takeLatest(EDITOR_SAVE_CHANGES, saveChangesToStorage),
+        takeLatest(EDITOR_SAVE_CHANGES_TO_FILE, saveChangesToFile),
+        takeLatest(EDITOR_CREATE_NEW_PROJECT, createNewProject)
+    ])
+}

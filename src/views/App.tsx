@@ -32,7 +32,7 @@ import {
 } from '../components'
 import { StyledWrapper, StyledContainer, StyledMiddleContainer, StyledThemeSwitchContainer } from './App.styled'
 
-const App: React.FunctionComponent = () => {
+const App = () => {
     useInjectReducer({ key: APP_RESOURCE_NAME, reducer: appReducer })
     useInjectReducer({ key: EDITOR_RESOURCE_NAME, reducer: editorReducer })
     useInjectSaga({ key: EDITOR_RESOURCE_NAME, saga: editorSaga })
@@ -105,6 +105,5 @@ const App: React.FunctionComponent = () => {
         </StyledWrapper>
     )
 }
-App.displayName = 'Plextus'
 
 export default App

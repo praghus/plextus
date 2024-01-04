@@ -17,14 +17,7 @@ interface Props {
     workspace: Workspace
 }
 
-const Pointer: React.FunctionComponent<Props> = ({
-    grid,
-    pointerPosition,
-    selected,
-    selectedLayer,
-    tileset,
-    workspace
-}) => {
+const Pointer = ({ grid, pointerPosition, selected, selectedLayer, tileset, workspace }: Props) => {
     const { tilewidth: width, tileheight: height } = tileset
     const { scale } = workspace
 
@@ -108,7 +101,5 @@ const Pointer: React.FunctionComponent<Props> = ({
         </Group>
     )
 }
-
-Pointer.displayName = 'Pointer'
 
 export default Pointer

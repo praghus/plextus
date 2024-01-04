@@ -11,7 +11,7 @@ interface Props {
     onClose: (e: React.MouseEvent<HTMLElement>) => void
 }
 
-const LayerPropertiesDialog: React.FunctionComponent<Props> = ({ layer, onSave, onClose, open }) => {
+const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props) => {
     const { t } = useTranslation()
     const [model, setModel] = useState<Layer | null>(null)
 
@@ -124,6 +124,5 @@ const LayerPropertiesDialog: React.FunctionComponent<Props> = ({ layer, onSave, 
         </Dialog>
     )
 }
-LayerPropertiesDialog.displayName = 'LayerPropertiesDialog'
 
 export default LayerPropertiesDialog

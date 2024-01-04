@@ -22,7 +22,7 @@ interface Props {
     onCenter: () => void
 }
 
-const StatusBar: React.FunctionComponent<Props> = ({ stage, onCenter }) => {
+const StatusBar = ({ stage, onCenter }: Props) => {
     const theme = useTheme()
     const grid = useSelector(selectGrid)
     const canvas = useSelector(selectCanvas)
@@ -116,6 +116,5 @@ const StatusBar: React.FunctionComponent<Props> = ({ stage, onCenter }) => {
         </StyledStatusBar>
     )
 }
-StatusBar.displayName = 'StatusBar'
 
 export default StatusBar

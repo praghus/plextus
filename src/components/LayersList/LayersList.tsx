@@ -53,7 +53,7 @@ import {
     StyledListItemText
 } from './LayersList.styled'
 
-const LayersList: React.FunctionComponent = () => {
+const LayersList = () => {
     const canvas = useSelector(selectCanvas)
     const layers = useSelector(selectLayers)
     const selected = useSelector(selectSelected)
@@ -294,6 +294,5 @@ const LayersList: React.FunctionComponent = () => {
         </>
     )
 }
-LayersList.displayName = 'LayersList'
 
 export default LayersList

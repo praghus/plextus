@@ -5,7 +5,8 @@ interface Props {
     width?: number
     height?: number
 }
-const PlextusLogo: React.FunctionComponent<Props> = props => {
+
+const PlextusLogo = (props: Props) => {
     const theme = useTheme()
     const colors = {
         background: theme.palette.background.default || '#fff',
@@ -19,6 +20,5 @@ const PlextusLogo: React.FunctionComponent<Props> = props => {
         </svg>
     )
 }
-PlextusLogo.displayName = 'PlextusLogo'
 
 export default PlextusLogo

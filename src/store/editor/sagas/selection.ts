@@ -1,6 +1,7 @@
 import { AnyAction } from '@reduxjs/toolkit'
-import { call, put, select } from 'redux-saga/effects'
+import { all, call, put, select, takeLatest } from 'redux-saga/effects'
 
+import { EDITOR_COPY_SELECTED_AREA, EDITOR_CROP, EDITOR_PASTE } from '../constants'
 import logger from '../../../common/utils/logger'
 import { compressLayerData } from '../../../common/utils/pako'
 import { createImage, get2DContext } from '../../../common/utils/image'
@@ -109,4 +110,10 @@ function* cropArea() {
     }
 }
 
-export { copySelectedArea, cropArea, paste }
+export default function* selectionSaga() {
+    yield all([
+        takeLatest(EDITOR_COPY_SELECTED_AREA, copySelectedArea),
+        takeLatest(EDITOR_CROP, cropArea),
+        takeLatest(EDITOR_PASTE, paste)
+    ])
+}
