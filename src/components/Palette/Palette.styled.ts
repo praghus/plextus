@@ -13,9 +13,9 @@ interface StyledColorsContainerProps {
 }
 
 export const StyledColorsContainer = styled.div`
-    max-height: 300px;
-    margin: 5px;
-    margin-right: ${({ scrollVisible }: StyledColorsContainerProps) => (scrollVisible ? '-5px' : '5px')};
+    max-height: 230px;
+    margin-top: 10px;
+    margin-left: ${({ scrollVisible }: StyledColorsContainerProps) => (scrollVisible ? '-2px' : '5px')};
     padding-bottom: 2px;
     overflow: auto;
 
@@ -38,6 +38,7 @@ export const StyledColorsContainer = styled.div`
 `
 
 export const StyledPalette = styled.div`
+    width: 100%;
     line-height: 0;
 `
 
@@ -45,7 +46,6 @@ export const StyledButtonContainer = styled.div`
     display: flex;
 `
 
-export const StyledColorValue = styled.div`
-    cursor: ${({ editingColor }: { editingColor: null | string }) =>
-        typeof editingColor === 'string' ? 'default' : 'pointer'};
+export const StyledWrapper = styled.div`
+    padding: 5px;
 `

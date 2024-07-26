@@ -34,6 +34,5 @@ export const StyledColorBox = styled.div`
     display: inline-flex;
     width: 32px;
     height: 32px;
-    padding-bottom: 4px;
     border-radius: 3px;
 `

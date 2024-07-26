@@ -3,31 +3,30 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { debounce } from 'lodash'
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
-import { FormControl, IconButton, MenuItem, Select, Stack, Typography, TextField } from '@mui/material'
+import { FormControl, IconButton, MenuItem, Select, Stack } from '@mui/material'
 
 import { PALETTES } from '../../common/constants'
 import { changePalette, changePrimaryColor, changeSelectedPalette } from '../../stores/editor/actions'
 import { selectPalette, selectSelected } from '../../stores/editor/selectors'
-import { rgbaToHex, colorToRGBA } from '../../common/utils/colors'
 import { ColorBox } from '../ColorBox'
+import { ColorInput } from '../ColorInput'
 import {
     StyledButtonContainer,
     StyledColorPicker,
-    StyledColorValue,
     StyledColorsContainer,
-    StyledPalette
+    StyledPalette,
+    StyledWrapper
 } from './Palette.styled'
 
 const DEFAULT = 'DEFAULT'
 
 const Palette = () => {
-    const [colors, setColors] = useState<number[][]>([])
-    const [editingColor, setEditingColor] = useState<string | null>(null)
-
     const palette = useSelector(selectPalette)
     const selected = useSelector(selectSelected)
 
+    const [colors, setColors] = useState<number[][]>([])
     const [r, g, b, a] = selected.color
+
     const selectedIndex = useMemo(
         () =>
             colors
@@ -60,95 +59,58 @@ const Palette = () => {
 
     return (
         <>
-            <StyledPalette>
-                <FormControl sx={{ padding: '6px', width: '100%' }}>
-                    <Select
-                        size="small"
-                        value={selected.palette}
-                        onChange={e => {
-                            onChangeSelectedPalette(e.target.value as string)
-                            setColors(
-                                e.target.value && e.target.value !== DEFAULT
-                                    ? PALETTES[e.target.value as keyof typeof PALETTES].colors
-                                    : palette
-                            )
-                        }}
-                    >
-                        <MenuItem value={DEFAULT}>{t('i18_current_palette')}</MenuItem>
-                        {Object.keys(PALETTES).map(pal => (
-                            <MenuItem key={pal} value={pal}>
-                                {PALETTES[pal as keyof typeof PALETTES].name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <StyledColorsContainer scrollVisible={colors.length > 80}>
-                    {colors.map((rgba, i) => (
-                        <ColorBox
-                            key={rgba.join()}
-                            selected={selectedIndex === i}
-                            onClick={onChangePrimaryColor}
-                            {...{ rgba }}
-                        />
-                    ))}
-                </StyledColorsContainer>
-            </StyledPalette>
-            <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ padding: '8px', width: '100%' }}
-            >
-                <ColorBox rgba={selected.color} />
-                <Typography variant="overline" sx={{ marginLeft: 1, width: '100%' }}>
-                    {typeof editingColor === 'string' ? (
-                        <TextField
-                            autoFocus
-                            fullWidth={true}
+            <StyledWrapper>
+                <StyledPalette>
+                    <FormControl sx={{ width: '100%', alignItems: 'center' }}>
+                        <Select
+                            sx={{ width: '285px' }}
                             size="small"
-                            type="text"
-                            variant="standard"
-                            value={editingColor}
-                            onBlur={() => {
-                                onChangePrimaryColor(colorToRGBA(editingColor))
-                                setEditingColor(null)
-                            }}
+                            value={selected.palette}
                             onChange={e => {
-                                setEditingColor(e.target.value)
-                            }}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') {
-                                    onChangePrimaryColor(colorToRGBA(editingColor))
-                                    setEditingColor(null)
-                                }
-                                if (e.key === 'Escape') {
-                                    setEditingColor(null)
-                                }
-                            }}
-                        />
-                    ) : (
-                        <StyledColorValue
-                            {...{ editingColor }}
-                            onClick={() => {
-                                setEditingColor(rgbaToHex(selected.color))
+                                onChangeSelectedPalette(e.target.value as string)
+                                setColors(
+                                    e.target.value && e.target.value !== DEFAULT
+                                        ? PALETTES[e.target.value as keyof typeof PALETTES].colors
+                                        : palette
+                                )
                             }}
                         >
-                            {rgbaToHex(selected.color)}
-                        </StyledColorValue>
+                            <MenuItem value={DEFAULT}>{t('i18_current_palette')}</MenuItem>
+                            {Object.keys(PALETTES).map(pal => (
+                                <MenuItem key={pal} value={pal}>
+                                    {PALETTES[pal as keyof typeof PALETTES].name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </StyledPalette>
+            </StyledWrapper>
+            <StyledColorsContainer scrollVisible={colors.length > 48}>
+                {colors.map((rgba, i) => (
+                    <ColorBox
+                        key={rgba.join()}
+                        selected={selectedIndex === i}
+                        onClick={onChangePrimaryColor}
+                        {...{ rgba }}
+                    />
+                ))}
+            </StyledColorsContainer>
+            <StyledColorPicker {...{ onChange }} color={{ a: (isNaN(a) && 1) || (a > 0 && a / 255) || 0, b, g, r }} />
+            <StyledWrapper>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <ColorInput value={selected.color} onChange={color => onChangePrimaryColor(color)} />
+                    {selected.palette === DEFAULT && (
+                        <StyledButtonContainer>
+                            <IconButton disabled={selectedIndex > -1} size="small" onClick={onAddColor}>
+                                <AddIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton disabled={selectedIndex === -1} size="small" onClick={onRemoveColor}>
+                                <RemoveIcon fontSize="small" />
+                            </IconButton>
+                        </StyledButtonContainer>
                     )}
-                </Typography>
-                {selected.palette === DEFAULT && (
-                    <StyledButtonContainer>
-                        <IconButton disabled={selectedIndex > -1} size="small" onClick={onAddColor}>
-                            <AddIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton disabled={selectedIndex === -1} size="small" onClick={onRemoveColor}>
-                            <RemoveIcon fontSize="small" />
-                        </IconButton>
-                    </StyledButtonContainer>
-                )}
-            </Stack>
+                </Stack>
+            </StyledWrapper>
         </>
     )
 }

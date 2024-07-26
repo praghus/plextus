@@ -92,10 +92,9 @@ const StatusBar = ({ stage, onCenter }: Props) => {
                         <AddIcon htmlColor={iconColor} onClick={onZoomIn} sx={{ cursor: 'pointer' }} />
                     </>
                 )}
-
                 <StyledCol>
                     <Tooltip title="Center and fit to view size" placement="top">
-                        <StyledButton onClick={onCenter}>
+                        <StyledButton onClick={onCenter} sx={{ textTransform: 'none' }}>
                             <AspectRatioIcon />
                             {canvas &&
                                 `${canvas.width}x${canvas.height}px [${
@@ -106,7 +105,7 @@ const StatusBar = ({ stage, onCenter }: Props) => {
                 </StyledCol>
                 <StyledCol>
                     <Tooltip title="Toggle grid" placement="top">
-                        <StyledButton onClick={() => onToggleShowGrid(!grid.visible)}>
+                        <StyledButton onClick={() => onToggleShowGrid(!grid.visible)} sx={{ textTransform: 'none' }}>
                             {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width}x{grid.height}]:{' '}
                             {grid.visible ? `On` : `Off`}
                         </StyledButton>
