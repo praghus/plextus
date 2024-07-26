@@ -39,11 +39,12 @@ const WelcomeDialog = () => {
                 <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                     <div>
                         <PlextusLogo />
-                        {` ${pjson.version}`}
+                        <div style={{ marginLeft: '10px' }}>{`${pjson.version}`}</div>
                     </div>
                     <ThemeSwitch />
                 </Stack>
             </DialogTitle>
+
             <StyledDialogContent dividers>
                 <Typography gutterBottom>
                     <b>Plextus</b> allows you to create and edit tile maps and tile sets, it also allows you to draw
@@ -57,6 +58,7 @@ const WelcomeDialog = () => {
                     To get started create an empty project, or import an image file containing a tile map
                 </Typography>
             </StyledDialogContent>
+
             <DialogActions>
                 <Button onClick={() => onLoadDemoProject()} startIcon={<CasinoIcon />}>
                     Demo

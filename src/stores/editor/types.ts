@@ -86,8 +86,8 @@ export type LayerImportConfig = {
     offset: Vec2
     tileSize: Dim
     columns: number
-    colorsCount: number
-    reducedColors: boolean
+    colorsCount?: number
+    reducedColors?: boolean
     resolution: Dim
 }
 
