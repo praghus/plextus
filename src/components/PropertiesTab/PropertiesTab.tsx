@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { ColorPicker, Color, ColorValue } from 'mui-color'
 import { Divider, Grid, InputAdornment, Slider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-import { selectCanvas, selectGrid, selectSelected } from '../../store/editor/selectors'
-import { changeCanvasBackground, changeGridColor, changeGridPitch, changeToolSize } from '../../store/editor/actions'
+import { selectCanvas, selectGrid, selectSelected } from '../../stores/editor/selectors'
+import { changeCanvasBackground, changeGridColor, changeGridPitch, changeToolSize } from '../../stores/editor/actions'
 import { rgbaToHex } from '../../common/utils/colors'
 import { StyledSettingsContainer, StyledPropContainer } from './PropertiesTab.styled'
 
@@ -109,5 +109,6 @@ const PropertiesTab = () => {
         </StyledSettingsContainer>
     )
 }
+PropertiesTab.displayName = 'PropertiesTab'
 
 export default PropertiesTab

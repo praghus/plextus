@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { Group, Rect } from 'react-konva'
-import { Grid, Layer, Workspace } from '../../store/editor/types'
+import { Grid, Layer, Workspace } from '../../stores/editor/types'
 import { getCoordsFromPos, getPointerRelativePos, getSelectionRect } from '../../common/utils/konva'
 import { useEditorActions } from '../../hooks/useEditorActions'
 
@@ -83,5 +83,6 @@ const SelectTool = ({ isMouseDown, grid, pointerPosition, selectedLayer, workspa
         </Group>
     )
 }
+SelectTool.displayName = 'SelectTool'
 
 export default SelectTool

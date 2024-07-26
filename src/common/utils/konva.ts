@@ -1,7 +1,7 @@
 import Konva from 'konva'
 
 import { TOOLS } from '../../common/tools'
-import { Canvas, Grid, Layer, Rectangle, Selected, Tileset, Workspace } from '../../store/editor/types'
+import { Vec2, Canvas, Grid, Layer, Rectangle, Selected, Tileset, Workspace } from '../../stores/editor/types'
 import { brightenDarken, getRgbaValue } from './colors'
 
 export const getAngle = (x: number, y: number) => Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
@@ -68,17 +68,21 @@ export function actionDraw(
 ): void {
     const { tool, toolSize } = selected
     switch (tool) {
-        case TOOLS.BRIGHTNESS:
+        case TOOLS.BRIGHTNESS: {
             const pick = ctx.getImageData(pos.x, pos.y, toolSize, toolSize)
             const amount = keyDown && keyDown.code === 'AltLeft' ? -1 : 1
             ctx.putImageData(brightenDarken(pick, amount), pos.x, pos.y)
             break
-        default:
+        }
+        default: {
             ctx.fillStyle = getRgbaValue(selected.color)
-            tool === TOOLS.ERASER
-                ? ctx.clearRect(pos.x, pos.y, toolSize, toolSize)
-                : ctx.fillRect(Math.floor(pos.x), Math.floor(pos.y), toolSize, toolSize)
+            if (tool === TOOLS.ERASER) {
+                ctx.clearRect(pos.x, pos.y, toolSize, toolSize)
+            } else {
+                ctx.fillRect(Math.floor(pos.x), Math.floor(pos.y), toolSize, toolSize)
+            }
             break
+        }
     }
 }
 

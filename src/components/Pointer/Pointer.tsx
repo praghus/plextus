@@ -1,12 +1,12 @@
-import React, { useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import Konva from 'konva'
 import useImage from 'use-image'
 import { Group, Rect } from 'react-konva'
 import { TOOLS } from '../../common/tools'
 import { getRgbaValue } from '../../common/utils/colors'
 import { getPointerRelativePos } from '../../common/utils/konva'
-import { getTilePos } from '../../store/editor/utils'
-import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
+import { getTilePos } from '../../stores/editor/utils'
+import { Grid, Layer, Selected, Tileset, Workspace } from '../../stores/editor/types'
 
 interface Props {
     grid: Grid
@@ -41,7 +41,7 @@ const Pointer = ({ grid, pointerPosition, selected, selectedLayer, tileset, work
         if (pointerRef.current && pointerOverlayRef.current && fillPatternImage) {
             const pointer = pointerRef.current
             const overlay = pointerOverlayRef.current
-            if ([TOOLS.STAMP, TOOLS.REPLACE, , TOOLS.TILE_FILL].includes(selected.tool)) {
+            if ([TOOLS.STAMP, TOOLS.REPLACE, TOOLS.TILE_FILL].includes(selected.tool)) {
                 const w = (pasteImage && selected.stamp?.width) || width
                 const h = (pasteImage && selected.stamp?.height) || height
                 overlay.setAttrs({
@@ -101,5 +101,6 @@ const Pointer = ({ grid, pointerPosition, selected, selectedLayer, tileset, work
         </Group>
     )
 }
+Pointer.displayName = 'Pointer'
 
 export default Pointer

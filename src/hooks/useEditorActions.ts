@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import Konva from 'konva'
 import { useDispatch } from 'react-redux'
 
-import { Rectangle, Tileset } from '../store/editor/types'
+import { Rectangle, Tileset } from '../stores/editor/types'
 
 import {
     adjustWorkspaceSize,
@@ -19,7 +19,7 @@ import {
     changeTilesetImage,
     copySelectedArea,
     paste
-} from '../store/editor/actions'
+} from '../stores/editor/actions'
 
 export const useEditorActions = () => {
     const dispatch = useDispatch()

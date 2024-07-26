@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { Global } from '@emotion/react'
 
 import { THEMES } from '../../common/constants'
-import { selectAppTheme } from '../../store/app/selectors'
+import { selectAppTheme } from '../../stores/app/selectors'
 import { lightTheme, darkTheme, styles } from './ThemeWrapper.styled'
 
 interface Props {
@@ -20,5 +20,6 @@ const ThemeWrapper = ({ children }: Props) => {
         </ThemeProvider>
     )
 }
+ThemeWrapper.displayName = 'ThemeWrapper'
 
 export default ThemeWrapper

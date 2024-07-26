@@ -20,14 +20,15 @@ import {
     Typography
 } from '@mui/material'
 import { IMPORT_MODES } from '../../common/constants'
-import { changeAppImportedImage } from '../../store/app/actions'
-import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../../store/editor/actions'
-import { selectImportedImage } from '../../store/app/selectors'
-import { selectCanvas, selectTileset } from '../../store/editor/selectors'
-import { getImage, reduceColors } from '../../common/utils/image'
-import { LayerImportConfig } from '../../store/editor/types'
+import { changeAppImportedImage } from '../../stores/app/actions'
+import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../../stores/editor/actions'
+import { selectImportedImage } from '../../stores/app/selectors'
+import { selectCanvas, selectTileset } from '../../stores/editor/selectors'
+import { getImage } from '../../common/utils/image'
+import { Dim, LayerImportConfig, Vec2 } from '../../stores/editor/types'
 import { ImportPreview } from '../ImportPreview'
 import { dataURLToBlob } from '../../common/utils/data'
+// import { dataURLToBlob } from "../../common/utils/data";
 
 const ImportDialog = () => {
     const canvas = useSelector(selectCanvas)
@@ -47,8 +48,14 @@ const ImportDialog = () => {
     const [name, setName] = useState('')
     const [offset, setOffset] = useState<Vec2>({ x: 0, y: 0 })
     const [reducedColors, setReducedColors] = useState(false)
-    const [resolution, setResolution] = useState<Dim>({ h: canvas?.height ?? 0, w: canvas?.width ?? 0 })
-    const [tileSize, setTileSize] = useState<Dim>({ h: tileset.tileheight, w: tileset.tilewidth })
+    const [resolution, setResolution] = useState<Dim>({
+        h: canvas?.height ?? 0,
+        w: canvas?.width ?? 0
+    })
+    const [tileSize, setTileSize] = useState<Dim>({
+        h: tileset.tileheight,
+        w: tileset.tilewidth
+    })
 
     const config: LayerImportConfig = {
         colorsCount,
@@ -70,7 +77,7 @@ const ImportDialog = () => {
         )
     }
 
-    const handleClose = (e: React.SyntheticEvent<Element, Event>, reason: string): void => {
+    const handleClose = (_e: React.SyntheticEvent<Element, Event>, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }
@@ -92,8 +99,8 @@ const ImportDialog = () => {
     useEffect(() => {
         async function reduceImageColors(img: string) {
             const i = await dataURLToBlob(img)
-            const blob = await reduceColors(i, colorsCount)
-            const url = window.URL.createObjectURL(blob)
+            // const blob = await reduceColors(i, colorsCount);
+            const url = window.URL.createObjectURL(i)
             const reducedImage = await getImage(url)
             setImage(reducedImage)
             setImageUrl(url)
@@ -294,11 +301,12 @@ const ImportDialog = () => {
                     {t('i18_cancel')}
                 </Button>
                 <Button onClick={onSave} variant="contained" disabled={isProcessing}>
-                    {t('i18_save')}
+                    {t('i18_import')}
                 </Button>
             </DialogActions>
         </Dialog>
     )
 }
+ImportDialog.displayName = 'ImportDialog'
 
 export default ImportDialog

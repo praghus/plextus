@@ -1,6 +1,6 @@
-import { css } from '@emotion/react'
+import { css } from '@emotion/css'
 
-import { Selected } from '../../store/editor/types'
+import { Selected } from '../../stores/editor/types'
 import { TOOLS } from '../../common/tools'
 
 export const styles = ({ selected }: { selected: Selected }) => css`

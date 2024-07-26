@@ -13,9 +13,9 @@ import {
     Typography
 } from '@mui/material'
 import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
-import { createNewProject } from '../../store/editor/actions'
-import { selectTileset } from '../../store/editor/selectors'
-import { ProjectConfig } from '../../store/editor/types'
+import { createNewProject } from '../../stores/editor/actions'
+import { selectTileset } from '../../stores/editor/selectors'
+import { ProjectConfig } from '../../stores/editor/types'
 
 const NewProjectDialog = () => {
     const tileset = useSelector(selectTileset)
@@ -35,7 +35,7 @@ const NewProjectDialog = () => {
     const dispatch = useDispatch()
 
     const onClose = () => setIsOpen(false)
-    const handleClose = (e: React.SyntheticEvent<Element, Event>, reason: string): void => {
+    const handleClose = (_e: React.SyntheticEvent<Element, Event>, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }
@@ -46,7 +46,7 @@ const NewProjectDialog = () => {
     }
 
     return (
-        <Dialog open={isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <Dialog open={isOpen} onClose={handleClose}>
             <DialogContent sx={{ maxWidth: '500px' }}>
                 <TextField
                     sx={{ marginBottom: '20px' }}
@@ -165,5 +165,6 @@ const NewProjectDialog = () => {
         </Dialog>
     )
 }
+NewProjectDialog.displayName = 'NewProjectDialog'
 
 export default NewProjectDialog

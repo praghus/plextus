@@ -1,6 +1,7 @@
 export const { isArray } = Array
 
 export function changeItemPosition<T>(array: T[], from: number, to: number): T[] {
+    // eslint-disable-next-line no-extra-semi
     ;[array[from], array[to]] = [array[to], array[from]]
     return array
 }

@@ -29,5 +29,6 @@ const ConfirmationDialog = ({ message, onConfirm, onClose, open, title }: Props)
         </Dialog>
     )
 }
+ConfirmationDialog.displayName = 'ConfirmationDialog'
 
 export default ConfirmationDialog

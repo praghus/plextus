@@ -1,5 +1,0 @@
-coverage
-build
-node_modules
-**/**/*{.,-}snap.js
-**/**/*{.,-}min.js

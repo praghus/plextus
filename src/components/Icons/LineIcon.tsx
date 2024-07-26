@@ -1,4 +1,3 @@
-import React from 'react'
 import SvgIcon, { SvgIconTypeMap } from '@mui/material/SvgIcon'
 
 const LineIcon = (props: SvgIconTypeMap) => (
@@ -11,5 +10,6 @@ const LineIcon = (props: SvgIconTypeMap) => (
         />
     </SvgIcon>
 )
+LineIcon.displayName = 'LineIcon'
 
 export default LineIcon

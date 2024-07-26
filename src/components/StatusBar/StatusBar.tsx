@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { useTheme } from '@mui/material/styles'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,8 +11,8 @@ import {
     Remove as RemoveIcon
 } from '@mui/icons-material'
 
-import { changePosition, changeScale, toggleShowGrid } from '../../store/editor/actions'
-import { selectCanvas, selectGrid, selectWorkspace } from '../../store/editor/selectors'
+import { changePosition, changeScale, toggleShowGrid } from '../../stores/editor/actions'
+import { selectCanvas, selectGrid, selectWorkspace } from '../../stores/editor/selectors'
 import { StyledStatusBar, StyledCol, StyledButton } from './StatusBar.styled'
 
 const marks = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 50]
@@ -54,7 +54,7 @@ const StatusBar = ({ stage, onCenter }: Props) => {
     )
 
     const onZoomCommitted = () => {
-        onChangeScale(stage.scale())
+        onChangeScale(stage.scale() as Konva.Vector2d)
         onChangePosition(stage.position())
     }
 
@@ -98,9 +98,9 @@ const StatusBar = ({ stage, onCenter }: Props) => {
                         <StyledButton onClick={onCenter}>
                             <AspectRatioIcon />
                             {canvas &&
-                                `${canvas.width}x${canvas.height}px [${canvas.width / grid.width}x${
-                                    canvas.height / grid.height
-                                }]`}
+                                `${canvas.width}x${canvas.height}px [${
+                                    canvas.width / grid.width
+                                }x${canvas.height / grid.height}]`}
                         </StyledButton>
                     </Tooltip>
                 </StyledCol>
@@ -116,5 +116,6 @@ const StatusBar = ({ stage, onCenter }: Props) => {
         </StyledStatusBar>
     )
 }
+StatusBar.displayName = 'StatusBar'
 
 export default StatusBar

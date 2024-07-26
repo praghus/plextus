@@ -1,11 +1,11 @@
-import React, { useCallback, useMemo, useEffect, useState } from 'react'
 import Konva from 'konva'
+import { useCallback, useMemo, useEffect, useState } from 'react'
 import Slider from '@mui/material/Slider'
 import { useTheme } from '@mui/material/styles'
 import { Layer, Rect } from 'react-konva'
 
 import { useZoomEvents } from '../../hooks/useZoomEvents'
-import { LayerImportConfig } from '../../store/editor/types'
+import { LayerImportConfig } from '../../stores/editor/types'
 import { IMPORT_PREVIEW_WIDTH, IMPORT_PREVIEW_HEIGHT, IMPORT_MODES } from '../../common/constants'
 import { TransparentBackground } from '../TransparentBackground'
 import { GridLines } from '../GridLines'
@@ -112,5 +112,6 @@ const ImportPreview = ({ image, config }: Props) => {
         </>
     )
 }
+ImportPreview.displayName = 'ImportPreview'
 
 export default ImportPreview

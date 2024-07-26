@@ -1,4 +1,3 @@
-import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Dialog, DialogActions, DialogTitle, Stack, Typography } from '@mui/material'
 import {
@@ -8,14 +7,14 @@ import {
     ImageSearch as ImageSearchIcon
 } from '@mui/icons-material'
 
-import { selectIsLoading, selectIsImportDialogOpen } from '../../store/app/selectors'
-import { openProject } from '../../store/editor/actions'
-import { selectCanvas } from '../../store/editor/selectors'
+import { selectIsLoading, selectIsImportDialogOpen } from '../../stores/app/selectors'
+import { openProject } from '../../stores/editor/actions'
+import { selectCanvas } from '../../stores/editor/selectors'
 import { PlextusLogo } from '../Icons'
 import { ImageUpload } from '../ImageUpload'
 import { ProjectUpload } from '../ProjectUpload'
 import { ThemeSwitch } from '../ThemeSwitch'
-import { ProjectFile } from '../../store/editor/types'
+import { ProjectFile } from '../../stores/editor/types'
 import { StyledDialogContent } from './WelcomeDialog.styled'
 import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
 
@@ -34,7 +33,7 @@ const WelcomeDialog = () => {
 
     const isOpen = !canvas && !isLoading && !isImportDialogOpen && !isNewProjectDialogOpen
 
-    return (
+    return isOpen ? (
         <Dialog open={isOpen}>
             <DialogTitle>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
@@ -76,7 +75,8 @@ const WelcomeDialog = () => {
                 </Button>
             </DialogActions>
         </Dialog>
-    )
+    ) : null
 }
+WelcomeDialog.displayName = 'WelcomeDialog'
 
 export default WelcomeDialog

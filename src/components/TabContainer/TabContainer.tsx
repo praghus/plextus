@@ -1,7 +1,5 @@
-import React, { useState } from 'react'
-
+import { useState } from 'react'
 import { Box, Tab, Tabs } from '@mui/material'
-
 import {
     ColorLens as ColorLensIcon,
     GridView as GridViewIcon,
@@ -63,5 +61,6 @@ const TabContainer = ({ tilesetCanvas }: Props) => {
         </StyledTabContainer>
     )
 }
+TabContainer.displayName = 'TabContainer'
 
 export default TabContainer

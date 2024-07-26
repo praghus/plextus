@@ -1,14 +1,16 @@
 import { v4 as uuidv4 } from 'uuid'
-import { execute } from 'wasm-imagemagick'
+// import { execute } from "wasm-imagemagick";
 
-import { INITIAL_STATE } from '../../store/editor/constants'
-import { LayerImportConfig, Tileset } from '../../store/editor/types'
+import { INITIAL_STATE } from '../../stores/editor/constants'
+import { LayerImportConfig, Tileset } from '../../stores/editor/types'
 import { IMPORT_MODES, TILESET_FILENAME } from '../constants'
-import { spliceIntoChunks } from './array'
+// import { spliceIntoChunks } from "./array";
 import { canvasToBlob, createDownloadLink } from './data'
 
 export const get2DContext = (canvasElement: HTMLCanvasElement): CanvasRenderingContext2D =>
-    canvasElement.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
+    canvasElement.getContext('2d', {
+        willReadFrequently: true
+    }) as CanvasRenderingContext2D
 
 export function createCanvasElement(): [HTMLCanvasElement, CanvasRenderingContext2D] {
     const canvasElement = document.createElement('canvas')
@@ -44,9 +46,13 @@ export function downloadImage(canvas: HTMLCanvasElement): void {
     )
 }
 
-export function uploadImage(
-    file: Blob
-): Promise<{ image: HTMLImageElement; blob: Blob; canvas: HTMLCanvasElement; width: number; height: number }> {
+export function uploadImage(file: Blob): Promise<{
+    image: HTMLImageElement
+    blob: Blob
+    canvas: HTMLCanvasElement
+    width: number
+    height: number
+}> {
     return new Promise((resolve, reject) => {
         const [canvasElement, ctx] = createCanvasElement()
         const imageReader = new FileReader()
@@ -63,7 +69,13 @@ export function uploadImage(
                     ctx.drawImage(image, 0, 0)
 
                     const blob = await canvasToBlob(canvasElement)
-                    resolve({ blob, canvas: canvasElement, height: image.height, image, width: image.width })
+                    resolve({
+                        blob,
+                        canvas: canvasElement,
+                        height: image.height,
+                        image,
+                        width: image.width
+                    })
                 }
             } else reject()
         }
@@ -168,54 +180,61 @@ export async function importLayer(image: CanvasImageSource, config: LayerImportC
     } else throw new Error('No image data for processing!')
 }
 
-export async function reduceColors(blob: Blob, colorsCount = 256): Promise<Blob> {
-    const fetchedSourceImage = await new Response(blob).arrayBuffer()
-    const sourceBytes = new Uint8Array(fetchedSourceImage)
-    const { outputFiles, exitCode } = await execute({
-        commands: [`convert ${TILESET_FILENAME} +dither -alpha off -colors ${colorsCount} remap.png`],
-        inputFiles: [{ content: sourceBytes, name: TILESET_FILENAME }]
-    })
-    if (exitCode === 0) {
-        const reducedBlob = outputFiles[0].blob
-        return reducedBlob.slice(0, reducedBlob.size, 'image/png')
-    }
-    return blob
-}
+// export async function reduceColors(
+//   blob: Blob,
+//   colorsCount = 256
+// ): Promise<Blob> {
+//   const fetchedSourceImage = await new Response(blob).arrayBuffer();
+//   const sourceBytes = new Uint8Array(fetchedSourceImage);
+//   const { outputFiles, exitCode } = await execute({
+//     commands: [
+//       `convert ${TILESET_FILENAME} +dither -alpha off -colors ${colorsCount} remap.png`,
+//     ],
+//     inputFiles: [{ content: sourceBytes, name: TILESET_FILENAME }],
+//   });
+//   if (exitCode === 0) {
+//     const reducedBlob = outputFiles[0].blob;
+//     return reducedBlob.slice(0, reducedBlob.size, "image/png");
+//   }
+//   return blob;
+// }
 
-export async function generateReducedPalette(blob: Blob): Promise<number[][]> {
-    const fetchedSourceImage = await new Response(blob).arrayBuffer()
-    const sourceBytes = new Uint8Array(fetchedSourceImage)
-    const [canvasElement, ctx] = createCanvasElement()
-    const tempPalette: string[] = []
+// export async function generateReducedPalette(blob: Blob): Promise<number[][]> {
+//   const fetchedSourceImage = await new Response(blob).arrayBuffer();
+//   const sourceBytes = new Uint8Array(fetchedSourceImage);
+//   const [canvasElement, ctx] = createCanvasElement();
+//   const tempPalette: string[] = [];
 
-    const { outputFiles, exitCode } = await execute({
-        commands: [`convert ${TILESET_FILENAME} -alpha off -unique-colors palette.png`],
-        inputFiles: [{ content: sourceBytes, name: TILESET_FILENAME }]
-    })
+//   const { outputFiles, exitCode } = await execute({
+//     commands: [
+//       `convert ${TILESET_FILENAME} -alpha off -unique-colors palette.png`,
+//     ],
+//     inputFiles: [{ content: sourceBytes, name: TILESET_FILENAME }],
+//   });
 
-    if (exitCode === 0) {
-        const reducedBlob = outputFiles[0].blob
-        const pal = reducedBlob.slice(0, reducedBlob.size, 'image/png')
-        const paletteImg = await getImage(window.URL.createObjectURL(pal))
-        const { width, height } = paletteImg
+//   if (exitCode === 0) {
+//     const reducedBlob = outputFiles[0].blob;
+//     const pal = reducedBlob.slice(0, reducedBlob.size, "image/png");
+//     const paletteImg = await getImage(window.URL.createObjectURL(pal));
+//     const { width, height } = paletteImg;
 
-        canvasElement.width = width
-        canvasElement.height = height
-        ctx.clearRect(0, 0, width, height)
-        ctx.drawImage(paletteImg, 0, 0)
+//     canvasElement.width = width;
+//     canvasElement.height = height;
+//     ctx.clearRect(0, 0, width, height);
+//     ctx.drawImage(paletteImg, 0, 0);
 
-        const data = ctx.getImageData(0, 0, width, height).data
+//     const data = ctx.getImageData(0, 0, width, height).data;
 
-        return spliceIntoChunks<number>(Array.from(data), 4)
-            .map(([r, g, b]) => [r, g, b])
-            .filter(c => {
-                const h = c.toString()
-                if (tempPalette.indexOf(h) === -1) {
-                    tempPalette.push(h)
-                    return true
-                }
-                return false
-            })
-    }
-    return []
-}
+//     return spliceIntoChunks<number>(Array.from(data), 4)
+//       .map(([r, g, b]) => [r, g, b])
+//       .filter((c) => {
+//         const h = c.toString();
+//         if (tempPalette.indexOf(h) === -1) {
+//           tempPalette.push(h);
+//           return true;
+//         }
+//         return false;
+//       });
+//   }
+//   return [];
+// }

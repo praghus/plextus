@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react'
 import Konva from 'konva'
+import { useCallback, useRef, useState, useEffect } from 'react'
 import { Image } from 'react-konva'
 import { toast } from 'react-toastify'
 import { Theme } from '@mui/material/styles'
@@ -8,7 +8,7 @@ import { isEqual } from 'lodash'
 import logger from '../../common/utils/logger'
 import { TOOLS } from '../../common/tools'
 import { SelectedTile } from '../../common/types'
-import { createTileFromImageData } from '../../store/editor/utils'
+import { createTileFromImageData } from '../../stores/editor/utils'
 import {
     actionDraw,
     actionLine,
@@ -22,7 +22,7 @@ import { isArray } from '../../common/utils/array'
 import { useCanvasBuffer } from '../../hooks/useCanvasBuffer'
 import { useEditorActions } from '../../hooks/useEditorActions'
 import { usePrevious } from '../../hooks/usePrevious'
-import { Grid, Layer, Selected, Tileset, Workspace } from '../../store/editor/types'
+import { Grid, Layer, Selected, Tileset, Workspace } from '../../stores/editor/types'
 
 interface Props {
     grid: Grid
@@ -375,5 +375,6 @@ const KonvaLayer = ({
         />
     )
 }
+KonvaLayer.displayName = 'KonvaLayer'
 
 export default KonvaLayer

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTheme } from '@mui/material/styles'
 
 interface Props {
@@ -20,5 +19,6 @@ const PlextusLogo = (props: Props) => {
         </svg>
     )
 }
+PlextusLogo.displayName = 'PlextusLogo'
 
 export default PlextusLogo

@@ -1,9 +1,10 @@
-import zlib from 'zlib'
+// import zlib from "zlib";
+import pako from 'pako'
 import JSZip from 'jszip'
 import { create } from 'xmlbuilder2'
-import { Buffer } from 'buffer'
+// import { Buffer } from "buffer";
 import { saveAs } from 'file-saver'
-import { Canvas, Layer, Tileset } from '../../store/editor/types'
+import { Canvas, Layer, Tileset } from '../../stores/editor/types'
 import { TILESET_FILENAME } from '../constants'
 import { componentToHex } from './colors'
 import logger from './logger'
@@ -13,10 +14,13 @@ const zip = new JSZip()
 const formatColor = (c: number[]): string =>
     `#${c[3] >= 0 ? componentToHex(c[3]) : ''}${componentToHex(c[0])}${componentToHex(c[1])}${componentToHex(c[2])}`
 
-const encodeLayer = async (data: Buffer) =>
-    new Promise((resolve, reject) =>
-        zlib.deflate(data, (err, buf) => (!err ? resolve(buf.toString('base64')) : reject(err)))
-    )
+const encodeLayer = async (data: string | ArrayBuffer) => pako.deflate(data)
+// new Promise((resolve, reject) =>
+//   zlib.deflate(data, (err, buf) =>
+//     !err ? resolve(buf.toString("base64")) : reject(err)
+//   )
+
+// );
 
 export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tileset) => {
     const { columns, tilewidth, tileheight, tilecount } = tileset
@@ -31,7 +35,10 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
             const offsety = offset.y !== 0 ? { offsety: offset.y } : {}
             if (image) {
                 const filename = `layer-${i + 1}.png`
-                layerImages.push({ data: await fetch(image).then(r => r.blob()), filename })
+                layerImages.push({
+                    data: await fetch(image).then(r => r.blob()),
+                    filename
+                })
                 return {
                     imagelayer: {
                         '@': {
@@ -129,6 +136,6 @@ export const exportToTmx = async (canvas: Canvas, layers: Layer[], tileset: Tile
     layerImages.map(({ filename, data }) => imagesFolder.file(filename, data))
 
     zip.generateAsync({ type: 'blob' })
-        .then(content => saveAs(content, 'exported-tiledmap.zip'))
-        .catch(err => logger.error(err))
+        .then((content: Blob) => saveAs(content, 'exported-tiledmap.zip'))
+        .catch((err: unknown) => logger.error(err))
 }

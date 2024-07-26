@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { debounce } from 'lodash'
@@ -6,8 +6,8 @@ import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
 import { FormControl, IconButton, MenuItem, Select, Stack, Typography, TextField } from '@mui/material'
 
 import { PALETTES } from '../../common/constants'
-import { changePalette, changePrimaryColor, changeSelectedPalette } from '../../store/editor/actions'
-import { selectPalette, selectSelected } from '../../store/editor/selectors'
+import { changePalette, changePrimaryColor, changeSelectedPalette } from '../../stores/editor/actions'
+import { selectPalette, selectSelected } from '../../stores/editor/selectors'
 import { rgbaToHex, colorToRGBA } from '../../common/utils/colors'
 import { ColorBox } from '../ColorBox'
 import {
@@ -45,7 +45,7 @@ const Palette = () => {
     const onAddColor = () => onChangePalette([...colors, selected.color])
     const onRemoveColor = () => {
         const newColors: number[][] = []
-        onChangePalette(newColors.concat(colors.filter((arr, idx) => idx !== selectedIndex)))
+        onChangePalette(newColors.concat(colors.filter((_arr, idx) => idx !== selectedIndex)))
     }
 
     const onChange = debounce(
@@ -152,5 +152,6 @@ const Palette = () => {
         </>
     )
 }
+Palette.displayName = 'Palette'
 
 export default Palette

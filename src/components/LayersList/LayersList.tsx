@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
     IconButton,
-    ListItem,
+    ListItemButton,
     ListItemIcon,
     ListItemSecondaryAction,
     Menu,
@@ -26,22 +26,22 @@ import {
 
 import { createImage } from '../../common/utils/image'
 import { changeItemPosition } from '../../common/utils/array'
-import { createEmptyLayer, createImageLayer, getLayerById } from '../../store/editor/utils'
-import { Layer } from '../../store/editor/types'
+import { createEmptyLayer, createImageLayer, getLayerById } from '../../stores/editor/utils'
+import { Layer } from '../../stores/editor/types'
 import {
     changeSelectedLayer,
     changeLayers,
     changeLayerName,
     changeLayerOpacity,
     changeLayerVisible
-} from '../../store/editor/actions'
+} from '../../stores/editor/actions'
 import {
     selectCanvas,
     selectSelected,
     selectLayers,
     selectTileset,
     selectSelectedLayer
-} from '../../store/editor/selectors'
+} from '../../stores/editor/selectors'
 import { ConfirmationDialog } from '../ConfirmationDialog'
 import { LayerPropertiesDialog } from '../LayerPropertiesDialog'
 import { ImageUpload } from '../ImageUpload'
@@ -55,13 +55,13 @@ import {
 
 const LayersList = () => {
     const canvas = useSelector(selectCanvas)
-    const layers = useSelector(selectLayers)
+    const layers = useSelector(selectLayers) as Layer[]
     const selected = useSelector(selectSelected)
     const tileset = useSelector(selectTileset)
     const selectedLayer = useSelector(selectSelectedLayer)
 
-    const reversedList = [...layers].reverse()
-    const currentLayer = getLayerById(layers, selected.layerId) || layers[0]
+    const reversedList = [...(layers as Layer[])].reverse()
+    const currentLayer = getLayerById(layers as Layer[], (selected as { layerId: string }).layerId) || layers[0]
 
     const [opacity, setOpacity] = useState(currentLayer ? currentLayer.opacity : 255)
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
@@ -156,9 +156,8 @@ const LayersList = () => {
 
             <StyledLayersList>
                 {reversedList.map((layer: Layer) => (
-                    <ListItem
+                    <ListItemButton
                         dense
-                        button
                         key={layer.id}
                         selected={layer.id === selected.layerId}
                         onClick={() => {
@@ -220,7 +219,7 @@ const LayersList = () => {
                                 )}
                             </IconButton>
                         </ListItemSecondaryAction>
-                    </ListItem>
+                    </ListItemButton>
                 ))}
             </StyledLayersList>
 
@@ -231,9 +230,9 @@ const LayersList = () => {
                         min={0}
                         max={255}
                         value={opacity}
-                        onChange={(e: Event, value: number | number[]) => setOpacity(value as number)}
+                        onChange={(_e: Event, value: number | number[]) => setOpacity(value as number)}
                         onChangeCommitted={(
-                            e: Event | React.SyntheticEvent<Element, Event>,
+                            _e: Event | React.SyntheticEvent<Element, Event>,
                             value: number | number[]
                         ) => onChangeLayerOpacity(currentLayer.id, value as number)}
                     />
@@ -294,5 +293,6 @@ const LayersList = () => {
         </>
     )
 }
+LayersList.displayName = 'LayersList'
 
 export default LayersList

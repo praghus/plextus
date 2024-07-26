@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const isProd = process.env.NODE_ENV === 'production'
 
 const styles = {
