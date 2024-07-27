@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Button, Dialog, DialogActions, DialogContent, FormControlLabel, Stack, Switch, TextField } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import { Layer } from '../../store/editor/types'
+import { Layer } from '../../stores/editor/types'
 
 interface Props {
     layer: Layer | null
@@ -124,5 +124,6 @@ const LayerPropertiesDialog = ({ layer, onSave, onClose, open }: Props) => {
         </Dialog>
     )
 }
+LayerPropertiesDialog.displayName = 'LayerPropertiesDialog'
 
 export default LayerPropertiesDialog

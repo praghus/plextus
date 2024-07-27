@@ -1,23 +1,16 @@
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { ToastContainer } from 'react-toastify'
-import { useDispatch, useSelector } from 'react-redux'
-import { useInjectReducer, useInjectSaga } from 'redux-injectors'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
 import { usePreventUnload } from '../hooks/usePreventUnload'
 import { createCanvasElement, getImage } from '../common/utils/image'
 import { THEMES } from '../common/constants'
-import { APP_RESOURCE_NAME } from '../store/app/constants'
-import { EDITOR_RESOURCE_NAME } from '../store/editor/constants'
-import { selectIsLoading } from '../store/app/selectors'
-import { selectIsPristine } from '../store/history/selectors'
-import { selectCanvas, selectTileset } from '../store/editor/selectors'
-import { adjustWorkspaceSize } from '../store/editor/actions'
-import { changeAppTheme } from '../store/app/actions'
-import appReducer from '../store/app/reducer'
-import editorReducer from '../store/editor/reducer'
-import editorSaga from '../store/editor/saga'
+import { selectIsLoading } from '../stores/app/selectors'
+import { selectIsPristine } from '../stores/history/selectors'
+import { selectCanvas, selectTileset } from '../stores/editor/selectors'
+import { adjustWorkspaceSize } from '../stores/editor/actions'
+import { changeAppTheme } from '../stores/app/actions'
 import logger from '../common/utils/logger'
 import {
     ImportDialog,
@@ -31,23 +24,20 @@ import {
     WelcomeDialog
 } from '../components'
 import { StyledWrapper, StyledContainer, StyledMiddleContainer, StyledThemeSwitchContainer } from './App.styled'
+import { useAppDispatch, useAppSelector } from '../hooks/useStore'
 
 const App = () => {
-    useInjectReducer({ key: APP_RESOURCE_NAME, reducer: appReducer })
-    useInjectReducer({ key: EDITOR_RESOURCE_NAME, reducer: editorReducer })
-    useInjectSaga({ key: EDITOR_RESOURCE_NAME, saga: editorSaga })
-
     const theme = useTheme()
 
-    const canvas = useSelector(selectCanvas)
-    const isLoading = useSelector(selectIsLoading)
-    const tileset = useSelector(selectTileset)
-    const isPristine = useSelector(selectIsPristine)
+    const canvas = useAppSelector(selectCanvas)
+    const isLoading = useAppSelector(selectIsLoading)
+    const tileset = useAppSelector(selectTileset)
+    const isPristine = useAppSelector(selectIsPristine)
     const isDarkModeEnabled = useMediaQuery('(prefers-color-scheme: dark)')
 
     const [tilesetCanvas, setTilesetCanvas] = useState<HTMLCanvasElement>(createCanvasElement()[0])
 
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
     const onAdjustWorkspaceSize = useCallback(() => dispatch(adjustWorkspaceSize()), [dispatch])
     const onChangeAppTheme = useCallback((theme: string) => dispatch(changeAppTheme(theme)), [dispatch])
 
@@ -75,7 +65,7 @@ const App = () => {
             canvasElement.height = image.height
             ctx.drawImage(image, 0, 0)
             setTilesetCanvas(canvasElement)
-            logger.info('New tileset', 'CANVAS')
+            logger.info('Tileset update', 'CANVAS')
         }
         if (tileset.image) {
             getTilesetImage(tileset.image)
@@ -87,7 +77,7 @@ const App = () => {
             <WelcomeDialog />
             <ImportDialog />
             <NewProjectDialog />
-            {canvas && (
+            {canvas ? (
                 <StyledContainer>
                     <LoadingIndicator loading={isLoading} />
                     <MainMenu />
@@ -100,10 +90,11 @@ const App = () => {
                         <KonvaStage {...{ tilesetCanvas }} />
                     </StyledMiddleContainer>
                 </StyledContainer>
-            )}
+            ) : null}
             <ToastContainer position="bottom-left" theme={theme.palette.mode} autoClose={2000} />
         </StyledWrapper>
     )
 }
+App.displayName = 'App'
 
 export default App

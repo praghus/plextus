@@ -6,10 +6,8 @@ export const usePreventUnload = (isPristine: boolean) => {
     useEffect(() => {
         eventListenerRef.current = (event: BeforeUnloadEvent) => {
             if (!isPristine) {
-                event.returnValue = 'If you leave this page you will lose your unsaved changes.'
-            } else {
                 event.preventDefault()
-                event.returnValue = ''
+                // event.returnValue = 'If you leave this page you will lose your unsaved changes.';
             }
         }
     }, [isPristine])

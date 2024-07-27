@@ -15,19 +15,19 @@ import {
     LinearProgress,
     Radio,
     RadioGroup,
-    Switch,
     TextField,
     Typography
 } from '@mui/material'
 import { IMPORT_MODES } from '../../common/constants'
-import { changeAppImportedImage } from '../../store/app/actions'
-import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../../store/editor/actions'
-import { selectImportedImage } from '../../store/app/selectors'
-import { selectCanvas, selectTileset } from '../../store/editor/selectors'
-import { getImage, reduceColors } from '../../common/utils/image'
-import { LayerImportConfig } from '../../store/editor/types'
+import { changeAppImportedImage } from '../../stores/app/actions'
+import { createNewImageLayerFromFile, createNewTileLayerFromFile } from '../../stores/editor/actions'
+import { selectImportedImage } from '../../stores/app/selectors'
+import { selectCanvas, selectTileset } from '../../stores/editor/selectors'
+import { getImage } from '../../common/utils/image'
+import { Dim, LayerImportConfig, Vec2 } from '../../stores/editor/types'
 import { ImportPreview } from '../ImportPreview'
 import { dataURLToBlob } from '../../common/utils/data'
+// import { dataURLToBlob } from "../../common/utils/data";
 
 const ImportDialog = () => {
     const canvas = useSelector(selectCanvas)
@@ -42,23 +42,29 @@ const ImportDialog = () => {
     const [image, setImage] = useState<CanvasImageSource>()
     const [imageUrl, setImageUrl] = useState<string>()
     const [columns, setColumns] = useState(tileset?.columns || 10)
-    const [colorsCount, setColorsCount] = useState(255)
+    // const [colorsCount, setColorsCount] = useState(255)
+    // const [reducedColors, setReducedColors] = useState(false)
     const [mode, setMode] = useState(IMPORT_MODES.NEW_PROJECT)
     const [name, setName] = useState('')
     const [offset, setOffset] = useState<Vec2>({ x: 0, y: 0 })
-    const [reducedColors, setReducedColors] = useState(false)
-    const [resolution, setResolution] = useState<Dim>({ h: canvas?.height ?? 0, w: canvas?.width ?? 0 })
-    const [tileSize, setTileSize] = useState<Dim>({ h: tileset.tileheight, w: tileset.tilewidth })
+    const [resolution, setResolution] = useState<Dim>({
+        h: canvas?.height ?? 0,
+        w: canvas?.width ?? 0
+    })
+    const [tileSize, setTileSize] = useState<Dim>({
+        h: tileset.tileheight,
+        w: tileset.tilewidth
+    })
 
     const config: LayerImportConfig = {
-        colorsCount,
+        // colorsCount,
+        // reducedColors,
         columns,
         image,
         imageUrl,
         mode,
         name,
         offset,
-        reducedColors,
         resolution,
         tileSize
     }
@@ -70,7 +76,7 @@ const ImportDialog = () => {
         )
     }
 
-    const handleClose = (e: React.SyntheticEvent<Element, Event>, reason: string): void => {
+    const handleClose = (_e: React.SyntheticEvent<Element, Event>, reason: string): void => {
         if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
             onClose()
         }
@@ -92,8 +98,8 @@ const ImportDialog = () => {
     useEffect(() => {
         async function reduceImageColors(img: string) {
             const i = await dataURLToBlob(img)
-            const blob = await reduceColors(i, colorsCount)
-            const url = window.URL.createObjectURL(blob)
+            // const blob = await reduceColors(i, colorsCount);
+            const url = window.URL.createObjectURL(i)
             const reducedImage = await getImage(url)
             setImage(reducedImage)
             setImageUrl(url)
@@ -101,7 +107,7 @@ const ImportDialog = () => {
         if (importedImage?.image) {
             reduceImageColors(importedImage.image)
         }
-    }, [colorsCount, importedImage])
+    }, [/*colorsCount, */ importedImage])
 
     useEffect(() => {
         if (mode !== IMPORT_MODES.NEW_PROJECT) {
@@ -117,7 +123,7 @@ const ImportDialog = () => {
         <Dialog open={!!importedImage} onClose={handleClose}>
             <DialogTitle>{t('i18_import_image')}</DialogTitle>
             {isProcessing ? (
-                <Box sx={{ width: '100%' }} p={2}>
+                <Box p={2}>
                     <LinearProgress />
                 </Box>
             ) : (
@@ -246,7 +252,7 @@ const ImportDialog = () => {
                                 </>
                             )}
                         </Grid>
-                        <Grid container spacing={1}>
+                        {/* <Grid container spacing={1}>
                             <Grid item xs={8} mt={2}>
                                 <FormControlLabel
                                     label={t('i18_use_reduced_palette') as string}
@@ -278,7 +284,7 @@ const ImportDialog = () => {
                                     variant="outlined"
                                 />
                             </Grid>
-                        </Grid>
+                        </Grid> */}
                     </Box>
                 </DialogContent>
             )}
@@ -294,11 +300,12 @@ const ImportDialog = () => {
                     {t('i18_cancel')}
                 </Button>
                 <Button onClick={onSave} variant="contained" disabled={isProcessing}>
-                    {t('i18_save')}
+                    {t('i18_import')}
                 </Button>
             </DialogActions>
         </Dialog>
     )
 }
+ImportDialog.displayName = 'ImportDialog'
 
 export default ImportDialog

@@ -1,4 +1,3 @@
-import React from 'react'
 import SvgIcon, { SvgIconTypeMap } from '@mui/material/SvgIcon'
 
 const TileReplaceIcon = (props: SvgIconTypeMap) => (
@@ -18,5 +17,6 @@ const TileReplaceIcon = (props: SvgIconTypeMap) => (
         />
     </SvgIcon>
 )
+TileReplaceIcon.displayName = 'TileReplaceIcon'
 
 export default TileReplaceIcon

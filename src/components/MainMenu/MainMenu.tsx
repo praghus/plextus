@@ -18,10 +18,10 @@ import {
 
 import { exportToTmx } from '../../common/utils/tmx'
 import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
-import { selectHistory } from '../../store/history/selectors'
-import { selectCanvas, selectLayers, selectProjectName, selectTileset } from '../../store/editor/selectors'
-import { changeProjectName, clearProject, saveChanges, saveChangesToFile } from '../../store/editor/actions'
-import { undo, redo } from '../../store/history/actions'
+import { selectHistory } from '../../stores/history/selectors'
+import { selectCanvas, selectLayers, selectProjectName, selectTileset } from '../../stores/editor/selectors'
+import { changeProjectName, clearProject, saveChanges, saveChangesToFile } from '../../stores/editor/actions'
+import { undo, redo } from '../../stores/history/actions'
 import { PlextusLogo } from '../Icons'
 import { ConfirmationDialog } from '../ConfirmationDialog'
 import { ImageUpload } from '../ImageUpload'
@@ -207,5 +207,6 @@ const MainMenu = () => {
         </StyledMenuContainer>
     )
 }
+MainMenu.displayName = 'MainMenu'
 
 export default MainMenu

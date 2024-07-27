@@ -1,10 +1,9 @@
-import React from 'react'
 import Konva from 'konva'
 import { useSelector } from 'react-redux'
 
 import { getCoordsFromPos, getPointerRelativePos } from '../../common/utils/konva'
-import { selectCanvas, selectGrid, selectWorkspace, selectTileset } from '../../store/editor/selectors'
-import { Layer } from '../../store/editor/types'
+import { selectCanvas, selectGrid, selectWorkspace, selectTileset } from '../../stores/editor/selectors'
+import { Layer } from '../../stores/editor/types'
 import { StyledLabel } from './TileInfoLabel.styled'
 
 interface Props {
@@ -39,5 +38,6 @@ const TileInfoLabel = ({ pointerPosition, selectedLayer }: Props) => {
         </StyledLabel>
     ) : null
 }
+TileInfoLabel.displayName = 'TileInfoLabel'
 
 export default TileInfoLabel

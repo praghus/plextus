@@ -5,8 +5,8 @@ import { IconButton, ListItemIcon, Menu, MenuItem, PopoverOrigin, ToggleButton, 
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
 
 import { TOOLS, TOOL_DESC, TOOL_ICONS, AVAILABLE_TOOLS } from '../../common/tools'
-import { selectSelected, selectSelectedLayer, selectWorkspace } from '../../store/editor/selectors'
-import { changeTool } from '../../store/editor/actions'
+import { selectSelected, selectSelectedLayer, selectWorkspace } from '../../stores/editor/selectors'
+import { changeTool } from '../../stores/editor/actions'
 
 import { StyledToolBarContainer, StyledToggleButtonGroup } from './ToolBar.styled'
 
@@ -150,5 +150,6 @@ const ToolBar = () => {
         </StyledToolBarContainer>
     )
 }
+ToolBar.displayName = 'ToolBar'
 
 export default ToolBar

@@ -1,6 +1,6 @@
 import { css } from '@emotion/react'
 
-export const override = css`
+export const cssOverride = css`
     margin: 2em auto;
     position: absolute;
     top: 50%;
@@ -10,4 +10,4 @@ export const override = css`
     margin-left: -32px;
     margin-top: -32px;
     z-index: 100;
-`
+` as React.CSSProperties

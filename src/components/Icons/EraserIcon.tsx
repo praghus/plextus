@@ -1,4 +1,3 @@
-import React from 'react'
 import SvgIcon, { SvgIconTypeMap } from '@mui/material/SvgIcon'
 
 const EraserIcon = (props: SvgIconTypeMap) => (
@@ -12,5 +11,6 @@ const EraserIcon = (props: SvgIconTypeMap) => (
         />
     </SvgIcon>
 )
+EraserIcon.displayName = 'EraserIcon'
 
 export default EraserIcon

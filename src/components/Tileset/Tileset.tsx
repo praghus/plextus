@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Konva from 'konva'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -6,13 +6,13 @@ import { Image, Layer, Rect, Stage } from 'react-konva'
 import { AddBox as AddBoxIcon, DeleteForever as DeleteForeverIcon, SaveAlt as SaveAltIcon } from '@mui/icons-material'
 import { Card, IconButton, Slider, Tooltip } from '@mui/material'
 
-import { getTilesetDimensions, createEmptyTile, getTilePos } from '../../store/editor/utils'
-import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } from '../../store/editor/actions'
-import { selectGrid, selectSelected, selectTileset } from '../../store/editor/selectors'
+import { getTilesetDimensions, createEmptyTile, getTilePos } from '../../stores/editor/utils'
+import { changeSelectedTile, changeTilesetImage, changeTileset, removeTile } from '../../stores/editor/actions'
+import { selectGrid, selectSelected, selectTileset } from '../../stores/editor/selectors'
 import { getCoordsFromPos, getPointerRelativePos } from '../../common/utils/konva'
 import { downloadImage, get2DContext } from '../../common/utils/image'
 import { useZoomEvents } from '../../hooks/useZoomEvents'
-import { Workspace, Tileset as TilesetType } from '../../store/editor/types'
+import { Workspace, Tileset as TilesetType, Dim } from '../../stores/editor/types'
 import { ConfirmationDialog } from '../ConfirmationDialog'
 import {
     StyledTilesetImageContainer,
@@ -40,7 +40,10 @@ const Tileset = ({ tilesetCanvas }: Props) => {
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
     const [scale, setScale] = useState<Konva.Vector2d>({ x: 1, y: 1 })
     const [position, setPosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
-    const [tilePosition, setTilePosition] = useState<Konva.Vector2d>({ x: 0, y: 0 })
+    const [tilePosition, setTilePosition] = useState<Konva.Vector2d>({
+        x: 0,
+        y: 0
+    })
     const [size, setSize] = useState<Dim>({ h: 320, w: 299 })
 
     const dispatch = useDispatch()
@@ -181,7 +184,14 @@ const Tileset = ({ tilesetCanvas }: Props) => {
                         draggable
                         onClick={onSelectTile}
                         onTouchStart={onSelectTile}
-                        {...{ dragBoundFunc, onDragEnd, onTouchEnd, onTouchMove, onWheel, scale }}
+                        {...{
+                            dragBoundFunc,
+                            onDragEnd,
+                            onTouchEnd,
+                            onTouchMove,
+                            onWheel,
+                            scale
+                        }}
                     >
                         <Layer imageSmoothingEnabled={false}>
                             {tilesetCanvas && <Image image={tilesetCanvas} />}
@@ -232,5 +242,6 @@ const Tileset = ({ tilesetCanvas }: Props) => {
         </>
     )
 }
+Tileset.displayName = 'Tileset'
 
 export default Tileset

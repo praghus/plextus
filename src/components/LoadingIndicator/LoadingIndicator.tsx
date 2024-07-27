@@ -1,28 +1,23 @@
-import React from 'react'
 import GridLoader from 'react-spinners/GridLoader'
 import Backdrop from '@mui/material/Backdrop'
 import { useTheme } from '@mui/material/styles'
 
-import { override } from './LoadingIndicator.styled'
+import { cssOverride } from './LoadingIndicator.styled'
 
 interface Props {
     color?: string
     loading: boolean
-    size?: number
 }
 
-const LoadingIndicator = ({ color, loading, size }: Props) => {
+const LoadingIndicator = ({ color, loading }: Props) => {
     const theme = useTheme()
     return (
         <Backdrop sx={{ color: '#fff', zIndex: theme.zIndex.drawer + 1 }} open={loading}>
-            <GridLoader css={override} {...{ color, loading, size }} />
+            <GridLoader size={15} {...{ color, cssOverride, loading }} />
         </Backdrop>
     )
 }
 
-LoadingIndicator.defaultProps = {
-    color: '#fff',
-    size: 15
-}
+LoadingIndicator.displayName = 'LoadingIndicator'
 
 export default LoadingIndicator

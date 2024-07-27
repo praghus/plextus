@@ -23,5 +23,6 @@ const TabPanel = ({ children, closed, value, index, ...other }: Props) => (
         {value === index && <Box>{children}</Box>}
     </div>
 )
+TabPanel.displayName = 'TabPanel'
 
 export default TabPanel

@@ -19,6 +19,7 @@ export const TRANSLATIONS_EN = {
     i18_export_png: 'Export to .png',
     i18_hold_on: 'Hold on!',
     i18_image_layer: 'Image layer',
+    i18_import: 'Import',
     i18_import_image: 'Import image',
     i18_import_layer: 'Import layer',
     i18_layer_name: 'Layer name',

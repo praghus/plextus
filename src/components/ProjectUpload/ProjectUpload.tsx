@@ -1,8 +1,8 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { openProject } from '../../store/editor/actions'
-import { ProjectFile } from '../../store/editor/types'
+import { openProject } from '../../stores/editor/actions'
+import { ProjectFile } from '../../stores/editor/types'
 
 const upload = async (file: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -35,5 +35,6 @@ const ProjectUpload = ({ children }: Props) => {
         </>
     )
 }
+ProjectUpload.displayName = 'ProjectUpload'
 
 export default ProjectUpload

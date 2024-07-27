@@ -1,10 +1,9 @@
 import React from 'react'
-
 import { useDispatch, useSelector } from 'react-redux'
 
 import { THEMES } from '../../common/constants'
-import { selectAppTheme } from '../../store/app/selectors'
-import { changeAppTheme } from '../../store/app/actions'
+import { selectAppTheme } from '../../stores/app/selectors'
+import { changeAppTheme } from '../../stores/app/actions'
 import { StyledThemeSwitch } from './ThemeSwitch.styled'
 
 interface Props {
@@ -19,5 +18,6 @@ const ThemeSwitch = ({ tiny }: Props) => {
 
     return <StyledThemeSwitch sx={{ m: 1 }} checked={appTheme === THEMES.DARK} {...{ onChange, tiny }} />
 }
+ThemeSwitch.displayName = 'ThemeSwitch'
 
 export default ThemeSwitch

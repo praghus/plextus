@@ -17,7 +17,7 @@ export const StyledPaper = styled.div`
     justify-content: center;
     align-items: center;
     padding: 5px;
-    height: 48px;
+    height: 40px;
     margin-right: 10px;
     ${commonPaperStyle}
     ${commonBoxShadow}

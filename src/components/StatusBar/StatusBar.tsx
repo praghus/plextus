@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Konva from 'konva'
 import { useTheme } from '@mui/material/styles'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,8 +11,8 @@ import {
     Remove as RemoveIcon
 } from '@mui/icons-material'
 
-import { changePosition, changeScale, toggleShowGrid } from '../../store/editor/actions'
-import { selectCanvas, selectGrid, selectWorkspace } from '../../store/editor/selectors'
+import { changePosition, changeScale, toggleShowGrid } from '../../stores/editor/actions'
+import { selectCanvas, selectGrid, selectWorkspace } from '../../stores/editor/selectors'
 import { StyledStatusBar, StyledCol, StyledButton } from './StatusBar.styled'
 
 const marks = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 50]
@@ -54,7 +54,7 @@ const StatusBar = ({ stage, onCenter }: Props) => {
     )
 
     const onZoomCommitted = () => {
-        onChangeScale(stage.scale())
+        onChangeScale(stage.scale() as Konva.Vector2d)
         onChangePosition(stage.position())
     }
 
@@ -92,21 +92,20 @@ const StatusBar = ({ stage, onCenter }: Props) => {
                         <AddIcon htmlColor={iconColor} onClick={onZoomIn} sx={{ cursor: 'pointer' }} />
                     </>
                 )}
-
                 <StyledCol>
                     <Tooltip title="Center and fit to view size" placement="top">
-                        <StyledButton onClick={onCenter}>
+                        <StyledButton onClick={onCenter} sx={{ textTransform: 'none' }}>
                             <AspectRatioIcon />
                             {canvas &&
-                                `${canvas.width}x${canvas.height}px [${canvas.width / grid.width}x${
-                                    canvas.height / grid.height
-                                }]`}
+                                `${canvas.width}x${canvas.height}px [${
+                                    canvas.width / grid.width
+                                }x${canvas.height / grid.height}]`}
                         </StyledButton>
                     </Tooltip>
                 </StyledCol>
                 <StyledCol>
                     <Tooltip title="Toggle grid" placement="top">
-                        <StyledButton onClick={() => onToggleShowGrid(!grid.visible)}>
+                        <StyledButton onClick={() => onToggleShowGrid(!grid.visible)} sx={{ textTransform: 'none' }}>
                             {grid.visible ? <GridOnIcon /> : <GridOffIcon />}[{grid.width}x{grid.height}]:{' '}
                             {grid.visible ? `On` : `Off`}
                         </StyledButton>
@@ -116,5 +115,6 @@ const StatusBar = ({ stage, onCenter }: Props) => {
         </StyledStatusBar>
     )
 }
+StatusBar.displayName = 'StatusBar'
 
 export default StatusBar

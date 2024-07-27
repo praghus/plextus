@@ -1,4 +1,3 @@
-import React from 'react'
 import { getRgbaValue } from '../../common/utils/colors'
 import { StyledColorBox, StyledTransparentContainer } from './ColorBox.styled'
 
@@ -16,5 +15,6 @@ const ColorBox = ({ onClick, selected, rgba }: Props) => (
         <StyledColorBox style={{ backgroundColor: getRgbaValue(rgba) }} />
     </StyledTransparentContainer>
 )
+ColorBox.displayName = 'ColorBox'
 
 export default ColorBox

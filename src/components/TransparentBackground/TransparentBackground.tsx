@@ -1,11 +1,10 @@
-import React from 'react'
 import { Rect } from 'react-konva'
 import { Theme } from '@mui/material/styles'
 
 import { TRANSPARENCY_BG_LIGHT_IMG, TRANSPARENCY_BG_DARK_IMG } from '../../common/constants'
 
-export const BG_IMAGE_LIGHT = new window.Image()
-export const BG_IMAGE_DARK = new window.Image()
+const BG_IMAGE_LIGHT = new window.Image()
+const BG_IMAGE_DARK = new window.Image()
 
 BG_IMAGE_LIGHT.src = TRANSPARENCY_BG_LIGHT_IMG
 BG_IMAGE_DARK.src = TRANSPARENCY_BG_DARK_IMG
@@ -27,5 +26,6 @@ const TransparentBackground = ({ width, height, scale, theme }: Props) => (
         fillPatternScaleY={scale || 1}
     />
 )
+TransparentBackground.displayName = 'TransparentBackground'
 
 export default TransparentBackground

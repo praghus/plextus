@@ -11,37 +11,35 @@ Plextus is a pixel art editor designed to make tiled maps and tilesets. In addit
 ## Installation
 
 1. Clone/download repo
-2. `yarn install` (or `npm install` for npm)
+2. `yarn install`
 
 ## Usage
 
 **Development**
 
-`yarn start`
+`yarn dev`
 
 -   Build app continuously (HMR enabled)
--   App served @ `http://localhost:8080`
+-   App served @ `http://localhost:5173`
 
 **Production**
 
-`yarn start-prod`
+`yarn build`
 
 -   Build app once (HMR disabled) to `/dist/`
--   App served @ `http://localhost:3000`
 
 ---
 
 **All commands**
 
-| Command               | Description                                                                   |
-| --------------------- | ----------------------------------------------------------------------------- |
-| `yarn run start-dev`  | Build app continuously (HMR enabled) and serve @ `http://localhost:8080`      |
-| `yarn run start-prod` | Build app once (HMR disabled) to `/dist/` and serve @ `http://localhost:3000` |
-| `yarn run build`      | Build app to `/dist/`                                                         |
-| `yarn run test`       | Run tests                                                                     |
-| `yarn run lint`       | Run linter                                                                    |
-| `yarn run lint --fix` | Run linter and fix issues                                                     |
-| `yarn run start`      | (alias of `yarn run start-dev`)                                               |
+| Command               | Description                                                              |
+| --------------------- | ------------------------------------------------------------------------ |
+| `yarn dev`            | Build app continuously (HMR enabled) and serve @ `http://localhost:5173` |
+| `yarn build`          | Build app to `/dist/`                                                    |
+| `yarn build:electron` | Build Electron app to `/dist-electron/`                                  |
+| `yarn lint`           | Run linter                                                               |
+| `yarn prettier:check` | Run prettier and check codestyles                                        |
+| `yarn prettier:write` | Run prettier and fix issues                                              |
 
 ## TODO
 

@@ -4,8 +4,8 @@ import { useCallback, useState, useEffect } from 'react'
 import { createCanvasElement, get2DContext, getImage } from '../common/utils/image'
 import { getCoordsFromPos } from '../common/utils/konva'
 import { SelectedTile } from '../common/types'
-import { getTilePos } from '../store/editor/utils'
-import { Grid, Layer, Selected, Tileset } from '../store/editor/types'
+import { getTilePos } from '../stores/editor/utils'
+import { Grid, Layer, Selected, Tileset } from '../stores/editor/types'
 
 export const useCanvasBuffer = (
     grid: Grid,

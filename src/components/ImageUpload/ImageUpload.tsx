@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { uploadImage } from '../../common/utils/image'
-import { changeAppImportedImage } from '../../store/app/actions'
+import { changeAppImportedImage } from '../../stores/app/actions'
 
 interface Props {
     children?: React.ReactNode
@@ -12,7 +12,12 @@ const ImageUpload = ({ children }: Props) => {
 
     const upload = async (file: File) => {
         const { blob } = await uploadImage(file)
-        dispatch(changeAppImportedImage({ filename: file.name, image: window.URL.createObjectURL(blob) }))
+        dispatch(
+            changeAppImportedImage({
+                filename: file.name,
+                image: window.URL.createObjectURL(blob)
+            })
+        )
     }
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,5 +35,6 @@ const ImageUpload = ({ children }: Props) => {
         </>
     )
 }
+ImageUpload.displayName = 'ImageUpload'
 
 export default ImageUpload

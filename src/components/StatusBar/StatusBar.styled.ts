@@ -38,6 +38,5 @@ export const StyledButton = styled(Button)(({ theme }: IMuiTheme) => ({
     color: theme?.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.6)',
     fontSize: 12,
     padding: '0 5px',
-    textTransform: 'lowercase',
     whiteSpace: 'nowrap'
 }))

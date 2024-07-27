@@ -1,4 +1,3 @@
-import React from 'react'
 import SvgIcon, { SvgIconTypeMap } from '@mui/material/SvgIcon'
 
 const StampIcon = (props: SvgIconTypeMap) => (
@@ -12,5 +11,6 @@ const StampIcon = (props: SvgIconTypeMap) => (
         />
     </SvgIcon>
 )
+StampIcon.displayName = 'StampIcon'
 
 export default StampIcon

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Dialog, DialogActions, DialogTitle, Stack, Typography } from '@mui/material'
 import {
@@ -8,15 +7,15 @@ import {
     ImageSearch as ImageSearchIcon
 } from '@mui/icons-material'
 
-import { selectIsLoading, selectIsImportDialogOpen } from '../../store/app/selectors'
-import { openProject } from '../../store/editor/actions'
-import { selectCanvas } from '../../store/editor/selectors'
+import { selectIsLoading, selectIsImportDialogOpen } from '../../stores/app/selectors'
+import { openProject } from '../../stores/editor/actions'
+import { selectCanvas } from '../../stores/editor/selectors'
 import { PlextusLogo } from '../Icons'
 import { ImageUpload } from '../ImageUpload'
 import { ProjectUpload } from '../ProjectUpload'
 import { ThemeSwitch } from '../ThemeSwitch'
-import { ProjectFile } from '../../store/editor/types'
-import { StyledDialogContent } from './WelcomeDialog.styled'
+import { ProjectFile } from '../../stores/editor/types'
+import { StyledDialogContent, StyledLogoWrapper } from './WelcomeDialog.styled'
 import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
 
 import pjson from '../../../package.json'
@@ -34,30 +33,32 @@ const WelcomeDialog = () => {
 
     const isOpen = !canvas && !isLoading && !isImportDialogOpen && !isNewProjectDialogOpen
 
-    return (
+    return isOpen ? (
         <Dialog open={isOpen}>
             <DialogTitle>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                    <div>
+                    <StyledLogoWrapper>
                         <PlextusLogo />
-                        {` ${pjson.version}`}
-                    </div>
+                        <div style={{ marginLeft: '10px' }}>{`${pjson.version}`}</div>
+                    </StyledLogoWrapper>
                     <ThemeSwitch />
                 </Stack>
             </DialogTitle>
+
             <StyledDialogContent dividers>
                 <Typography gutterBottom>
-                    <b>Plextus</b> allows you to create and edit tile maps and tile sets, it also allows you to draw
+                    💥 <b>Plextus</b> allows you to create and edit tile maps and tile sets, it also allows you to draw
                     directly on tiles and track changes on your map in real time.
                 </Typography>
                 <Typography gutterBottom>
-                    <b>Plextus</b> is fully compatible with Tiled map editor and allows you to export your finished
+                    🧱 <b>Plextus</b> is fully compatible with Tiled map editor and allows you to export your finished
                     project to .tmx format.
                 </Typography>
                 <Typography gutterBottom>
-                    To get started create an empty project, or import an image file containing a tile map
+                    🚀 To get started create an empty project, or import an image file containing a tile map
                 </Typography>
             </StyledDialogContent>
+
             <DialogActions>
                 <Button onClick={() => onLoadDemoProject()} startIcon={<CasinoIcon />}>
                     Demo
@@ -70,13 +71,13 @@ const WelcomeDialog = () => {
                     Import
                     <ImageUpload />
                 </Button>
-
                 <Button variant="contained" onClick={() => setNewProjectDialogOpen(true)} startIcon={<AddBoxIcon />}>
                     New project
                 </Button>
             </DialogActions>
         </Dialog>
-    )
+    ) : null
 }
+WelcomeDialog.displayName = 'WelcomeDialog'
 
 export default WelcomeDialog
