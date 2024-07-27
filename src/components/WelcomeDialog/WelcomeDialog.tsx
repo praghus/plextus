@@ -47,15 +47,15 @@ const WelcomeDialog = () => {
 
             <StyledDialogContent dividers>
                 <Typography gutterBottom>
-                    <b>Plextus</b> allows you to create and edit tile maps and tile sets, it also allows you to draw
+                    💥 <b>Plextus</b> allows you to create and edit tile maps and tile sets, it also allows you to draw
                     directly on tiles and track changes on your map in real time.
                 </Typography>
                 <Typography gutterBottom>
-                    <b>Plextus</b> is fully compatible with Tiled map editor and allows you to export your finished
+                    🧱 <b>Plextus</b> is fully compatible with Tiled map editor and allows you to export your finished
                     project to .tmx format.
                 </Typography>
                 <Typography gutterBottom>
-                    To get started create an empty project, or import an image file containing a tile map
+                    🚀 To get started create an empty project, or import an image file containing a tile map
                 </Typography>
             </StyledDialogContent>
 
