@@ -15,7 +15,7 @@ import { ImageUpload } from '../ImageUpload'
 import { ProjectUpload } from '../ProjectUpload'
 import { ThemeSwitch } from '../ThemeSwitch'
 import { ProjectFile } from '../../stores/editor/types'
-import { StyledDialogContent } from './WelcomeDialog.styled'
+import { StyledDialogContent, StyledLogoWrapper } from './WelcomeDialog.styled'
 import { useNewProjectDialogToggle } from '../../hooks/useDialogToggle'
 
 import pjson from '../../../package.json'
@@ -37,10 +37,10 @@ const WelcomeDialog = () => {
         <Dialog open={isOpen}>
             <DialogTitle>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                    <div>
+                    <StyledLogoWrapper>
                         <PlextusLogo />
                         <div style={{ marginLeft: '10px' }}>{`${pjson.version}`}</div>
-                    </div>
+                    </StyledLogoWrapper>
                     <ThemeSwitch />
                 </Stack>
             </DialogTitle>
@@ -71,7 +71,6 @@ const WelcomeDialog = () => {
                     Import
                     <ImageUpload />
                 </Button>
-
                 <Button variant="contained" onClick={() => setNewProjectDialogOpen(true)} startIcon={<AddBoxIcon />}>
                     New project
                 </Button>
