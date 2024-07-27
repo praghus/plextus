@@ -1,9 +1,9 @@
 # Plextus 
 [![CircleCI](https://circleci.com/gh/praghus/plextus/tree/main.svg?style=svg)](https://circleci.com/gh/praghus/plextus/?branch=main)
 
-Plextus is a pixel art editor designed to make tiled maps and tilesets. In addition to the usual tile placement, it also allows you to draw directly on map and edit the tiles.
+🚀 **Plextus** is a pixel art editor designed to make tiled maps and tilesets. In addition to the usual tile placement, it also allows you to draw directly on map and edit the tiles.
 
-**Plextus is fully compatible with [Tiled](https://www.mapeditor.org/) map editor and allows you to export your finished project to `.tmx` format.**
+🧱 **Plextus** is fully compatible with [Tiled](https://www.mapeditor.org/) map editor and allows you to export your finished project to `.tmx` format.
 
 ## [Demo](https://praghus.github.io/plextus/)
 
