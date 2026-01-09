@@ -1,30 +1,31 @@
 version: 2.1
 orbs:
-  node: circleci/node@5.2.0
-  gh-pages: sugarshin/gh-pages@1.0.1
+    node: circleci/node@5.1.0
+    gh-pages: sugarshin/gh-pages@1.0.1
 
 jobs:
-  build:
-    executor: node/default
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:odTvIULMtMyBg4MikX1JAeO11ImOTzsh0dTFvYi7dXY"
-      - checkout
-      - node/install-packages:
-          pkg-manager: yarn
-      - run:
-          command: yarn build
-          name: Build app
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - .
-      - gh-pages/deploy:
-          ssh-fingerprints: SHA256:odTvIULMtMyBg4MikX1JAeO11ImOTzsh0dTFvYi7dXY
+    build:
+        executor:
+            name: node/default
+            tag: '20.15'
+        steps:
+            - add_ssh_keys:
+                  fingerprints:
+                      - 'SHA256:odTvIULMtMyBg4MikX1JAeO11ImOTzsh0dTFvYi7dXY'
+            - checkout
+            - node/install-packages:
+                  pkg-manager: yarn
+            - run:
+                  command: yarn build
+                  name: Build app
+            - persist_to_workspace:
+                  root: ~/project
+                  paths:
+                      - .
+            - gh-pages/deploy:
+                  ssh-fingerprints: SHA256:odTvIULMtMyBg4MikX1JAeO11ImOTzsh0dTFvYi7dXY
 
 workflows:
-  deploy:
-    jobs:
-      - build
-
+    deploy:
+        jobs:
+            - build
